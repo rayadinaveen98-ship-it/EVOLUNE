@@ -19,6 +19,9 @@ This log separates **confirmed user direction** from **proposals**. A working ti
 | D-013 | Non-invasive barrier support | Proposed | Optional capability/opportunity/motivation-inspired prompts; not a psychological assessment |
 | D-014 | Challenge history | Proposed | Track schedule revisions and preserve honest practice records; don't fabricate completion |
 | D-015 | Science-to-product translation | Proposed | Research supports selected techniques in specific contexts; EVOLUNE effectiveness must be validated |
+| D-016 | Visual exploration v0.1 | Exploratory, awaiting owner selection | Stillwater / Atelier / Moon Atlas mood directions; no UI art or palette approved |
+| D-017 | Visual fidelity gate | Required before development | Real Android mockups and interaction reviews; concept artworks are not UI implementation |
+| D-018 | Visual and functional separation | Confirmed principle | Every visual direction preserves challenge engine, truthful progress, user control and recovery behavior |
 
 ## Workflow
 For every new decision, record date, alternatives, rationale, approval owner, status, and consequences. For every stage, report planned versus implemented accurately.
