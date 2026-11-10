@@ -22,6 +22,10 @@ This log separates **confirmed user direction** from **proposals**. A working ti
 | D-016 | Visual exploration v0.1 | Exploratory, awaiting owner selection | Stillwater / Atelier / Moon Atlas mood directions; no UI art or palette approved |
 | D-017 | Visual fidelity gate | Required before development | Real Android mockups and interaction reviews; concept artworks are not UI implementation |
 | D-018 | Visual and functional separation | Confirmed principle | Every visual direction preserves challenge engine, truthful progress, user control and recovery behavior |
+| D-019 | Visual direction | User selected | Stillwater + Atelier hybrid; approved as direction for v0.3, not a blanket signoff for all native Android visuals |
+| D-020 | Native architecture | Engineering proposal | Kotlin + Jetpack Compose, offline-first Room, DataStore preferences, no mandatory account |
+| D-021 | Challenge core implementation | Verified locally | Pure Kotlin domain engine committed; standalone checks passed. No Android build performed |
+| D-022 | Reminders | Planned, not implemented | Opt-in; review Android exact-alarm permissions and Play policy; avoid assuming scheduled reliability |
 
 ## Workflow
 For every new decision, record date, alternatives, rationale, approval owner, status, and consequences. For every stage, report planned versus implemented accurately.
