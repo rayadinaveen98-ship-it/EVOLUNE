@@ -1,6 +1,6 @@
 # Scientific evidence register — v0.1
 
-**Purpose:** Distinguish external research evidence from the untested efficacy of EVOLUNE itself. All feature recommendations remain hypotheses until evaluated with real users. Reviewed 2026-11-10.
+**Purpose:** Distinguish external research evidence from the untested efficacy of EVOLUNE itself. All feature recommendations remain hypotheses until evaluated with real users. Reviewed 2026-11-11.
 
 ## E01 — Habit formation varies; 21 days is not a universal threshold
 **Source:** Singh B, Murphy A, Maher C, Smith AE. *Time to Form a Habit: A Systematic Review and Meta-Analysis of Health Behaviour Habit Formation and Its Determinants.* Healthcare (2024). https://pubmed.ncbi.nlm.nih.gov/39685110/ ; full text https://pmc.ncbi.nlm.nih.gov/articles/PMC11641623/  
@@ -19,6 +19,24 @@
 **Finding:** 93 behavior-change techniques in 16 groups; a structured language for describing intervention ingredients.  
 **Product implication:** Tag proposed interventions and design reviews explicitly (e.g., goal-setting, action planning, self-monitoring, feedback, reviewing goals).  
 **Evidence use:** **Taxonomy is not efficacy evidence** that all 93 techniques work or that including them makes a product effective.
+
+## E04 — COM-B diagnostic model for behavior design
+**Source:** Michie S, van Stralen MM, West R. *The Behaviour Change Wheel: A New Method for Characterising and Designing Behaviour Change Interventions.* Implementation Science (2011). https://pubmed.ncbi.nlm.nih.gov/21513547/ ; DOI https://doi.org/10.1186/1748-5908-6-42
+**Finding:** A conceptual framework describing capability, opportunity and motivation as interacting sources of behavior; the original article proposes a framework and tests its ability to characterise interventions. This is **not** a validated individual diagnostic test or proof that a specific app increases adherence.
+**Product implication:** When the user chooses, offer optional questions about what gets in the way, then support practical adjustments. Never score or pathologize the user.
+**Evidence use:** Theory-informed design heuristic; effectiveness of the EVOLUNE barrier prompt must be tested.
+
+## E05 — Choice, competence and autonomous motivation
+**Source:** Ntoumanis N et al. *A meta-analysis of self-determination theory-informed intervention studies in the health domain.* (2020) Related SDT health behavior meta-analysis: https://pubmed.ncbi.nlm.nih.gov/32437175/ (65 independent tests across 56 articles; average effect d=0.23).
+**Finding:** SDT-based health behavior interventions have, on average, small positive effects in the reviewed populations, with variation across behaviors and contexts.
+**Product implication:** Keep user-selected actions, voluntary reflection, editable difficulty, easy exit and clear non-coercive feedback. Relatedness is part of the theory, but this does not imply requiring social features.
+**Evidence use:** Supports an autonomy-supportive approach; not evidence that any EVOLUNE screen will improve health.
+
+## E06 — Self-monitoring combined with other techniques
+**Source:** Michie S et al. *Effective techniques in healthy eating and physical activity interventions: a meta-regression.* Health Psychology (2009). https://pubmed.ncbi.nlm.nih.gov/19916637/ DOI:10.1037/a0016136.
+**Finding:** A meta-regression across 122 evaluations (N=44,747) identified self-monitoring as associated with intervention outcomes in physical activity and eating interventions, particularly when combined with other self-regulation techniques. Heterogeneity and review limitations make causation and transfer to all domains uncertain.
+**Product implication:** Combine optional, low-friction action logs with transparent reviews and adjustable plans. Avoid rigid monitoring in populations where it could cause distress.
+**Evidence use:** Context-specific support for technique selection, not proof of the app's efficacy.
 
 ## Design hypotheses requiring validation
 - A compassion-based 'resume' flow may help user re-engagement more than punitive streak resets.
