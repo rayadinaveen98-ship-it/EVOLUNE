@@ -19,7 +19,7 @@ Example: 'Read for 10 minutes.' The challenge can have alternate lower-effort ve
 
 ## Duration vs sessions: explicit semantics
 - **21-day challenge:** default means **21 calendar days** from the user-selected start, with practice opportunities only on scheduled days. E.g., Mon–Fri across 21 days normally yields 15 due opportunities, not 21.
-- **21-session challenge:** means completing 21 scheduled practices, regardless of elapsed calendar days; target date is estimated, never guaranteed.
+- **21-session challenge:** means completing 21 full practices, regardless of elapsed calendar days. Partial/backup practices do not silently count as full. The estimated target date is not a guarantee and there is no automatic failure cutoff.
 - A calendar-day milestone remains 21 elapsed days unless explicitly postponed by user; a pause does not rewrite the calendar. The milestone review can include due days, paused days and completed practices.
 - A challenge can continue after a milestone; the milestone is not a habit-certification claim.
 - End/start-of-day follow the challenge's chosen IANA timezone and local date, not device UTC boundaries. Travel timezone handling remains a design decision.
@@ -28,7 +28,8 @@ Example: 'Read for 10 minutes.' The challenge can have alternate lower-effort ve
 - **Pending:** scheduled but not due/resolved.
 - **Completed:** full user-defined action occurred.
 - **Partial:** some action occurred, but full target not achieved.
-- **Missed:** due opportunity passed without user action or user explicitly marks missed.
+- **Unreported:** opportunity window passed without a check-in; the app does **not** know whether the behavior happened.
+- **Missed:** user explicitly records that a planned action did not occur.
 - **Rested:** user intentionally chose rest; preserved as a distinct truthful status, not hidden completion.
 - **Paused:** opportunity excluded from practice while challenge intentionally suspended.
 - **Not scheduled:** display state only, not a recorded failure.
@@ -45,17 +46,17 @@ ARCHIVED is a non-destructive user choice from finished or stopped/paused states
 2. Show only due/selected upcoming items on Today; the user can explore all.
 3. At scheduled time, **offer** an opt-in reminder; no reminder means the plan is still valid.
 4. User records status and optional journal/effort; do not force mood capture.
-5. On missed days, offer: 'Continue as planned', 'Try a smaller version', 'Change schedule', 'Pause', 'Reflect' (all optional).
+5. On explicitly missed or unreported days, offer (without assuming user failure): 'Continue as planned', 'Try a smaller version', 'Change schedule', 'Pause', 'Reflect' (all optional).
 6. Weekly/milestone review summarizes facts, leaves interpretation and next choice to user.
 
 ## Example calendar challenge
 - Start: November 12, 2026; length 21 calendar days, Mon–Fri at 7:30 AM (India local time).
 - There are ~15 scheduled opportunities in the 21-day window, depending on start weekday; this must be computed, not hardcoded.
-- If 9 complete, 2 partial, 1 rested and 3 missed, show those counts separately.
-- Example completion rate **9 / 15 = 60% of planned opportunities**. If rest was intentionally inserted as a plan revision, additionally show eligible-denominator numbers clearly; no unlabelled 'success score'.
+- If the user reports 9 complete, 2 partial, 1 rested and 3 explicitly missed, show those counts separately. If some days have no check-in, show 'unreported' instead.
+- Example **recorded full completions: 9 / 15 = 60% of planned opportunities**. If rest was intentionally inserted as a plan revision, additionally show eligible-denominator numbers clearly; no unlabelled 'success score'.
 
 ## Metrics and truthfulness
-- **Adherence:** completed / scheduled opportunities during eligible period, with numerator and denominator always visible.
+- **Logged full-action ratio:** completed / scheduled opportunities during an eligible period, with numerator, denominator, and unreported count always visible. Label it 'recorded completions,' not a definitive behavioral adherence rate when unreported data exist.
 - **Practice frequency:** count of logged full actions in a selected period; separate partial/backup.
 - **Return after interruption:** number of days between interruption and next logged practice; descriptive, not virtue judgment.
 - **Self-reported mood, energy, confidence:** trends only when enough user-entered data exists; non-causal and non-diagnostic.
@@ -70,7 +71,7 @@ ARCHIVED is a non-destructive user choice from finished or stopped/paused states
 - Pause mid-week and resume; milestone reached while paused.
 - Changing frequency/target after records already exist.
 - Deleting challenge vs preserving reflections, data export, edit history.
-- 0 due opportunities, 0 scheduled days, incomplete historical data.
+- 0 due opportunities, 0 scheduled days, and incomplete/unreported historical data.
 - Accessibility, low-bandwidth/offline and device reinstalls.
 
 ## Evidence link
