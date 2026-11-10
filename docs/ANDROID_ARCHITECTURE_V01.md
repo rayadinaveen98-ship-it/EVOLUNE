@@ -1,6 +1,6 @@
 # EVOLUNE — Android architecture v0.1
 
-Status: Phase 3A foundation in progress; updated 2026-11-11. This is architecture and tested Kotlin logic, NOT an Android APK.
+Status: Phase 3B data-layer source committed, updated 2026-11-11. Kotlin and on-disk SQLite contracts tested. **Android Room runtime compilation/instrumentation and APK are NOT verified.**
 
 ## Approved product baseline
 Stillwater + Atelier visual direction. Preserve v0.3: Today, Challenges, My Growth, optional Journal, Insights, Recovery, and Milestone Review. Keep one repeatable action per challenge, honest missing-data labels, no shame-based streaks, no clinical claims.
@@ -17,7 +17,7 @@ Stillwater + Atelier visual direction. Preserve v0.3: Today, Challenges, My Grow
 ## Domain engine — initial tested implementation
 A pure Kotlin/java.time engine has been written and its standalone JVM checks passed locally. Test cases: weekday schedules, 21 calendar-days vs session milestones, explicit missing/partial/rested status, corrections with record history, pause/resume, future-effective schedule revisions and timezone boundaries. Kotlin source and runnable checks are provided in EVOLUNE_Android_Foundation_v0.1.zip in this conversation.
 
-Important: The engine has not yet been connected to Room, Compose, notifications or actual device scheduling.
+Important: A Room repository adapter has been written and committed, but not compiled with Room's annotation processor, integrated into Compose, or verified on an Android device. Do not claim native persistence works yet.
 
 ## Proposed module boundaries
 app = Android activity, navigation, lifecycle, dependency wiring.
@@ -29,13 +29,13 @@ core:notifications = opt-in reminders after reliability and policy review.
 
 ## Ordered work
 3A — Foundation: architecture and standalone engine (test pass), repository integration.
-3B — Persistent records: database, migrations and process-restart testing.
+3B — Persistent records: Room entity/DAO/repository code committed; SQLite restart contract passed; Room compilation/generated-schema/runtime process-death validation pending.
 3C — Compose Today and Challenge Creation/Detail/Recovery/Review.
 3D — Growth, Journal, Insights, settings, export/delete.
 3E — Responsive polish, artwork integration, optional reminders, accessibility and full-device QA before APK.
 
 ## Verification gaps
-No Android SDK or Gradle was available here. The Kotlin logic passed local JVM checks, but an APK, emulator run, or native screenshots are NOT verified. Pin and test compatible dependencies during Android build setup.
+No Android SDK or Gradle was available here. Kotlin logic, codec, syntax with lightweight compile stubs, and real SQLite file restart checks passed. Those **do not** validate Room-generated queries, app lifecycle, schema migration, an APK, or emulator behavior. Pin compatible versions and run Room/device checks during Gradle setup. See [Phase 3B notes](PHASE3B_PERSISTENCE.md).
 
 ## Official references
 - https://android-developers.googleblog.com/2026/05/android-ui-development-is-compose-first.html
