@@ -17,7 +17,7 @@ EVOLUNE is an Android-first, personal self-development experience for choosing m
 
 ## Current status
 
-**Stage 01: Discovery and pre-production.** No app implementation, visual identity, features, clinical effectiveness claims, or release date is finalized. This repository contains the initial working brief and research direction.
+**Phase 3A: Native Android foundation begun.** Stillwater + Atelier is the approved visual direction; HTML prototype v0.3 has been reviewed. A pure-Kotlin challenge domain engine and standalone regression checks have been committed and locally tested. This is **not yet a compiled Android application or APK**. Room persistence, Compose screens, reminders, artwork and native device QA remain pending.
 
 ## Project documents
 
@@ -31,6 +31,8 @@ EVOLUNE is an Android-first, personal self-development experience for choosing m
 - [Initial competitor scan](docs/COMPETITOR_SCAN.md)
 - [Experience and visual direction](docs/DESIGN_DIRECTION.md)
 - [Staged roadmap](docs/ROADMAP.md)
+- [Android architecture v0.1](docs/ANDROID_ARCHITECTURE_V01.md)
+- [Tested Kotlin challenge engine](domain/README.md)
 - [Decision log](docs/DECISIONS.md)
 
 ## Safety and data principles
