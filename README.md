@@ -22,6 +22,9 @@ EVOLUNE is an Android-first, personal self-development experience for choosing m
 ## Project documents
 
 - [Product brief](docs/PRODUCT_BRIEF.md)
+- [Growth architecture](docs/GROWTH_ARCHITECTURE.md)
+- [Challenge engine behavior specification](docs/CHALLENGE_ENGINE_SPEC.md)
+- [Experience journeys](docs/EXPERIENCE_JOURNEYS.md)
 - [Scientific evidence register](docs/EVIDENCE_REGISTER.md)
 - [Initial competitor scan](docs/COMPETITOR_SCAN.md)
 - [Experience and visual direction](docs/DESIGN_DIRECTION.md)
