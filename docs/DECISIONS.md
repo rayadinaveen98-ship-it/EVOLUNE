@@ -14,6 +14,11 @@ This log separates **confirmed user direction** from **proposals**. A working ti
 | D-008 | Technical stack | Open | Evaluate Android architecture and offline/privacy design before decision |
 | D-009 | Color, font, mascot, detailed UI | Open | Present options and request visual approval before finalizing |
 | D-010 | Repository visibility | Observed | GitHub repository currently public; do not commit any user data or secrets |
+| D-011 | Growth architecture | Proposed | My Growth, Today, Challenges, Journal, Insights and Library as conceptual destinations, not locked tabs |
+| D-012 | Challenge engine semantics | Proposed | Calendar-day milestone vs session-target mode; explicit records for complete/partial/rest/missed/unreported/paused |
+| D-013 | Non-invasive barrier support | Proposed | Optional capability/opportunity/motivation-inspired prompts; not a psychological assessment |
+| D-014 | Challenge history | Proposed | Track schedule revisions and preserve honest practice records; don't fabricate completion |
+| D-015 | Science-to-product translation | Proposed | Research supports selected techniques in specific contexts; EVOLUNE effectiveness must be validated |
 
 ## Workflow
 For every new decision, record date, alternatives, rationale, approval owner, status, and consequences. For every stage, report planned versus implemented accurately.
