@@ -17,7 +17,7 @@ EVOLUNE is an Android-first, personal self-development experience for choosing m
 
 ## Current status
 
-**Phase 3A: Native Android foundation begun.** Stillwater + Atelier is the approved visual direction; HTML prototype v0.3 has been reviewed. A pure-Kotlin challenge domain engine and standalone regression checks have been committed and locally tested. This is **not yet a compiled Android application or APK**. Room persistence, Compose screens, reminders, artwork and native device QA remain pending.
+**Phase 3B: Local persistence source committed.** Stillwater + Atelier remains the approved prototype direction. Pure-Kotlin challenge engine tests, independent storage codec tests, and on-disk SQLite restart/revision tests passed locally. Room entities, DAO, and repository source are now in `core/data`. **Room has not been compiled in an Android Gradle project or tested on-device; no APK exists.** Compose screens, platform persistence verification, reminders, artwork integration and device QA are pending.
 
 ## Project documents
 
@@ -32,6 +32,8 @@ EVOLUNE is an Android-first, personal self-development experience for choosing m
 - [Experience and visual direction](docs/DESIGN_DIRECTION.md)
 - [Staged roadmap](docs/ROADMAP.md)
 - [Android architecture v0.1](docs/ANDROID_ARCHITECTURE_V01.md)
+- [Phase 3B Room persistence source, tests and verification gaps](docs/PHASE3B_PERSISTENCE.md)
+- [Room persistence source](core/data/src/main/kotlin/studio/evolune/data)
 - [Tested Kotlin challenge engine](domain/README.md)
 - [Decision log](docs/DECISIONS.md)
 
