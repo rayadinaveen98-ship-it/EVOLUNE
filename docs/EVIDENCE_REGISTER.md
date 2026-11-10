@@ -27,7 +27,7 @@
 **Evidence use:** Theory-informed design heuristic; effectiveness of the EVOLUNE barrier prompt must be tested.
 
 ## E05 — Choice, competence and autonomous motivation
-**Source:** Ntoumanis N et al. *A meta-analysis of self-determination theory-informed intervention studies in the health domain.* (2020) Related SDT health behavior meta-analysis: https://pubmed.ncbi.nlm.nih.gov/32437175/ (65 independent tests across 56 articles; average effect d=0.23).
+**Source:** Sheeran P et al. *Self-Determination Theory Interventions for Health Behavior Change: Meta-Analysis and Meta-Analytic Structural Equation Modeling of Randomized Controlled Trials.* Journal of Consulting and Clinical Psychology (2020). https://pubmed.ncbi.nlm.nih.gov/32437175/ DOI:10.1037/ccp0000501 (65 independent tests across 56 articles; average effect d=0.23).
 **Finding:** SDT-based health behavior interventions have, on average, small positive effects in the reviewed populations, with variation across behaviors and contexts.
 **Product implication:** Keep user-selected actions, voluntary reflection, editable difficulty, easy exit and clear non-coercive feedback. Relatedness is part of the theory, but this does not imply requiring social features.
 **Evidence use:** Supports an autonomy-supportive approach; not evidence that any EVOLUNE screen will improve health.
