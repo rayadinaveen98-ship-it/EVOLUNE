@@ -26,6 +26,9 @@ This log separates **confirmed user direction** from **proposals**. A working ti
 | D-020 | Native architecture | Engineering proposal | Kotlin + Jetpack Compose, offline-first Room, DataStore preferences, no mandatory account |
 | D-021 | Challenge core implementation | Verified locally | Pure Kotlin domain engine committed; standalone checks passed. No Android build performed |
 | D-022 | Reminders | Planned, not implemented | Opt-in; review Android exact-alarm permissions and Play policy; avoid assuming scheduled reliability |
+| D-023 | Local persistence v1 | Engineering source implemented | Room entities for growth areas/challenges/schedules/practice revisions/pauses/journal; locally run SQLite contract & codec checks |
+| D-024 | Storage truthfulness | Verified by contract tests only | Unreported stays unlogged, corrections append, journal survives linked challenge deletion; Android Room runtime still unverified |
+| D-025 | Room runtime gate | Pending | Build with compatible Room 2.x/Kotlin/KSP; export schema and verify on emulator before calling persistence implemented in Android |
 
 ## Workflow
 For every new decision, record date, alternatives, rationale, approval owner, status, and consequences. For every stage, report planned versus implemented accurately.
