@@ -203,13 +203,20 @@ internal fun EvoluneBottomNav(
     val config=LocalConfiguration.current
     val compact=config.screenWidthDp < 370 || config.fontScale >= 1.35f
     val shortNames=compact && config.fontScale >= 1.3f
+    // The bottom bar MUST have a bounded height: child fillMaxHeight would
+    // otherwise grow a min-height-only Row to the full window and hide screens.
+    val navHeight=when {
+        config.fontScale >= 1.65f -> 128.dp
+        config.fontScale >= 1.3f -> 104.dp
+        else -> 86.dp
+    }
     Surface(color=EvoluneTokens.Paper,modifier=modifier.fillMaxWidth(),
         border=BorderStroke(0.5.dp,EvoluneTokens.Line)) {
         Box(Modifier.fillMaxWidth().navigationBarsPadding(),
             contentAlignment=Alignment.Center) {
             Row(
                 Modifier.widthIn(max=760.dp).fillMaxWidth()
-                    .heightIn(min=if(config.fontScale >= 1.65f) 108.dp else 83.dp)
+                    .height(navHeight)
                     .padding(horizontal=4.dp,vertical=4.dp),
                 horizontalArrangement=Arrangement.SpaceEvenly,
                 verticalAlignment=Alignment.CenterVertically
