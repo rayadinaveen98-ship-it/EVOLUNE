@@ -152,38 +152,77 @@ fun EvoluneShell(page: String, onPage: (String)->Unit, notice: String?, onDismis
     }
 }
 
-@Composable private fun Header(kicker: String, title: String, subtitle: String = "") {
-    Column(Modifier.fillMaxWidth().padding(bottom=18.dp)) {
-        Text(kicker.uppercase(), fontSize=10.sp, letterSpacing=2.sp, color=Sage, fontWeight=FontWeight.Bold)
+@Composable
+private fun Header(kicker: String, title: String, subtitle: String = "") {
+    Column(Modifier.fillMaxWidth().padding(bottom=4.dp)) {
+        Text(kicker.uppercase(), fontSize=9.sp, letterSpacing=1.6.sp, color=Color(0xFF829085),
+            fontWeight=FontWeight.Bold, lineHeight=13.sp)
         Spacer(Modifier.height(7.dp))
-        Text(title, fontFamily=FontFamily.Serif, fontSize=31.sp, lineHeight=36.sp, color=Ink)
-        if (subtitle.isNotEmpty()) { Spacer(Modifier.height(7.dp)); Text(subtitle, color=Muted, fontSize=13.sp, lineHeight=19.sp) }
+        Text(title, fontFamily=FontFamily.Serif, fontSize=30.sp, lineHeight=32.sp,
+            letterSpacing=(-1.15).sp, color=Ink)
+        if (subtitle.isNotEmpty()) {
+            Spacer(Modifier.height(6.dp))
+            Text(subtitle, color=Muted, fontSize=12.sp, lineHeight=18.sp)
+        }
     }
 }
 
-@Composable private fun Panel(content: @Composable ColumnScope.() -> Unit) {
-    Surface(color=Paper, shape=RoundedCornerShape(22.dp), border=BorderStroke(1.dp,Line), modifier=Modifier.fillMaxWidth()) {
-        Column(Modifier.padding(20.dp), content=content)
+@Composable
+private fun Panel(content: @Composable ColumnScope.() -> Unit) {
+    Surface(color=Paper, shape=RoundedCornerShape(20.dp), border=BorderStroke(1.dp,Line),
+        modifier=Modifier.fillMaxWidth()) {
+        Column(Modifier.padding(17.dp), content=content)
     }
 }
 
-@Composable private fun MainScroll(content: @Composable ColumnScope.() -> Unit) {
-    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal=20.dp, vertical=12.dp), verticalArrangement=Arrangement.spacedBy(16.dp), content=content)
+@Composable
+private fun MainScroll(content: @Composable ColumnScope.() -> Unit) {
+    Column(
+        Modifier.fillMaxSize().verticalScroll(rememberScrollState())
+            .padding(horizontal=20.dp, vertical=10.dp),
+        verticalArrangement=Arrangement.spacedBy(15.dp), content=content
+    )
 }
 
-@Composable private fun PrimaryAction(text: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
-    Button(onClick=onClick, modifier=modifier, shape=RoundedCornerShape(14.dp)) { Text(text) }
+@Composable
+private fun PrimaryAction(text: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    Button(onClick=onClick, modifier=modifier.heightIn(min=43.dp),
+        shape=RoundedCornerShape(11.dp),
+        colors=ButtonDefaults.buttonColors(containerColor=Forest, contentColor=Paper)) {
+        Text(text, fontSize=12.sp, fontWeight=FontWeight.SemiBold)
+    }
 }
 
-@Composable private fun SecondaryAction(text: String, onClick: () -> Unit) {
-    OutlinedButton(onClick=onClick, shape=RoundedCornerShape(14.dp)) { Text(text) }
+@Composable
+private fun SecondaryAction(text: String, onClick: () -> Unit) {
+    OutlinedButton(onClick=onClick, shape=RoundedCornerShape(11.dp),
+        colors=ButtonDefaults.outlinedButtonColors(containerColor=Color(0xFFF3F6F0), contentColor=Forest),
+        border=BorderStroke(1.dp,Color(0xFFDDE5D9))) {
+        Text(text, fontSize=12.sp, fontWeight=FontWeight.SemiBold)
+    }
 }
 
-@Composable private fun LandscapeHero() {
-    Box(Modifier.fillMaxWidth().height(175.dp).clip(RoundedCornerShape(22.dp))) {
-        Image(painterResource(R.drawable.stillwater_banner), contentDescription="Quiet garden with stepping stones and leaves", contentScale=ContentScale.Crop, modifier=Modifier.fillMaxSize())
-        Surface(color=Color(0xDDFFFDF7), shape=RoundedCornerShape(16.dp), modifier=Modifier.align(Alignment.BottomStart).padding(12.dp)) {
-            Text("A little progress is still progress.", Modifier.padding(10.dp), fontSize=12.sp, color=Ink)
+/** Approved Stillwater scene, with the readable editorial overlay used in the HTML baseline. */
+@Composable
+private fun LandscapeHero() {
+    Box(Modifier.fillMaxWidth().height(195.dp).clip(RoundedCornerShape(19.dp))) {
+        Image(painterResource(R.drawable.stillwater_banner),
+            contentDescription="Quiet Stillwater landscape with stone steps, a tree and distant hills",
+            contentScale=ContentScale.Crop, modifier=Modifier.fillMaxSize())
+        Box(Modifier.fillMaxSize().background(Brush.verticalGradient(
+            listOf(Color(0x00112318), Color(0x16112318), Color(0xBD11251A))
+        )))
+        Text("YOUR GROWTH SPACE",
+            modifier=Modifier.align(Alignment.TopEnd).padding(12.dp)
+                .clip(RoundedCornerShape(30.dp)).background(Color(0xE8FFFDF6))
+                .padding(horizontal=11.dp,vertical=7.dp),
+            fontSize=9.sp,color=Forest,fontWeight=FontWeight.Bold)
+        Column(Modifier.align(Alignment.BottomStart).padding(start=16.dp,bottom=17.dp)) {
+            Text("STILLWATER × ATELIER",fontSize=9.sp,color=Paper,
+                fontWeight=FontWeight.Bold,letterSpacing=1.3.sp)
+            Spacer(Modifier.height(6.dp))
+            Text("Every small step\nbelongs here.",fontFamily=FontFamily.Serif,
+                fontSize=21.sp,lineHeight=23.sp,color=Paper)
         }
     }
 }
