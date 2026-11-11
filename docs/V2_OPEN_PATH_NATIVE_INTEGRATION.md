@@ -17,7 +17,7 @@
 - [Android CI run 43012872864](https://github.com/rayadinave98-ship-it/EVOLUNE/actions/runs/43012872864): **SUCCESS** after an API compatibility correction.
 - [Android emulator QA run 43012872857](https://github.com/rayadinave98-ship-it/EVOLUNE/actions/runs/43012872857): **SUCCESS**, 31 total Android tests (6 core data + 25 app), 0 failures/errors. Native welcome and existing Room/navigation journeys pass.
 - Native integration tests added for first-run Skip/returning-user bypass, reduced motion and recreation progress. Existing V1 smoke tests auto-dismiss welcome during normal scenario QA.
-- The initial automated welcome frame was captured too early (establishing landscape only). QA now captures two additional meaningful frames at approximately **2.3 seconds (stones)** and **4.45 seconds (wordmark)**; the corrected screen evidence is pending a new emulator rerun.
+- The initial native screenshot was captured too early. The corrected [Android emulator run 43013838539](https://github.com/rayadinave98-ship-it/EVOLUNE/actions/runs/43013838539) **PASSED** (31/31 tests, 0 failures/errors) and captured the **2.3s stone reveal** and **4.45s wordmark reveal**. The native screenshots were opened and visually inspected next to the approved HTML v0.1 reference.
 
 ## Known acceptance limits
 - Current logo **direction A** is selected; exact geometry, commercial wordmark typography and OEM adaptive icon masks are not fully signed off.
@@ -26,4 +26,4 @@
 - A debug build and passing tests are not a release candidate.
 - User data (including journal) remains local. Test fixtures are synthetic.
 
-**Status:** Native first-run behavior emulator-tested (31/31 on first run); **visual screenshot timing corrected** and new QA rerun in progress. Actual art/motion signoff remains pending.
+**Status:** Native first-run behavior and the two animation frames are verified in real emulator output. [Android CI 43013838641](https://github.com/rayadinave98-ship-it/EVOLUNE/actions/runs/43013838641) **success**; [emulator QA 43013838539](https://github.com/rayadinave98-ship-it/EVOLUNE/actions/runs/43013838539) **success**, 31 tests / 0 failures, 17 native screenshots including the two timed intro frames. Browser/reference and native wordmark typography differ, so final visual signoff is still pending.
