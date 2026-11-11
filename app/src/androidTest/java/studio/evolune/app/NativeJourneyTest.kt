@@ -1,5 +1,11 @@
 package studio.evolune.app
 
+import android.graphics.Bitmap
+import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.compose.ui.test.captureToImage
+import androidx.compose.ui.test.onRoot
+import java.io.File
+import java.io.FileOutputStream
 import androidx.compose.ui.test.assertExists
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasSetTextAction
@@ -20,20 +26,35 @@ import org.junit.runner.RunWith
 class NativeJourneyTest {
     @get:Rule val rule = createAndroidComposeRule<MainActivity>()
 
+    private fun captureNative(name: String) {
+        val dir = File(rule.activity.filesDir, "evolune-qa")
+        check(dir.exists() || dir.mkdirs()) { "Failed to create QA screenshot directory" }
+        val file = File(dir, "$name.png")
+        FileOutputStream(file).use { out ->
+            check(rule.onRoot().captureToImage().asAndroidBitmap()
+                .compress(Bitmap.CompressFormat.PNG, 100, out)) { "Failed to capture $name" }
+        }
+    }
+
     @Test fun mainDestinationsAreNavigable() {
         rule.onNodeWithText("Make room for growth.").assertIsDisplayed()
+        captureNative("today")
 
         rule.onNodeWithText("Challenges").performClick()
         rule.onNodeWithText("The changes you choose.").assertExists()
+        captureNative("challenges")
 
         rule.onNodeWithText("Growth").performClick()
         rule.onNodeWithText("Your direction, your pace.").assertExists()
+        captureNative("growth")
 
         rule.onNodeWithText("Insights").performClick()
         rule.onNodeWithText("Look at what is real.").assertExists()
+        captureNative("insights")
 
         rule.onNodeWithText("Journal").performClick()
         rule.onNodeWithText("The living journal.").assertExists()
+        captureNative("journal")
 
         rule.onNodeWithText("Today").performClick()
         rule.onNodeWithText("Make room for growth.").assertExists()
