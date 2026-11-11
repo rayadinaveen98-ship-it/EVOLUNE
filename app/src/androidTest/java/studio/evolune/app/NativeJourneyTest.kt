@@ -98,6 +98,17 @@ class NativeJourneyTest {
     }
 
 
+    @Test fun dataPrivacyIsUserAccessibleButErasureNeedsTypedConfirmation() {
+        rule.onNodeWithText("Journal").performClick()
+        rule.onNodeWithText("Export or manage my data").performScrollTo().performClick()
+        rule.onNodeWithText("Data & privacy").assertExists()
+        rule.onNodeWithText("Choose export location").assertExists()
+        rule.onNodeWithText("Type DELETE to confirm").assertExists()
+        rule.onNodeWithText("Permanently erase this device's data").assertExists()
+        rule.onNodeWithText("Back to Journal").performScrollTo().performClick()
+        rule.onNodeWithText("Room to feel.", substring=true).assertExists()
+    }
+
     @Test fun privateJournalEntrySurvivesActivityRecreation() {
         val marker = "EVOLUNE device QA " + System.nanoTime()
         rule.onNodeWithText("Journal").performClick()
