@@ -104,23 +104,28 @@ fun EvoluneShell(page: String, onPage: (String)->Unit, notice: String?, onDismis
             containerColor = Cream,
             bottomBar = {
                 Surface(color = Paper, border = BorderStroke(0.5.dp, Line)) {
-                    Row(Modifier.fillMaxWidth().height(70.dp).padding(horizontal=5.dp, vertical=5.dp),
-                        horizontalArrangement = Arrangement.SpaceEvenly) {
-                        listOf("today" to "Today", "growth" to "My Growth", "challenges" to "Challenges",
-                            "journal" to "Journal", "insights" to "Insights").forEach { (route,label) ->
-                            val isActive = selected == route
-                            Column(
-                                Modifier.weight(1f).fillMaxHeight().clickable { onPage(route) },
-                                horizontalAlignment=Alignment.CenterHorizontally,
-                                verticalArrangement=Arrangement.Center
-                            ) {
-                                Box(
-                                    Modifier.size(30.dp).clip(RoundedCornerShape(50)).background(if(isActive) Pale else Color.Transparent),
-                                    contentAlignment=Alignment.Center
-                                ) { NavGlyph(route, if(isActive) Forest else Color(0xFF96A299)) }
-                                Text(label, fontSize=9.sp, lineHeight=12.sp, maxLines=1,
-                                    color=if(isActive) Forest else Muted,
-                                    fontWeight=if(isActive) FontWeight.Bold else FontWeight.Medium)
+                    Box(Modifier.fillMaxWidth(), contentAlignment=Alignment.Center) {
+                        Row(Modifier.widthIn(max=760.dp).fillMaxWidth().height(73.dp)
+                            .padding(horizontal=4.dp, vertical=5.dp),
+                            horizontalArrangement = Arrangement.SpaceEvenly) {
+                            listOf("today" to "Today", "growth" to "My Growth",
+                                "challenges" to "Challenges", "journal" to "Journal",
+                                "insights" to "Insights").forEach { (route,label) ->
+                                val isActive = selected == route
+                                Column(
+                                    Modifier.weight(1f).fillMaxHeight().clickable { onPage(route) },
+                                    horizontalAlignment=Alignment.CenterHorizontally,
+                                    verticalArrangement=Arrangement.Center
+                                ) {
+                                    Box(
+                                        Modifier.size(33.dp).clip(RoundedCornerShape(50))
+                                            .background(if(isActive) Pale else Color.Transparent),
+                                        contentAlignment=Alignment.Center
+                                    ) { NavGlyph(route, if(isActive) Forest else Color(0xFF96A299)) }
+                                    Text(label, fontSize=10.sp, lineHeight=13.sp, maxLines=1,
+                                        color=if(isActive) Forest else Muted,
+                                        fontWeight=if(isActive) FontWeight.Bold else FontWeight.Medium)
+                                }
                             }
                         }
                     }
@@ -290,13 +295,18 @@ private fun stateLabel(state: OpportunityState) = when(state) {
     OpportunityState.SCHEDULED -> "Scheduled"
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable private fun OutcomeButtons(onLog: (PracticeOutcome)->Unit) {
     Text("Record what happened", color=Muted, fontSize=12.sp)
     Row(horizontalArrangement=Arrangement.spacedBy(8.dp), modifier=Modifier.fillMaxWidth()) {
         PrimaryAction("Completed", { onLog(PracticeOutcome.COMPLETED) }, Modifier.weight(1f))
         SecondaryAction("Partly", { onLog(PracticeOutcome.PARTIAL) })
     }
-    Row(horizontalArrangement=Arrangement.spacedBy(8.dp)) {
+    FlowRow(
+        modifier=Modifier.fillMaxWidth(),
+        horizontalArrangement=Arrangement.spacedBy(7.dp),
+        verticalArrangement=Arrangement.spacedBy(6.dp)
+    ) {
         SecondaryAction("Rested", { onLog(PracticeOutcome.RESTED) })
         SecondaryAction("Missed", { onLog(PracticeOutcome.MISSED) })
         SecondaryAction("Backup", { onLog(PracticeOutcome.COMPLETED_BACKUP) })
@@ -423,6 +433,7 @@ fun ChallengeListPage(challenges: List<ChallengeEntity>, chosen: String?, onSele
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun ChallengeDetailPage(
     s: ChallengeSnapshot?, onAdjust:()->Unit, onReview:()->Unit,
@@ -508,7 +519,8 @@ fun ChallengeDetailPage(
             Text(sum.unreported.toString()+" unreported · "+sum.partial.toString()+
                 " partial · "+sum.rested.toString()+" rest days",fontSize=11.sp,color=Muted)
             Spacer(Modifier.height(12.dp))
-            Row(horizontalArrangement=Arrangement.spacedBy(8.dp)) {
+            FlowRow(horizontalArrangement=Arrangement.spacedBy(8.dp),
+                verticalArrangement=Arrangement.spacedBy(6.dp)) {
                 PrimaryAction("Adjust plan",onAdjust)
                 SecondaryAction("Milestone review",onReview)
             }
