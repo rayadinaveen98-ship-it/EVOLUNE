@@ -79,4 +79,46 @@ class ReminderPlanningTest {
             Instant.parse("2026-03-08T01:00:00Z"))
         assertEquals(Instant.parse("2026-03-08T13:00:00Z"),result)
     }
+    @Test fun delayedButSameDayReminderMayAppearWithinGracePeriod() {
+        val plan=snapshot()
+        val due=Instant.parse("2026-11-11T03:30:00Z")
+        assertTrue(ReminderScheduler.isValidDelivery(
+            plan,LocalTime.of(9,0),due.toEpochMilli(),due.plusSeconds(20*60)
+        ))
+        assertFalse(ReminderScheduler.isValidDelivery(
+            plan,LocalTime.of(9,0),due.toEpochMilli(),due.minusSeconds(10)
+        ))
+    }
+
+    @Test fun excessivelyLateOrWrongDayRemindersAreSuppressed() {
+        val plan=snapshot()
+        val due=Instant.parse("2026-11-11T03:30:00Z")
+        assertFalse(ReminderScheduler.isValidDelivery(
+            plan,LocalTime.of(9,0),due.toEpochMilli(),due.plusSeconds(5*3600)
+        ))
+        assertFalse(ReminderScheduler.isValidDelivery(
+            plan,LocalTime.of(9,0),due.toEpochMilli(),due.plusSeconds(17*3600)
+        ))
+    }
+
+    @Test fun previouslyLoggedOrPausedOpportunityDoesNotDispatchStaleAlarm() {
+        val due=Instant.parse("2026-11-11T03:30:00Z")
+        val rec=PracticeRecord("practice",start,PracticeOutcome.COMPLETED,1L,due)
+        assertFalse(ReminderScheduler.isValidDelivery(
+            snapshot(records=listOf(rec)),LocalTime.of(9,0),
+            due.toEpochMilli(),due.plusSeconds(60)
+        ))
+        assertFalse(ReminderScheduler.isValidDelivery(
+            snapshot(pauses=listOf(PauseWindow(start,start.plusDays(1)))),
+            LocalTime.of(9,0),due.toEpochMilli(),due.plusSeconds(60)
+        ))
+    }
+
+    @Test fun wrongTimeOrOldRevisionCannotDeliver() {
+        val due=Instant.parse("2026-11-11T03:30:00Z")
+        assertFalse(ReminderScheduler.isValidDelivery(
+            snapshot(),LocalTime.of(10,0),due.toEpochMilli(),due.plusSeconds(20)
+        ))
+    }
+
 }
