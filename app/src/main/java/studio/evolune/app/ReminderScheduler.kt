@@ -31,6 +31,8 @@ object ReminderScheduler {
     private const val ENABLED = "enabled:"
     private const val TIME = "time:"
     private const val TRIGGER = "trigger:"
+    // Avoid delivering a gentle morning nudge late at night after Doze or clock changes.
+    internal const val MAX_LATE_MILLIS = 4L * 60 * 60 * 1000
 
     private fun settings(context: Context) =
         context.applicationContext.getSharedPreferences(PREF, Context.MODE_PRIVATE)
@@ -45,10 +47,43 @@ object ReminderScheduler {
 
     fun canNotify(context: Context): Boolean {
         val manager = context.getSystemService(NotificationManager::class.java)
-        return manager.areNotificationsEnabled() &&
+        val channelAllowed = if (Build.VERSION.SDK_INT >= 26) {
+            manager.getNotificationChannel(CHANNEL)?.importance != NotificationManager.IMPORTANCE_NONE
+        } else true
+        return manager.areNotificationsEnabled() && channelAllowed &&
             (Build.VERSION.SDK_INT < 33 ||
              context.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) ==
                 PackageManager.PERMISSION_GRANTED)
+    }
+
+    /** Only called when a user explicitly enables a reminder or delivery is due. */
+    private fun ensureQuietChannel(context: Context) {
+        if (Build.VERSION.SDK_INT >= 26) {
+            context.getSystemService(NotificationManager::class.java)
+                .createNotificationChannel(NotificationChannel(
+                    CHANNEL, "Gentle practice reminders", NotificationManager.IMPORTANCE_LOW
+                ).apply {
+                    description = "Optional, quiet reminders chosen for your EVOLUNE practices"
+                    setSound(null, null)
+                    enableVibration(false)
+                })
+        }
+    }
+
+    /** Inexact alarms must never become old-day or late-night surprises. */
+    internal fun isValidDelivery(
+        snapshot: studio.evolune.data.ChallengeSnapshot,
+        chosenTime: LocalTime,
+        scheduled: Long,
+        now: Instant
+    ): Boolean {
+        val dueAt = Instant.ofEpochMilli(scheduled)
+        if (dueAt.isAfter(now) || now.toEpochMilli() - scheduled > MAX_LATE_MILLIS) return false
+        if (dueAt.atZone(snapshot.plan.zone).toLocalDate() !=
+            now.atZone(snapshot.plan.zone).toLocalDate()) return false
+        return ReminderPlanning.next(
+            snapshot, chosenTime, dueAt.minusMillis(1000)
+        ) == dueAt
     }
 
     private fun alarm(context: Context, id: String, trigger: Long): PendingIntent {
@@ -91,6 +126,7 @@ object ReminderScheduler {
      * Explicit user action only; never infer consent from a schedule's cueTime.
      */
     suspend fun enable(context: Context, dao: EvoluneDao, id: String, at: LocalTime): Boolean {
+        ensureQuietChannel(context)
         require(canNotify(context)) { "Notifications are disabled in Android settings" }
         settings(context).edit().putBoolean(ENABLED + id, true)
             .putString(TIME + id, at.toString()).apply()
@@ -131,28 +167,21 @@ object ReminderScheduler {
 
     suspend fun receive(context: Context, dao: EvoluneDao, id: String, trigger: Long) {
         // Ignore canceled or superseded in-flight broadcasts.
-        if (!isOptedIn(context, id) || !canNotify(context) ||
-            scheduledAt(context, id) != trigger) return
+        if (!isOptedIn(context, id) || scheduledAt(context, id) != trigger) return
+        if (!canNotify(context)) {
+            // Keep user opt-in, but erase misleading trigger metadata until permission returns.
+            cancelAlarm(context, id)
+            return
+        }
         val snapshot = RoomEvoluneRepository(dao).snapshot(id)
         if (snapshot == null || dao.findChallenge(id)?.archivedAtEpochMs != null) {
             disable(context, id)
             return
         }
         val now = Instant.now()
-        val expected = ReminderPlanning.next(
-            snapshot, time(context, id), Instant.ofEpochMilli(trigger - 1_000L)
-        )
-        if (expected?.toEpochMilli() == trigger && trigger <= now.toEpochMilli() + 60_000L) {
+        if (isValidDelivery(snapshot, time(context, id), trigger, now)) {
             val manager = context.getSystemService(NotificationManager::class.java)
-            if (Build.VERSION.SDK_INT >= 26) {
-                manager.createNotificationChannel(NotificationChannel(
-                    CHANNEL, "Gentle practice reminders", NotificationManager.IMPORTANCE_LOW
-                ).apply {
-                    description = "Optional, quiet reminders chosen for your EVOLUNE practices"
-                    setSound(null, null)
-                    enableVibration(false)
-                })
-            }
+            ensureQuietChannel(context)
             val open = PendingIntent.getActivity(
                 context, 0, Intent(context, MainActivity::class.java).apply {
                     flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
