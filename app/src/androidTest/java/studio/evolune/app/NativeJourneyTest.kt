@@ -66,7 +66,8 @@ class NativeJourneyTest {
             OpenPathFirstRun.PREF_FILE, Context.MODE_PRIVATE
         )
         prefs.edit().remove(OpenPathFirstRun.KEY_COMPLETED)
-            .remove(OpenPathFirstRun.KEY_STARTED_UPTIME).commit()
+            .remove(OpenPathFirstRun.KEY_STARTED_UPTIME)
+            .putBoolean(OpenPathFirstRun.FORCE_FULL_MOTION_QA, true).commit()
         rule.activityRule.scenario.recreate()
         rule.waitUntil(timeoutMillis = 10_000) {
             rule.onAllNodesWithText("Skip intro").fetchSemanticsNodes().isNotEmpty()
@@ -79,6 +80,7 @@ class NativeJourneyTest {
         rule.activityRule.scenario.recreate()
         rule.onNodeWithText("A gentle day", substring=true).assertExists()
         assertTrue(rule.onAllNodesWithText("Skip intro").fetchSemanticsNodes().isEmpty())
+        prefs.edit().remove(OpenPathFirstRun.FORCE_FULL_MOTION_QA).commit()
     }
 
     @Test fun reducedMotionWelcomeReturnsDirectlyWithoutLongSequence() {
@@ -87,6 +89,7 @@ class NativeJourneyTest {
         )
         prefs.edit().remove(OpenPathFirstRun.KEY_COMPLETED)
             .remove(OpenPathFirstRun.KEY_STARTED_UPTIME)
+            .remove(OpenPathFirstRun.FORCE_FULL_MOTION_QA)
             .putBoolean(OpenPathFirstRun.FORCE_REDUCED_MOTION_QA, true).commit()
         try {
             rule.activityRule.scenario.recreate()
@@ -105,6 +108,7 @@ class NativeJourneyTest {
             OpenPathFirstRun.PREF_FILE, Context.MODE_PRIVATE
         )
         prefs.edit().remove(OpenPathFirstRun.KEY_COMPLETED)
+            .putBoolean(OpenPathFirstRun.FORCE_FULL_MOTION_QA, true)
             .putLong(OpenPathFirstRun.KEY_STARTED_UPTIME,
                 SystemClock.elapsedRealtime() - 5_450L).commit()
         rule.activityRule.scenario.recreate()
@@ -113,6 +117,7 @@ class NativeJourneyTest {
                 .fetchSemanticsNodes().isNotEmpty()
         }
         assertTrue(OpenPathFirstRun.completed(rule.activity))
+        prefs.edit().remove(OpenPathFirstRun.FORCE_FULL_MOTION_QA).commit()
     }
 
     @Test fun mainDestinationsAreNavigable() {
