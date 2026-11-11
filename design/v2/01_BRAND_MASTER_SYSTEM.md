@@ -1,6 +1,6 @@
 # EVOLUNE V2 — Stage 01 Brand Master System (proposal v0.1)
 
-**Current state:** Written visual specifications, NOT finalized visual assets or UI implementation. The product owner approved Stillwater + Atelier as a direction; no new exact logo, font asset or v2 mark has yet been approved.
+**Current state:** Brand system under review. Product owner selected **Direction A — The Open Path** on 2026-11-11. Original SVG mark prototypes, Android VectorDrawable candidates and actual-size icon preview have now been prepared; **final mark geometry, wordmark typeface, icon integration and brand clearance are not yet signed off**. No V1 app source was changed.
 
 ## 1. Identity and positioning
 
@@ -24,7 +24,7 @@ All proposals must read as original **single-color silhouettes** at 24dp and avo
 | **B. Living Monogram** | Construct an E from two curved interlocking mineral forms; quiet depth without thin decorative strokes | Ownable letterform possible; could feel too corporate if too symmetrical | Alternative |
 | **C. Atelier Seal** | One continuous irregular hand-crafted oval enclosure, with a single forward opening / inlaid stepping mark | Warm and tactile, but complex contours may turn to mush at launcher scale | Alternative |
 
-**Recommendation:** Test A as the lead *candidate*, not as an approved final. Judge each in actual Android mask crops, monochrome theme, dark wallpaper, 24dp and blurred home screen. No gradients, shadows, illustrations or tiny letters inside the launcher icon. Wordmark may use editorial display type with custom kerning, but only after a full vector review.
+**Decision:** A is the *selected direction* (not just a recommended option). [Open Path vector source and handoff](assets/open-path/README.md). This does not yet approve the exact small-scale icon geometry. Judge each in actual Android mask crops, monochrome theme, dark wallpaper, 24dp and blurred home screen. No gradients, shadows, illustrations or tiny letters inside the launcher icon. Wordmark may use editorial display type with custom kerning, but only after a full vector review.
 
 ### Android adaptive icon delivery contract
 - Two 108×108dp layers (foreground/background), centered primary silhouette in the safe **66×66dp** region; separate monochrome single-color layer for theme support.
@@ -113,16 +113,16 @@ All numbers should have visible meaning (what is counted, eligible opportunities
 
 ## 9. Stage 01 deliverables / approval boundary
 
-**Prepared in this turn:** exact proposal, logo candidates, palette contrast checks, size and component rules, acceptance criteria and prototype tokens.
+**Prepared:** V2 brand-system plan, selected Open Path direction, original path-based SVGs and Android adaptive-icon XML templates, light/dark/monochrome render tests at 24/48/108/512px, and measured icon safe-zone radius (<33dp). The original board is a preview, not a source vector or visual sign-off.
 
 **To build before Stage 01 is marked done:**
-1. Three real mark/wordmark concepts rendered in **light, dark and monochrome**; exact vector source and adaptive masks.
+1. **Selected A direction:** Review prepared Open Path source in actual 24/48/108dp and light/dark/monochrome launcher contexts; confirm/refine exact geometry. B/C no longer need production asset work unless A is rejected.
 2. Side-by-side screen reference for one common Today card, bottom nav, Journal and Settings using shared tokens.
 3. Typography license/fallback and Telugu/English scaling samples; icon family samples.
 4. Contrast matrix on *all* surfaces and 100/140/200% text preview.
 5. Written owner confirmation of mark and final tokens; commit production asset files only after approval.
 
-Stage 01 is **IN PROGRESS**, not "fully approved" merely because the existing Stillwater + Atelier direction is approved.
+Stage 01 is **IN PROGRESS**: *direction A approved; asset geometry and all other design tokens remain in review*. No V2 launcher icon is installed in the Android app.
 
 ### Authoritative implementation references
 - [Android adaptive launcher icon system](https://developer.android.com/develop/ui/compose/system/icon_design_adaptive)
