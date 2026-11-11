@@ -27,8 +27,8 @@ import androidx.compose.ui.unit.sp
 @Composable
 internal fun EvolunePanel(content: @Composable ColumnScope.() -> Unit) {
     Surface(
-        color=Paper,shape=RoundedCornerShape(20.dp),
-        border=BorderStroke(1.dp,Line),modifier=Modifier.fillMaxWidth()
+        color=EvoluneTokens.Paper,shape=RoundedCornerShape(20.dp),
+        border=BorderStroke(1.dp,EvoluneTokens.Line),modifier=Modifier.fillMaxWidth()
     ) { Column(Modifier.padding(18.dp),content=content) }
 }
 
@@ -50,7 +50,7 @@ internal fun EvoluneInput(
         value=value,onValueChange=onValueChange,
         label={Text(label,fontSize=14.sp)},
         placeholder=if(placeholder==null) null else {
-            { Text(placeholder,color=Muted,fontSize=14.sp) }
+            { Text(placeholder,color=EvoluneTokens.Muted,fontSize=14.sp) }
         },
         modifier=modifier.fillMaxWidth(),
         enabled=enabled,isError=isError,
@@ -58,11 +58,11 @@ internal fun EvoluneInput(
         keyboardOptions=keyboardOptions,
         shape=RoundedCornerShape(13.dp),
         colors=OutlinedTextFieldDefaults.colors(
-            focusedBorderColor=Forest,unfocusedBorderColor=Color(0xFF9EAFA1),
+            focusedBorderColor=EvoluneTokens.Forest,unfocusedBorderColor=Color(0xFF9EAFA1),
             errorBorderColor=Color(0xFF905C3E),
             errorLabelColor=Color(0xFF905C3E),
-            focusedContainerColor=Paper,unfocusedContainerColor=Paper,
-            disabledContainerColor=Pale
+            focusedContainerColor=EvoluneTokens.Paper,unfocusedContainerColor=EvoluneTokens.Paper,
+            disabledContainerColor=EvoluneTokens.Pale
         )
     )
 }
@@ -81,13 +81,13 @@ internal fun EvoluneChoice(
         modifier=Modifier.heightIn(min=48.dp),
         shape=RoundedCornerShape(12.dp),
         colors=FilterChipDefaults.filterChipColors(
-            containerColor=Paper,labelColor=Forest,
-            selectedContainerColor=Pale,selectedLabelColor=Forest,
-            disabledContainerColor=Pale,disabledLabelColor=Muted
+            containerColor=EvoluneTokens.Paper,labelColor=EvoluneTokens.Forest,
+            selectedContainerColor=EvoluneTokens.Pale,selectedLabelColor=EvoluneTokens.Forest,
+            disabledContainerColor=EvoluneTokens.Pale,disabledLabelColor=EvoluneTokens.Muted
         ),
         border=FilterChipDefaults.filterChipBorder(
             enabled=enabled,selected=selected,
-            borderColor=Color(0xFFC8D5C9),selectedBorderColor=Forest
+            borderColor=Color(0xFFC8D5C9),selectedBorderColor=EvoluneTokens.Forest
         )
     )
 }
@@ -100,8 +100,8 @@ internal fun EvoluneDestructiveDialog(
 ) {
     AlertDialog(
         onDismissRequest=onCancel,
-        title={Text(title,color=Ink,fontSize=21.sp)},
-        text={Text(message,color=Muted,fontSize=14.sp,lineHeight=21.sp)},
+        title={Text(title,color=EvoluneTokens.Ink,fontSize=21.sp)},
+        text={Text(message,color=EvoluneTokens.Muted,fontSize=14.sp,lineHeight=21.sp)},
         confirmButton={
             TextButton(onClick=onConfirm,modifier=Modifier.heightIn(min=48.dp)) {
                 Text(actionLabel,color=Color(0xFF905C3E),
@@ -110,10 +110,10 @@ internal fun EvoluneDestructiveDialog(
         },
         dismissButton={
             TextButton(onClick=onCancel,modifier=Modifier.heightIn(min=48.dp)) {
-                Text("Keep reflection",color=Forest,fontSize=14.sp)
+                Text("Keep reflection",color=EvoluneTokens.Forest,fontSize=14.sp)
             }
         },
-        containerColor=Paper,
+        containerColor=EvoluneTokens.Paper,
         shape=RoundedCornerShape(20.dp)
     )
 }
