@@ -1,6 +1,15 @@
 package studio.evolune.app
 
 import androidx.compose.material3.Text
+import android.content.ContentValues
+import android.content.Context
+import android.graphics.Bitmap
+import android.os.Environment
+import android.provider.MediaStore
+import androidx.compose.ui.test.captureToImage
+import androidx.compose.ui.test.onRoot
+import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.test.core.app.ApplicationProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -24,6 +33,23 @@ import org.junit.runner.RunWith
 class Stage06ChromeTest {
     @get:Rule val rule = createComposeRule()
 
+    private fun saveFrame(name: String) {
+        val context=ApplicationProvider.getApplicationContext<Context>()
+        val values=ContentValues().apply {
+            put(MediaStore.Images.Media.DISPLAY_NAME,"evolune_qa_stage06_"+name+".png")
+            put(MediaStore.Images.Media.MIME_TYPE,"image/png")
+            put(MediaStore.Images.Media.RELATIVE_PATH,
+                Environment.DIRECTORY_PICTURES+"/EVOLUNE-QA")
+        }
+        val uri=requireNotNull(context.contentResolver.insert(
+            MediaStore.Images.Media.EXTERNAL_CONTENT_URI,values))
+        val ok=context.contentResolver.openOutputStream(uri)?.use { stream ->
+            rule.onRoot().captureToImage().asAndroidBitmap()
+                .compress(Bitmap.CompressFormat.PNG,100,stream)
+        } ?: false
+        assertTrue("Stage 06 native screenshot failed",ok)
+    }
+
     @Test fun parentTabSelectionRemainsCorrectForEveryNestedScreen() {
         assertEquals("challenges",selectedEvoluneDestination("detail"))
         assertEquals("challenges",selectedEvoluneDestination("create"))
@@ -46,6 +72,7 @@ class Stage06ChromeTest {
             ) { Text("Screen: $destination") }
         }
         rule.onNodeWithTag("evolune-nav-today").assertIsSelected()
+        saveFrame("phone_tabs")
         rule.onNodeWithTag("evolune-nav-challenges").performClick()
         rule.waitForIdle()
         assertEquals("challenges",destination)
@@ -69,6 +96,7 @@ class Stage06ChromeTest {
             ) { Text("Recovery detail") }
         }
         rule.onNodeWithTag("evolune-nav-challenges").assertIsSelected()
+        saveFrame("expanded_rail_simulated")
         rule.onNodeWithTag("evolune-nav-growth").performClick()
         assertEquals("growth",chosen)
         rule.onNodeWithText("Recovery detail").assertExists()
