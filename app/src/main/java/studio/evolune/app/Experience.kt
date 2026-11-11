@@ -1468,74 +1468,86 @@ fun DataPrivacyPage(
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun InsightsPage(s: ChallengeSnapshot?) {
     MainScroll {
         Header("Patterns, not verdicts", "See what\nis changing.",
-            "Every number has a story. You decide what it means.")
+            "A calm view of what you have actually recorded.")
         if(s==null) {
-            Surface(color=Pale, shape=RoundedCornerShape(20.dp),modifier=Modifier.fillMaxWidth()) {
-                Column(Modifier.padding(19.dp)) {
-                    Text("YOUR FIRST INSIGHT",fontSize=10.sp,color=Sage,
-                        fontWeight=FontWeight.Bold,letterSpacing=1.4.sp)
-                    Spacer(Modifier.height(10.dp))
-                    Text("0",fontFamily=FontFamily.Serif,fontSize=47.sp,color=Forest)
-                    Text("Recorded full practices so far",fontSize=12.sp,color=Muted)
-                    Spacer(Modifier.height(10.dp))
-                    Text("Create a challenge and record a practice to reveal patterns over time.",
-                        fontSize=12.sp,lineHeight=19.sp,color=Muted)
-                }
+            Panel {
+                Text("YOUR FIRST INSIGHT",fontSize=11.sp,color=Forest,
+                    fontWeight=FontWeight.Bold,letterSpacing=1.sp)
+                Spacer(Modifier.height(11.dp))
+                Text("Your story starts with a record.",fontFamily=FontFamily.Serif,
+                    fontSize=24.sp,lineHeight=30.sp,color=Ink)
+                Spacer(Modifier.height(8.dp))
+                Text("There is no challenge activity to summarize yet. Create a practice and log what actually happened to see meaningful patterns.",
+                    fontSize=14.sp,lineHeight=21.sp,color=Muted)
             }
         } else {
             val list=days(s)
             val summary=ChallengeEngine.summarize(list)
-            Surface(color=Pale,shape=RoundedCornerShape(21.dp),
-                modifier=Modifier.fillMaxWidth()) {
-                Column(Modifier.padding(20.dp)) {
-                    Text("RECORDED PRACTICES",fontSize=10.sp,color=Sage,
-                        fontWeight=FontWeight.Bold,letterSpacing=1.5.sp)
-                    Spacer(Modifier.height(7.dp))
-                    Text(summary.recordedFull.toString(),
-                        fontSize=52.sp,fontFamily=FontFamily.Serif,color=Forest)
-                    Text("Full actions you explicitly recorded",fontSize=12.sp,color=Muted)
+            Panel {
+                Text("THIS CHALLENGE",fontSize=11.sp,color=Forest,
+                    fontWeight=FontWeight.Bold,letterSpacing=1.sp)
+                Spacer(Modifier.height(8.dp))
+                Text(s.plan.title,fontFamily=FontFamily.Serif,
+                    fontSize=23.sp,lineHeight=28.sp,color=Ink)
+                Spacer(Modifier.height(15.dp))
+                Surface(color=Pale,shape=RoundedCornerShape(17.dp),
+                    modifier=Modifier.fillMaxWidth()) {
+                    Column(Modifier.padding(18.dp)) {
+                        Text(summary.recordedFull.toString(),
+                            fontSize=49.sp,lineHeight=55.sp,
+                            fontFamily=FontFamily.Serif,color=Forest)
+                        Spacer(Modifier.height(5.dp))
+                        Text("Full practices explicitly recorded",
+                            fontSize=15.sp,lineHeight=22.sp,color=Ink)
+                        Spacer(Modifier.height(8.dp))
+                        Text("Out of ${summary.eligibleOpportunities} eligible opportunities through today. This number describes records, not your worth.",
+                            fontSize=13.sp,lineHeight=20.sp,color=Muted)
+                    }
                 }
             }
-            Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(7.dp)) {
-                listOf("Partial" to summary.partial,
-                       "Unreported" to summary.unreported,
-                       "Rest" to summary.rested).forEach { (name,n) ->
-                    Surface(color=Pale,shape=RoundedCornerShape(13.dp),
-                        modifier=Modifier.weight(1f)) {
-                        Column(Modifier.padding(vertical=13.dp),horizontalAlignment=Alignment.CenterHorizontally) {
-                            Text(n.toString(),fontFamily=FontFamily.Serif,fontSize=23.sp,color=Ink)
-                            Text(name,fontSize=10.sp,color=Muted)
+            Text("MORE OF THE PICTURE",fontSize=11.sp,color=Forest,
+                fontWeight=FontWeight.Bold,letterSpacing=1.sp)
+            FlowRow(
+                modifier=Modifier.fillMaxWidth(),
+                horizontalArrangement=Arrangement.spacedBy(8.dp),
+                verticalArrangement=Arrangement.spacedBy(8.dp)
+            ) {
+                listOf(
+                    "Partial" to summary.partial,
+                    "Backup action" to summary.recordedBackup,
+                    "Intentional rest" to summary.rested,
+                    "Unreported" to summary.unreported,
+                    "Explicitly missed" to summary.explicitlyMissed,
+                    "Paused" to summary.paused
+                ).forEach { (label,count) ->
+                    Surface(color=Pale,shape=RoundedCornerShape(14.dp),
+                        modifier=Modifier.widthIn(min=135.dp)) {
+                        Column(Modifier.padding(15.dp)) {
+                            Text(count.toString(),fontFamily=FontFamily.Serif,
+                                fontSize=29.sp,lineHeight=34.sp,color=Ink)
+                            Spacer(Modifier.height(5.dp))
+                            Text(label,fontSize=14.sp,lineHeight=20.sp,color=Forest)
                         }
                     }
                 }
             }
-            Text("By challenge",fontFamily=FontFamily.Serif,fontSize=21.sp,color=Ink)
             Panel {
-                Text(s.plan.title,fontWeight=FontWeight.SemiBold,color=Ink,fontSize=13.sp)
-                Spacer(Modifier.height(5.dp))
-                Text(summary.recordedFull.toString()+" full records out of "+
-                    summary.eligibleOpportunities.toString()+" eligible opportunities so far",
-                    fontSize=11.sp,color=Muted,lineHeight=16.sp)
-                Spacer(Modifier.height(6.dp))
-                Text("Only the currently selected challenge is shown in this foundation build.",
-                    fontSize=10.sp,color=Muted,lineHeight=16.sp)
-            }
-            Surface(color=Pale,shape=RoundedCornerShape(16.dp),
-                modifier=Modifier.fillMaxWidth()) {
-                Column(Modifier.padding(16.dp)) {
-                    Text("REFLECTIVE NOTE",color=Sage,fontWeight=FontWeight.Bold,
-                        letterSpacing=1.4.sp,fontSize=9.sp)
-                    Spacer(Modifier.height(8.dp))
-                    Text("An unreported day is not evidence of failure. Consider what made a practice easier or harder.",
-                        color=Ink,fontSize=13.sp,lineHeight=19.sp)
-                }
+                Text("How to read your history",fontFamily=FontFamily.Serif,
+                    fontSize=22.sp,lineHeight=28.sp,color=Ink)
+                Spacer(Modifier.height(10.dp))
+                Text("Unreported means no entry was made—not that you missed the practice. A backup action is shown separately from a full action.",
+                    fontSize=14.sp,lineHeight=21.sp,color=Muted)
+                Spacer(Modifier.height(11.dp))
+                Text("Only your currently selected challenge is summarized here. This is not an overall wellbeing score.",
+                    fontSize=14.sp,lineHeight=21.sp,color=Muted)
             }
         }
-        Text("These are descriptions of recorded behavior, never scores for health, worth or habit formation.",
-            color=Muted,fontSize=11.sp,lineHeight=17.sp)
+        Text("Insights describe your recorded behavior. They do not diagnose health, predict future results, or prove that a habit is permanent.",
+            fontSize=13.sp,lineHeight=20.sp,color=Muted)
     }
 }
