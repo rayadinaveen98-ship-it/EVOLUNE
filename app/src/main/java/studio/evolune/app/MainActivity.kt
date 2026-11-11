@@ -82,7 +82,8 @@ private fun EvoluneRoot(dao: EvoluneDao, repository: RoomEvoluneRepository) {
     var setupError by remember { mutableStateOf<String?>(null) }
     LaunchedEffect(Unit) {
         try {
-            val hasData = dao.listChallenges().isNotEmpty()
+            val hasData = dao.listChallenges().isNotEmpty() ||
+                dao.listGrowthAreas().isNotEmpty() || dao.listJournal().isNotEmpty()
             val prefs = context.getSharedPreferences(OpenPathFirstRun.PREF_FILE, android.content.Context.MODE_PRIVATE)
             val qaMode = (context.applicationInfo.flags and android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0 &&
                 (prefs.getBoolean(OpenPathFirstRun.FORCE_FULL_MOTION_QA, false) ||
