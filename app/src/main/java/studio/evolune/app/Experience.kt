@@ -805,6 +805,7 @@ data class CreateRequest(
     val recurrence: Recurrence, val cueTime: LocalTime?, val fallback: String?, val areaId: String?
 )
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun CreateChallengePage(areas: List<GrowthAreaEntity>, onBack:()->Unit, onCreate:(CreateRequest)->Unit) {
     var title by remember { mutableStateOf("") }
@@ -815,44 +816,107 @@ fun CreateChallengePage(areas: List<GrowthAreaEntity>, onBack:()->Unit, onCreate
     var cue by remember { mutableStateOf("") }
     var fallback by remember { mutableStateOf("") }
     var areaId by remember { mutableStateOf<String?>(null) }
+    var showOptional by remember { mutableStateOf(false) }
     var warning by remember { mutableStateOf("") }
     MainScroll {
-        Header("A fresh beginning", "Start with one thing.", "Define an action you can practice. It doesn't have to be perfect.")
+        Header("A fresh beginning", "Start with one thing.",
+            "Choose a repeatable practice. You can adjust future plans later.")
         Panel {
-            OutlinedTextField(value=title,onValueChange={title=it},label={Text("Challenge title")},singleLine=true,modifier=Modifier.fillMaxWidth())
-            Spacer(Modifier.height(12.dp))
-            OutlinedTextField(value=action,onValueChange={action=it},label={Text("My repeatable action")},placeholder={Text("Read for 10 minutes")},modifier=Modifier.fillMaxWidth())
-            Spacer(Modifier.height(12.dp))
-            OutlinedTextField(value=targetText,onValueChange={targetText=it.filter(Char::isDigit)},label={Text("Milestone number")},singleLine=true,modifier=Modifier.fillMaxWidth())
+            Text("01 · YOUR PRACTICE",fontSize=11.sp,fontWeight=FontWeight.Bold,
+                letterSpacing=1.sp,color=Forest)
             Spacer(Modifier.height(10.dp))
-            Text("Milestone means",color=Muted,fontSize=12.sp)
-            Row(horizontalArrangement=Arrangement.spacedBy(6.dp)) {
-                FilterChip(selected=mode==MilestoneKind.CALENDAR_DAYS,onClick={mode=MilestoneKind.CALENDAR_DAYS},label={Text("Calendar days")})
-                FilterChip(selected=mode==MilestoneKind.COMPLETED_SESSIONS,onClick={mode=MilestoneKind.COMPLETED_SESSIONS},label={Text("Full sessions")})
-            }
-            Text("A 21-day period isn't a guarantee that a habit is formed.",fontSize=11.sp,color=Muted)
+            Text("Begin with an action",fontSize=23.sp,lineHeight=29.sp,
+                fontFamily=FontFamily.Serif,color=Ink)
+            Spacer(Modifier.height(8.dp))
+            Text("Small and specific works better than vague pressure.",
+                fontSize=14.sp,lineHeight=21.sp,color=Muted)
+            Spacer(Modifier.height(15.dp))
+            OutlinedTextField(value=title,onValueChange={title=it},
+                label={Text("Challenge title")},singleLine=true,
+                modifier=Modifier.fillMaxWidth())
+            Spacer(Modifier.height(13.dp))
+            OutlinedTextField(value=action,onValueChange={action=it},
+                label={Text("My repeatable action")},
+                placeholder={Text("Read for 10 minutes")},
+                minLines=2,maxLines=4,modifier=Modifier.fillMaxWidth())
         }
         Panel {
-            Text("Choose practice days",fontSize=17.sp,fontFamily=FontFamily.Serif)
-            listOf("Every day" to Recurrence.Daily,"Weekdays" to Recurrence.Weekdays,"Weekends" to Recurrence.Weekends).forEach { (name,r) ->
-                Row(verticalAlignment=Alignment.CenterVertically) {
-                    RadioButton(selected=recurrence==r,onClick={recurrence=r})
-                    Text(name,modifier=Modifier.clickable{recurrence=r},fontSize=14.sp)
-                }
-            }
-            OutlinedTextField(value=cue,onValueChange={cue=it},label={Text("Optional time (HH:mm)")},singleLine=true,modifier=Modifier.fillMaxWidth())
+            Text("02 · YOUR RHYTHM",fontSize=11.sp,fontWeight=FontWeight.Bold,
+                letterSpacing=1.sp,color=Forest)
             Spacer(Modifier.height(9.dp))
-            OutlinedTextField(value=fallback,onValueChange={fallback=it},label={Text("Smaller backup action (optional)")},modifier=Modifier.fillMaxWidth())
-            if(areas.isNotEmpty()) {
-                Spacer(Modifier.height(12.dp)); Text("Growth area (optional)",fontSize=12.sp,color=Muted)
-                Row(horizontalArrangement=Arrangement.spacedBy(6.dp),modifier=Modifier.horizontalScroll(rememberScrollState())) {
-                    FilterChip(selected=areaId==null,onClick={areaId=null},label={Text("None")})
-                    areas.forEach { area -> FilterChip(selected=area.id==areaId,onClick={areaId=area.id},label={Text(area.name)}) }
+            Text("Choose how to count",fontSize=22.sp,lineHeight=28.sp,
+                fontFamily=FontFamily.Serif,color=Ink)
+            Spacer(Modifier.height(12.dp))
+            OutlinedTextField(value=targetText,
+                onValueChange={targetText=it.filter(Char::isDigit)},
+                label={Text("Milestone number")},singleLine=true,
+                modifier=Modifier.fillMaxWidth())
+            Spacer(Modifier.height(10.dp))
+            Text("Milestone means",fontSize=14.sp,color=Ink)
+            FlowRow(horizontalArrangement=Arrangement.spacedBy(8.dp),
+                verticalArrangement=Arrangement.spacedBy(6.dp)) {
+                FilterChip(selected=mode==MilestoneKind.CALENDAR_DAYS,
+                    onClick={mode=MilestoneKind.CALENDAR_DAYS},label={Text("Calendar days")})
+                FilterChip(selected=mode==MilestoneKind.COMPLETED_SESSIONS,
+                    onClick={mode=MilestoneKind.COMPLETED_SESSIONS},label={Text("Full sessions")})
+            }
+            Spacer(Modifier.height(8.dp))
+            Text("A 21-day period does not prove a permanent habit has formed.",
+                fontSize=13.sp,lineHeight=20.sp,color=Muted)
+            Spacer(Modifier.height(13.dp))
+            Text("Practice days",fontSize=14.sp,color=Forest,
+                fontWeight=FontWeight.SemiBold)
+            listOf("Every day" to Recurrence.Daily,
+                "Weekdays" to Recurrence.Weekdays,
+                "Weekends" to Recurrence.Weekends).forEach { (name,r) ->
+                Row(Modifier.fillMaxWidth().heightIn(min=50.dp)
+                    .clickable(role=Role.RadioButton){recurrence=r},
+                    verticalAlignment=Alignment.CenterVertically) {
+                    RadioButton(selected=recurrence==r,onClick={recurrence=r})
+                    Text(name,fontSize=15.sp,lineHeight=22.sp,color=Ink)
                 }
             }
         }
-        if(warning.isNotEmpty()) Text(warning,color=Color(0xFF9D4F40),fontSize=12.sp)
-        PrimaryAction("Create my challenge",{
+        Panel {
+            Text("03 · PERSONAL DETAILS",fontSize=11.sp,color=Forest,
+                fontWeight=FontWeight.Bold,letterSpacing=1.sp)
+            Spacer(Modifier.height(8.dp))
+            Text("Keep it your own",fontSize=22.sp,lineHeight=28.sp,
+                fontFamily=FontFamily.Serif,color=Ink)
+            Spacer(Modifier.height(10.dp))
+            if(areas.isNotEmpty()) {
+                Text("Growth area (optional)",fontSize=14.sp,color=Muted)
+                FlowRow(horizontalArrangement=Arrangement.spacedBy(7.dp),
+                    verticalArrangement=Arrangement.spacedBy(5.dp)) {
+                    FilterChip(selected=areaId==null,onClick={areaId=null},
+                        label={Text("None")})
+                    areas.forEach { area ->
+                        FilterChip(selected=areaId==area.id,
+                            onClick={areaId=area.id},label={Text(area.name)})
+                    }
+                }
+                Spacer(Modifier.height(10.dp))
+            }
+            TodayQuietButton(if(showOptional)"Hide optional details" else "Add optional details",{
+                showOptional=!showOptional
+            })
+            if(showOptional) {
+                Spacer(Modifier.height(14.dp))
+                OutlinedTextField(value=cue,onValueChange={cue=it},
+                    label={Text("Optional time (HH:mm)")},
+                    singleLine=true,modifier=Modifier.fillMaxWidth())
+                Spacer(Modifier.height(11.dp))
+                OutlinedTextField(value=fallback,onValueChange={fallback=it},
+                    label={Text("Smaller backup action (optional)")},
+                    modifier=Modifier.fillMaxWidth())
+                Spacer(Modifier.height(8.dp))
+                Text("A cue time does not enable notifications. Reminders stay opt-in.",
+                    fontSize=13.sp,lineHeight=20.sp,color=Muted)
+            }
+        }
+        if(warning.isNotEmpty()) Text(warning,color=Color(0xFF905C3E),
+            fontSize=14.sp,lineHeight=21.sp)
+        TodayMainButton("Create my challenge", {
             val count=targetText.toIntOrNull()
             val time=if(cue.isBlank()) null else runCatching { LocalTime.parse(cue.trim()) }.getOrNull()
             warning = when {
@@ -861,9 +925,12 @@ fun CreateChallengePage(areas: List<GrowthAreaEntity>, onBack:()->Unit, onCreate
                 cue.isNotBlank() && time == null -> "Use a valid time such as 07:30."
                 else -> ""
             }
-            if(warning.isEmpty()) onCreate(CreateRequest(title,action,count!!,mode,recurrence,time,fallback,areaId))
-        },Modifier.fillMaxWidth())
-        SecondaryAction("Back",onBack)
+            if(warning.isEmpty()) onCreate(CreateRequest(
+                title.trim(),action.trim(),count!!,mode,recurrence,time,
+                fallback.trim().ifEmpty{null},areaId
+            ))
+        })
+        TodayQuietButton("Back",onBack)
     }
 }
 
