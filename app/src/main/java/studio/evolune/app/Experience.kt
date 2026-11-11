@@ -98,7 +98,11 @@ private fun NavGlyph(route: String, color: Color = Sage) {
 
 @Composable
 fun EvoluneShell(page: String, onPage: (String)->Unit, notice: String?, onDismissNotice: ()->Unit, content: @Composable () -> Unit) {
-    val selected = if (page in setOf("detail","create","recovery","review")) "challenges" else page
+    val selected = when(page) {
+        "detail", "create", "recovery", "review" -> "challenges"
+        "data" -> "journal"
+        else -> page
+    }
     MaterialTheme(colorScheme = appColors) {
         Scaffold(
             containerColor = Cream,
@@ -690,7 +694,8 @@ fun GrowthPage(areas:List<GrowthAreaEntity>,onCreateArea:(String)->Unit,onStart:
 fun JournalPage(
     entries: List<JournalEntryEntity>,
     onSave:(JournalEntryEntity?,String,String?,Int?)->Unit,
-    onDelete:(JournalEntryEntity)->Unit
+    onDelete:(JournalEntryEntity)->Unit,
+    onDataPrivacy:()->Unit
 ) {
     var editing by remember { mutableStateOf<JournalEntryEntity?>(null) }
     var showingEditor by remember { mutableStateOf(false) }
@@ -799,8 +804,62 @@ fun JournalPage(
                 Spacer(Modifier.height(7.dp))
                 Text("Your journal is stored in this device's private app database. No cloud sync or account is enabled in this build.",
                     color=Muted,fontSize=12.sp,lineHeight=18.sp)
+                Spacer(Modifier.height(10.dp))
+                SecondaryAction("Export or manage my data",onDataPrivacy)
             }
         }
+    }
+}
+
+@Composable
+fun DataPrivacyPage(onBack:()->Unit, onExport:()->Unit, onErase:()->Unit) {
+    var deletionText by remember { mutableStateOf("") }
+    MainScroll {
+        Header("Your information · Your choice", "Data & privacy",
+            "Keep your personal writing and challenge history under your control.")
+        Panel {
+            Text("Export my data",fontFamily=FontFamily.Serif,fontSize=21.sp,color=Ink)
+            Spacer(Modifier.height(8.dp))
+            Text("Save a JSON copy of your growth areas, challenges, every practice revision, pauses and journal entries. You choose where it is stored.",
+                color=Muted,fontSize=12.sp,lineHeight=19.sp)
+            Spacer(Modifier.height(10.dp))
+            Text("Important: exports contain private reflections and are not encrypted by EVOLUNE. Store the file securely. Import/restore is not yet supported.",
+                color=Color(0xFF905C3E),fontSize=11.sp,lineHeight=17.sp)
+            Spacer(Modifier.height(13.dp))
+            PrimaryAction("Choose export location",onExport,Modifier.fillMaxWidth())
+        }
+        Panel {
+            Text("Erase local data",fontFamily=FontFamily.Serif,fontSize=21.sp,color=Ink)
+            Spacer(Modifier.height(8.dp))
+            Text("Permanently remove all growth areas, challenge and schedule history, and private journal entries from this installation. This cannot be undone. Export first if you need a copy.",
+                color=Muted,fontSize=12.sp,lineHeight=19.sp)
+            Spacer(Modifier.height(12.dp))
+            OutlinedTextField(value=deletionText,
+                onValueChange={ deletionText=it.take(32) },
+                label={Text("Type DELETE to confirm")},
+                shape=RoundedCornerShape(12.dp),
+                singleLine=true,
+                modifier=Modifier.fillMaxWidth(),
+                colors=OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor=Color(0xFFAA665A),
+                    unfocusedBorderColor=Line
+                ))
+            Spacer(Modifier.height(12.dp))
+            Button(onClick={
+                    if(deletionText=="DELETE") {
+                        deletionText=""
+                        onErase()
+                    }
+                },enabled=deletionText=="DELETE",
+                colors=ButtonDefaults.buttonColors(
+                    containerColor=Color(0xFF995646),contentColor=Color.White),
+                shape=RoundedCornerShape(12.dp),modifier=Modifier.fillMaxWidth()) {
+                Text("Permanently erase this device's data")
+            }
+        }
+        Text("No account or server backup is configured. Uninstalling the app before exporting may permanently lose your records.",
+            fontSize=11.sp,color=Muted,lineHeight=17.sp)
+        SecondaryAction("Back to Journal",onBack)
     }
 }
 
