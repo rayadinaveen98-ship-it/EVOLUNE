@@ -156,6 +156,24 @@ abstract class EvoluneDao {
         deleteAllChallenges()
         deleteAllGrowthAreas()
     }
+
+    /**
+     * One atomic replacement. All input must be validated by the import parser
+     * *before* calling this method; SQLite foreign keys are the final safeguard.
+     * A failed insert rolls back the deletes and leaves the previous data intact.
+     */
+    @Transaction
+    open suspend fun replaceAllLocalData(validated: StoredLocalExport) {
+        deleteAllJournalEntries()
+        deleteAllChallenges()
+        deleteAllGrowthAreas()
+        validated.growthAreas.forEach { insertGrowthArea(it) }
+        validated.challenges.forEach { insertChallenge(it) }
+        validated.schedules.forEach { insertInitialSchedule(it) }
+        validated.practices.forEach { insertPractice(it) }
+        validated.pauses.forEach { insertPause(it) }
+        validated.journal.forEach { createJournal(it) }
+    }
 }
 
 /** Complete local snapshot, including historic schedule and outcome revisions. */
