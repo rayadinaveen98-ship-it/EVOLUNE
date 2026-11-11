@@ -65,8 +65,8 @@ object EvoluneImportJson {
                     ChallengeEntity(
                         id=keyId(o),growthAreaId=optString(o,"growthAreaId",150),
                         title=required(o,"title",150),
-                        startDate=required(o,"startDate",16).also(::date),
-                        zoneId=required(o,"zoneId",80).also(ZoneId::of),
+                        startDate=required(o,"startDate",16).also { date(it) },
+                        zoneId=required(o,"zoneId",80).also { ZoneId.of(it) },
                         milestoneKind=required(o,"milestoneKind",40)
                             .also { MilestoneKind.valueOf(it) },
                         target=o.getInt("target").also { require(it in 1..3650) },
@@ -81,7 +81,7 @@ object EvoluneImportJson {
                     val o=a.getJSONObject(idx)
                     ScheduleVersionEntity(
                         id=rowId(o),challengeId=keyId(o,"challengeId"),
-                        effectiveFrom=required(o,"effectiveFrom",16).also(::date),
+                        effectiveFrom=required(o,"effectiveFrom",16).also { date(it) },
                         recurrenceKind=required(o,"recurrenceKind",40),
                         recurrenceArgument=optString(o,"recurrenceArgument",80),
                         action=required(o,"action",500),
@@ -96,7 +96,7 @@ object EvoluneImportJson {
                     val o=a.getJSONObject(idx)
                     PracticeRecordEntity(
                         id=rowId(o),challengeId=keyId(o,"challengeId"),
-                        localDate=required(o,"localDate",16).also(::date),
+                        localDate=required(o,"localDate",16).also { date(it) },
                         outcome=required(o,"outcome",35),
                         revision=o.getLong("revision").also { require(it>0) },
                         recordedAtEpochMs=millis(o,"recordedAtEpochMs"),
@@ -109,8 +109,8 @@ object EvoluneImportJson {
                     val o=a.getJSONObject(idx)
                     PauseWindowEntity(
                         id=rowId(o),challengeId=keyId(o,"challengeId"),
-                        fromDate=required(o,"fromDate",16).also(::date),
-                        throughDate=required(o,"throughDate",16).also(::date)
+                        fromDate=required(o,"fromDate",16).also { date(it) },
+                        throughDate=required(o,"throughDate",16).also { date(it) }
                     ).also { require(!date(it.throughDate).isBefore(date(it.fromDate))) }
                 }
             }
