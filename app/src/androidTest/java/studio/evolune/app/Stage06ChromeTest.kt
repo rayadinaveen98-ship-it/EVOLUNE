@@ -20,6 +20,8 @@ import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.hasSetTextAction
+import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.junit.Assert.assertEquals
@@ -132,4 +134,19 @@ class Stage06ChromeTest {
         rule.onNodeWithText("Cancel").assertIsNotEnabled()
         assertEquals(1,count)
     }
+    @Test fun sharedInputAndChoiceKeepRealValuesAndSelection() {
+        var area by mutableStateOf("")
+        var selected by mutableStateOf(false)
+        rule.setContent {
+            androidx.compose.foundation.layout.Column {
+                EvoluneInput(value=area,onValueChange={area=it},label="Area name")
+                EvoluneChoice(selected=selected,onClick={selected=!selected},label="Learning")
+            }
+        }
+        rule.onAllNodes(hasSetTextAction())[0].performTextInput("Personal learning")
+        assertEquals("Personal learning",area)
+        rule.onNodeWithText("Learning").performClick()
+        assertTrue(selected)
+    }
+
 }
