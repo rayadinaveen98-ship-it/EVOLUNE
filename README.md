@@ -17,7 +17,7 @@ EVOLUNE is an Android-first, personal self-development experience for choosing m
 
 ## Current status
 
-**Android v1 development milestone — Data ownership (2026-11-11).** The existing Stillwater + Atelier native v0.5 visual baseline is preserved. A versioned local JSON export, strict validated import/restore with explicit REPLACE confirmation, and atomic deletion with explicit DELETE confirmation have been added to the review branch. [Android CI 42992160733](https://github.com/rayadinaveen98-ship-it/EVOLUNE/actions/runs/42992160733) and [Android emulator QA 42992160422](https://github.com/rayadinaveen98-ship-it/EVOLUNE/actions/runs/42992160422) **passed** (15 Android instrumented tests, zero failures). This is **not** release completion: manual document-picker/reinstall tests, notifications, accessibility, wider QA, consenting pilot and signed release remain. Source is still in [draft PR #2](https://github.com/rayadinaveen98-ship-it/EVOLUNE/pull/2), unmerged.
+**Android v1 development — optional gentle reminders implemented (2026-11-11).** Stillwater + Atelier remains the approved visual direction. Local versioned export/restore/erase is implemented, and inexact opt-in per-challenge Android reminders are connected to the native app without requiring a server or exact-alarm special access. [Android CI 42995670955](https://github.com/rayadinave98-ship-it/EVOLUNE/actions/runs/42995670955) and [emulator QA 42995670616](https://github.com/rayadinave98-ship-it/EVOLUNE/actions/runs/42995670616) **passed (22 tests, 0 failures)**. **Release still pending:** real reminder delivery under battery restrictions, reboot/permission trials, manual document-picker/reinstall, migration, accessibility, user pilot, security/privacy and signed production release. [Draft PR #2](https://github.com/rayadinave98-ship-it/EVOLUNE/pull/2) remains unmerged.
 
 
 ## Project documents
@@ -38,6 +38,7 @@ EVOLUNE is an Android-first, personal self-development experience for choosing m
 - [Versioned local data ownership and Android verification](docs/V1_DATA_OWNERSHIP_VERIFICATION.md)
 - [Privacy and release-risk register](docs/V1_SAFETY_AND_RELEASE_RISKS.md)
 - [Reminder scheduling contract](docs/V1_REMINDER_DELIVERY_CONTRACT.md)
+- [Reminder implementation and 22-test Android QA evidence](docs/V1_REMINDER_IMPLEMENTATION_REPORT.md)
 - [Limited pilot protocol (not yet conducted)](docs/V1_LIMITED_PILOT_PROTOCOL.md)
 - [Native v0.4 visual parity, emulator evidence and remaining gaps](docs/PHASE3E_NATIVE_VISUAL_PARITY.md)
 - [Phase 3C verified build and remaining gaps](docs/PHASE3C_BUILD_VERIFICATION.md)
