@@ -42,3 +42,12 @@ EVOLUNE is an Android-first, personal self-development experience for choosing m
 EVOLUNE is initially a general wellness and self-development concept, **not** therapy, diagnosis, emergency support, or a medical device. Any clinical features require a separate evidence, regulatory, and safety review. No personal journal, mood, or health data belongs in this public repository.
 
 Copyright © project owner. No license granted by default; license choice pending.
+
+## Phase 3C Android source (2026-11-11)
+
+The repository now contains a **Kotlin + Compose Android source project** with `app`, `domain`, and `core:data` modules, a Room-backed local data layer, instrumented test source and a GitHub Actions build workflow. The native UI is an integration shell and **not yet a final visual match** to the approved Stillwater + Atelier HTML v0.3 prototype.
+
+- [Phase 3C implementation and limitations](docs/PHASE3C_ANDROID_INTEGRATION.md)
+- [GitHub Android CI](.github/workflows/android-ci.yml)
+
+**Important:** An Android APK or working Android persistence is only confirmed after CI builds the app and on-device tests pass. No user data or secrets are stored in this public repository.
