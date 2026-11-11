@@ -14,15 +14,15 @@
 - Reworked Challenge Detail with real first-seven-day status markers, factual progress cards, revision/review links and its existing history and outcome actions.
 
 ## Verification evidence
-- [Android UI + persistence emulator run 42964354746](https://github.com/rayadinaveen98-ship-it/EVOLUNE/actions/runs/42964354746): **PASS**, 6 Room/data tests and 3 Compose UI tests, zero failures/errors. Includes screenshots of a newly created synthetic challenge, Today, Growth, Journal, Insights, Detail, Recovery and Review. This run predates the final **Challenge Detail visual refinement**.
+- [Android UI + persistence emulator run 42964354746](https://github.com/rayadinaveen98-ship-it/EVOLUNE/actions/runs/42964354746): **PASS**, 6 Room/data tests and 3 Compose UI tests, zero failures/errors. Includes screenshots of a newly created synthetic challenge, Today, Growth, Journal, Insights, Detail, Recovery and Review. This run predates the final **Challenge Detail visual refinement**; the newer emulator run below covers it.
 - [Android build run 42965272744](https://github.com/rayadinaveen98-ship-it/EVOLUNE/actions/runs/42965272744): **PASS**, builds the final Challenge Detail visual refinement at source commit `7fb42848525bb489fd05fd5805744fef8b25fa9c`.
-- [Latest emulator run 42965272820](https://github.com/rayadinaveen98-ship-it/EVOLUNE/actions/runs/42965272820): **not yet verified** at the time this report was written. Do not infer pass based on successful compilation.
-- APK from successful build was extracted and ZIP integrity checked; a compiled debug APK does not verify runtime functionality.
+- [Latest emulator run 42965272820](https://github.com/rayadinave98-ship-it/EVOLUNE/actions/runs/42965272820): **PASS**, 6 Room/data and 3 native Compose UI tests, 0 failures/errors. Its evidence ZIP was downloaded and checked; all 10 screenshot files are valid 1080×2400 PNGs, including populated Challenge Detail, Recovery, Review and Today.
+- APK from successful build was extracted and ZIP integrity checked; the same source revision also passed real Android emulator instrumentation tests.
 
 ## Current visual-parity findings
 **Improved:** Today, navigation, typography, warm/pale color system, landscape hero placement, progressive Journal, factual Insights, and Challenge Detail information hierarchy.
 
-**Still not exact:**
+**Still not exact (requires visual approval):**
 1. The Journal currently reuses the Stillwater landscape instead of the unique **Atelier journal/tea/stationery artwork** in v0.3. The approved source art must be integrated as an optimized Android image asset before visual signoff.
 2. The challenge path's first-week strip needs review at narrow widths and against the v0.3 calendar tile behavior.
 3. Android transitions, background motion/reduced-motion handling, dynamic visual elements and photo treatment are not yet at full v0.3 fidelity.
