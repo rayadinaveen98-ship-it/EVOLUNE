@@ -30,7 +30,8 @@ This is a **visual, language, brand, onboarding presentation and interaction-qua
 | --- | --- | --- |
 | Stage 01: Brand | Direction **A / Open Path selected**, original SVG mark and Android icon templates committed | Exact geometry + brand type approval, Android OEM mask and palette QA |
 | Stage 02: Welcome | Browser prototype and **native 5.8s Compose first-run integration** in [PR #4](https://github.com/rayadinave98-ship-it/EVOLUNE/pull/4). [Android CI 43013838641](https://github.com/rayadinave98-ship-it/EVOLUNE/actions/runs/43013838641) and [emulator QA 43013838539](https://github.com/rayadinave98-ship-it/EVOLUNE/actions/runs/43013838539) passed **31 tests**, with timed native welcome captures | Owner visual signoff, final wordmark, TalkBack/200%-font/real-device animation performance and reduced-motion review |
-| Stages 03–10 | Roadmap established, not implemented in V2 branch | Proceed sequentially after Stage 01 identity lock and Stage 02 native gate |
+| Stage 03: Guided setup | [Four-step product/visual contract](03_GUIDED_SETUP_SPEC.md) prepared; implementation committed in [stacked native PR #5](https://github.com/rayadinave98-ship-it/EVOLUNE/pull/5) | Pending native Android CI/emulator and actual screen QA; no new domain features |
+| Stages 04–10 | Roadmap established, not implemented in V2 branch | Continue in existing ten-stage order after Stage 03 validation |
 
 Native system splash and separate Compose intro are implemented as an integration prototype, not a signed-off V2 visual release. V1 Android PR #2 and all existing challenge/Room/reminder behavior remain unaffected.
 
