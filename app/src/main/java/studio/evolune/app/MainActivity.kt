@@ -14,11 +14,23 @@ import java.util.UUID
 
 /** The only Android entry point. No remote database, account, telemetry or network permission. */
 class MainActivity : ComponentActivity() {
+    private lateinit var database: EvoluneDatabase
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val db = Room.databaseBuilder(applicationContext, EvoluneDatabase::class.java, "evolune_v1.db")
+        database = Room.databaseBuilder(applicationContext, EvoluneDatabase::class.java, "evolune_v1.db")
             .build() // Never use destructive migration for private user records.
-        setContent { EvoluneRoot(db.evoluneDao(), RoomEvoluneRepository(db.evoluneDao())) }
+        setContent {
+            val dao = remember(database) { database.evoluneDao() }
+            val repository = remember(dao) { RoomEvoluneRepository(dao) }
+            EvoluneRoot(dao, repository)
+        }
+    }
+
+    override fun onDestroy() {
+        // Avoid keeping a stale Room instance open across rotation/activity recreation.
+        if (::database.isInitialized) database.close()
+        super.onDestroy()
     }
 }
 
