@@ -79,7 +79,7 @@ internal object EvoluneType {
         return when {
             narrow && largeScale ->
                 typography.headlineMedium.copy(fontSize=23.sp,lineHeight=30.sp)
-            narrow -> typography.headlineLarge
+            narrow -> typography.headlineMedium
             largeScale -> typography.displayMedium
             else -> typography.displayMedium
         }
