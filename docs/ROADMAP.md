@@ -1,47 +1,49 @@
-# EVOLUNE development roadmap — v0.1
+# EVOLUNE — development roadmap v0.2
 
-## Status key
-- ✅ Done: confirmed in repository or research.
-- ◐ In progress: planning/review.
-- ○ Not started: no implementation claims.
+**Reviewed:** 2026-11-11 · **Working branch:** `feature/android-phase3d-qa` · **PR:** [#2](https://github.com/rayadinaveen98-ship-it/EVOLUNE/pull/2) (draft, unmerged)  
+**Current build:** native Android **v0.5 debug**, visually inspired by approved Stillwater + Atelier HTML v0.3.  
+**Status terminology:** ✅ Verified deliverable · ◐ Implemented partially / needs signoff · ○ Not yet begun.
 
-| Stage | Workstream | Status | Exit criterion |
-| --- | --- | --- | --- |
-| 00 | Repository and working name | ✅ | GitHub repository found and initialized with foundation docs |
-| 01 | Discovery and product charter | ◐ | Growth architecture, challenge behavioral rules and first journeys **drafted**; target user and scope still to be validated |
-| 02 | Evidence + safety framework | ◐ | Initial register expanded to COM-B, SDT, planning, monitoring; complete feature-level risk review pending |
-| 03 | UX journeys and visual art direction | ◐ | Stillwater + Atelier chosen; HTML v0.3 interactive flows tested, real Android screenshots and accessibility review pending |
-| 04 | Technical design | ◐ | Room v1 entities/DAO/repository sources added; Android compile, generated schema, privacy/backup policy and build pinning pending |
-| 05 | MVP implementation | ◐ | Kotlin engine and persistence sources committed, JVM + SQLite contract checks passed; no Android app compile, Room runtime test, Compose screens or APK yet |
-| 06 | Reflection & personalization | ○ | User-governed optional check-ins, difficulty adjustments, privacy controls |
-| 07 | Premium visual system | ○ | Original Blender/mobile assets, motion, accessibility and performance |
-| 08 | Integrated QA | ○ | End-to-end behavior, data reliability, accessibility, device matrix, safety |
-| 09 | Small pilot | ○ | Real-user usability and effectiveness feedback; iterate |
-| 10 | Release readiness | ○ | Security/privacy review, store listing, release process |
+> Product promise: **A calmer way to become better.** Progress without pressure; discipline without punishment; growth without comparison.
 
-## Completed pre-production artifacts (not implementation)
-- [Growth architecture](GROWTH_ARCHITECTURE.md)
-- [Challenge engine behavior contract](CHALLENGE_ENGINE_SPEC.md)
-- [Experience journeys](EXPERIENCE_JOURNEYS.md)
-- [Screen & interaction blueprint](SCREEN_BLUEPRINT_V01.md)
-- [Visual exploration v0.1](VISUAL_EXPLORATION_V01.md)
+## Live stage-by-stage roadmap
 
-## New technical artifact (2026-11-11)
-- [Android architecture and limitations](ANDROID_ARCHITECTURE_V01.md)
-- [ChallengeEngine Kotlin source and checks](../domain/README.md)
-- [Phase 3B source, SQLite restart contract and verification gaps](PHASE3B_PERSISTENCE.md)
-- HTML interactive prototype v0.3 was provided in the conversation; this is not native Android code.
+| Stage | Workstream | Status | Evidence and remaining exit criteria |
+|---|---|---|---|
+| **00** | Repo and working identity | ✅ | `EVOLUNE` repo and source/docs exist; brand trademark/release identity not legally cleared |
+| **01** | Discovery and product charter | ◐ | Growth architecture, key personas and journeys documented; target-user interviews and final MVP scope validation remain |
+| **02** | Evidence and safety | ◐ | Evidence register and defensible habit/challenge behavior implemented; finish feature-level risk, privacy, and accessibility reviews. No clinical/therapy claim |
+| **03** | UX / prototypes | ◐ | Approved Stillwater + Atelier direction; clickable HTML v0.3; native v0.5 screenshots available. User signoff on native look and interactions remains |
+| **04** | Native architecture and data | ◐ | Kotlin domain, Room models/DAO/repository, Compose app, CI, and emulator instrumentation operational. Export/delete, backup policy, schema migration coverage and process-death/reboot resilience remain |
+| **05** | Core Android MVP | ◐ | Today, create/customize challenges, challenge detail, practice logging, pauses/revisions, milestone review, Growth, Journal and Insights exist in native source; reliability/empty states and onboarding completeness still need manual review |
+| **06** | Reflection and personalization | ◐ | Private journal create/edit/delete, optional mood/energy, growth areas, recurrence/cues/fallbacks present. Rich personalized guidance, controls, cross-challenge insights and user-managed data are unfinished |
+| **07** | Premium Stillwater + Atelier | ◐ | Landscape + approved Atelier journal asset in native app, consistent greener navigation, gentle motion, responsive phone/tablet rendering. Tablet composition, touch/animation fidelity, reduced-motion and accessibility reviews remain |
+| **08** | Integrated QA and stabilization | ◐ | Latest [Android CI](https://github.com/rayadinaveen98-ship-it/EVOLUNE/actions/runs/42975113458) and [emulator QA](https://github.com/rayadinave98-ship-it/EVOLUNE/actions/runs/42975112550) passed; 9 Android instrumented tests, 12 screenshots. Long-run use, device matrix, migration/export, reminders and install/update scenarios still untested |
+| **09** | Limited pilot | ○ | Test with consenting real users on supported Android phones; gather usability, retention and reliability feedback; no efficacy claims |
+| **10** | Release readiness | ○ | Final privacy/security review, data ownership controls, signed release APK/AAB, store requirements and listing, rollout/rollback plan; no public release yet |
 
-## Initial MVP candidate (not yet locked)
-A user can select a meaningful domain, set up **one repeatable challenge**, plan daily action with optional if-then cue, see a simple Today screen, record completion/partial/rest/missed accurately, recover after interruption, review at a milestone, and choose whether to continue.
+## Completed technical milestones (verifiable)
 
-**Deliberate exclusions:** therapy, complex social feed, marketplace, broad AI coach, full workout catalogue, excessive gamification.
+- Preproduction: scientific evidence register, challenge architecture, UX journeys, Stillwater + Atelier visual exploration and interactive HTML v0.3.
+- Domain: pure Kotlin ChallengeEngine distinguishes **unreported** versus explicitly **missed**, supports partial/rested/paused and calendar-day versus completed-session milestones; no universal “21-day habit formation” claim.
+- Persistence: local Room v1 storage, correction history, journal records and schedule revisions; automated tests run on an Android emulator.
+- Android: debug APK builds via GitHub Actions with native Compose UI and premium art integration.
+- v0.5 visual QA: 320dp simulated phone and 853dp simulated tablet screenshots, Journal Atelier artwork, green navigation, baseline motion. **These screenshots are evidence of rendering, not final user approval.**
+- Latest verification: [Android CI 42975113458](https://github.com/rayadinave98-ship-it/EVOLUNE/actions/runs/42975113458) **success** and [Android emulator QA 42975112550](https://github.com/rayadinave98-ship-it/EVOLUNE/actions/runs/42975112550) **success**; current automated scope = 9 tests, 12 native screenshot files.
 
-## Next work in order
-1. Set up reproducible Android Gradle + compatible Kotlin/KSP/Room versions, and compile committed Room source (not yet verified).
-2. Export Room's generated schema and run Room integration/instrumentation tests for persistence, revisions, restart and deletion. Draft SQLite contract alone is not a runtime test.
-3. Connect tested engine and repository to ViewModels and native Compose Today/Challenge/Recovery/Review screens.
-4. Port Growth, private Journal and Insights with export/delete controls.
-5. Test real Android screenshots, accessibility, device restart/reminders and full integrated functionality. User approves visual adjustments before finalizing.
+## The remaining path — no extra phases added
 
-**Change control:** New features enter the backlog, not the active stage, until their scope, benefit, evidence, and cost are reviewed. Confirm shipped versus proposed work in every status update.
+1. **Visual and interaction approval:** v0.5 device review; improve unused tablet space, consistency of Challenge/Recovery/Review, large fonts, touch targets and reduced-motion behavior. Compare with HTML v0.3. Do not replace approved art or established challenge logic.
+2. **Finish essential product reliability:** real user-controlled **export/delete**, backup/restore policy, upgrade/migration tests, process death and reboot continuity. Confirm no private journal data is logged or exposed.
+3. **Reminders and schedule delivery:** design and implement consent-based on-device notifications (only if included in MVP), permission handling, time zone/DST changes, reboot rescheduling, cancellation/edit/pause behavior, and a documented reliability test matrix. Current v0.5 does **not** establish working scheduled notifications.
+4. **Accessibility and device QA:** 320dp, typical phones, tablets/foldables; portrait and landscape; keyboard/IME; TalkBack, larger fonts, contrast, system animation disabled, performance. Run realistic multi-day and multiple-challenge tests, not only fresh-install tests.
+5. **Pilot → release gate:** after user visual signoff and reliability criteria, merge reviewed source, run a small pilot, fix findings, and only then prepare signed AAB/APK and store compliance.
+
+## Explicit non-goals for initial release
+No therapy/diagnosis, medical efficacy claim, public social feeds, marketplace, large generative AI coach, automatic punishment/streak shame, or health-data collection by default.
+
+## Change control / truthfulness
+- “Compiled”, “emulator-tested”, “visually approved”, and “released” are **different** statuses.
+- **PR #2 stays a draft**; `main` does not include v0.5 visual refinements.
+- A debug APK is not a signed public-release package; do not use real irreplaceable journal data until export/backup is available.
+- Keep user data out of public GitHub files and screenshot fixtures.
