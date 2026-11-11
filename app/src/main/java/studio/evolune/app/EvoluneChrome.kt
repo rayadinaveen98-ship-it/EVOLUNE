@@ -6,7 +6,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.selectable
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
@@ -52,7 +52,7 @@ internal fun selectedEvoluneDestination(page: String): String = when (page) {
 @Composable
 internal fun EvoluneGlyph(
     kind: String,
-    color: Color = Forest,
+    color: Color = EvoluneTokens.Forest,
     modifier: Modifier = Modifier
 ) {
     Canvas(modifier.size(22.dp)) {
@@ -131,8 +131,8 @@ internal fun EvoluneAction(
             modifier=modifier.heightIn(min=52.dp),
             shape=RoundedCornerShape(13.dp),
             colors=ButtonDefaults.buttonColors(
-                containerColor=Forest, contentColor=Paper,
-                disabledContainerColor=Pale, disabledContentColor=Muted
+                containerColor=EvoluneTokens.Forest, contentColor=EvoluneTokens.Paper,
+                disabledContainerColor=EvoluneTokens.Pale, disabledContentColor=EvoluneTokens.Muted
             )
         ) {
             Text(text, fontSize=14.sp, lineHeight=20.sp,
@@ -145,10 +145,10 @@ internal fun EvoluneAction(
             modifier=modifier.heightIn(min=50.dp),
             shape=RoundedCornerShape(13.dp),
             colors=ButtonDefaults.outlinedButtonColors(
-                containerColor=Paper, contentColor=Forest,
-                disabledContentColor=Muted
+                containerColor=EvoluneTokens.Paper, contentColor=EvoluneTokens.Forest,
+                disabledContentColor=EvoluneTokens.Muted
             ),
-            border=BorderStroke(1.dp, if(enabled) Color(0xFFC5D2C5) else Line)
+            border=BorderStroke(1.dp, if(enabled) Color(0xFFC5D2C5) else EvoluneTokens.Line)
         ) {
             Text(text, fontSize=14.sp, lineHeight=20.sp,
                 fontWeight=FontWeight.Medium, textAlign=TextAlign.Center)
@@ -179,9 +179,9 @@ private fun ChromeDestination(
         verticalArrangement=Arrangement.Center
     ) {
         Box(Modifier.size(36.dp).clip(RoundedCornerShape(13.dp))
-            .background(if(active)Pale else Color.Transparent),
+            .background(if(active)EvoluneTokens.Pale else Color.Transparent),
             contentAlignment=Alignment.Center) {
-            EvoluneGlyph(destination.route,if(active)Forest else Muted,
+            EvoluneGlyph(destination.route,if(active)EvoluneTokens.Forest else EvoluneTokens.Muted,
                 Modifier.size(23.dp))
         }
         Spacer(Modifier.height(4.dp))
@@ -190,7 +190,7 @@ private fun ChromeDestination(
             maxLines=2,softWrap=true,
             textAlign=TextAlign.Center,
             fontWeight=if(active)FontWeight.SemiBold else FontWeight.Medium,
-            color=if(active)Forest else Muted)
+            color=if(active)EvoluneTokens.Forest else EvoluneTokens.Muted)
     }
 }
 
@@ -203,8 +203,8 @@ internal fun EvoluneBottomNav(
     val config=LocalConfiguration.current
     val compact=config.screenWidthDp < 370 || config.fontScale >= 1.35f
     val shortNames=compact && config.fontScale >= 1.3f
-    Surface(color=Paper,modifier=modifier.fillMaxWidth(),
-        border=BorderStroke(0.5.dp,Line)) {
+    Surface(color=EvoluneTokens.Paper,modifier=modifier.fillMaxWidth(),
+        border=BorderStroke(0.5.dp,EvoluneTokens.Line)) {
         Box(Modifier.fillMaxWidth().navigationBarsPadding(),
             contentAlignment=Alignment.Center) {
             Row(
@@ -231,12 +231,12 @@ internal fun EvoluneSideRail(
     modifier: Modifier = Modifier
 ) {
     val selected=selectedEvoluneDestination(page)
-    Surface(color=Paper,modifier=modifier.width(116.dp).fillMaxHeight(),
-        border=BorderStroke(0.5.dp,Line)) {
+    Surface(color=EvoluneTokens.Paper,modifier=modifier.width(116.dp).fillMaxHeight(),
+        border=BorderStroke(0.5.dp,EvoluneTokens.Line)) {
         Column(Modifier.fillMaxHeight().systemBarsPadding()
             .verticalScroll(rememberScrollState()).padding(horizontal=9.dp,vertical=14.dp),
             verticalArrangement=Arrangement.spacedBy(6.dp)) {
-            Text("EXPLORE",color=Forest,fontSize=11.sp,
+            Text("EXPLORE",color=EvoluneTokens.Forest,fontSize=11.sp,
                 letterSpacing=1.sp,fontWeight=FontWeight.Bold,
                 modifier=Modifier.padding(start=10.dp,top=8.dp,bottom=8.dp))
             evoluneDestinations.forEach { dest ->
@@ -261,15 +261,15 @@ internal fun EvoluneTopBar(onGrowth: () -> Unit) {
         }
         Spacer(Modifier.width(8.dp))
         Text("EVOLUNE",fontSize=14.sp,letterSpacing=2.sp,
-            fontWeight=FontWeight.SemiBold,color=Ink)
+            fontWeight=FontWeight.SemiBold,color=EvoluneTokens.Ink)
         Spacer(Modifier.weight(1f))
         Box(Modifier.size(48.dp).clip(RoundedCornerShape(16.dp))
-            .background(Pale)
+            .background(EvoluneTokens.Pale)
             .clickable(role=Role.Button,onClick=onGrowth)
             .semantics { contentDescription="Open My Growth" }
             .testTag("evolune-top-growth"),
             contentAlignment=Alignment.Center) {
-            EvoluneGlyph("growth",Forest,Modifier.size(23.dp))
+            EvoluneGlyph("growth",EvoluneTokens.Forest,Modifier.size(23.dp))
         }
     }
 }
@@ -283,11 +283,11 @@ internal fun EvoluneNotice(message: String, onDismiss: () -> Unit) {
     ) {
         Row(Modifier.padding(start=14.dp,top=10.dp,bottom=10.dp,end=5.dp),
             verticalAlignment=Alignment.CenterVertically) {
-            Text(message,color=Ink,fontSize=14.sp,lineHeight=21.sp,
+            Text(message,color=EvoluneTokens.Ink,fontSize=14.sp,lineHeight=21.sp,
                 modifier=Modifier.weight(1f))
             Spacer(Modifier.width(4.dp))
             TextButton(onClick=onDismiss,modifier=Modifier.heightIn(min=48.dp)) {
-                Text("Close",color=Forest,fontSize=14.sp)
+                Text("Close",color=EvoluneTokens.Forest,fontSize=14.sp)
             }
         }
     }
@@ -306,9 +306,9 @@ internal fun EvoluneChromeShell(
     content: @Composable () -> Unit
 ) {
     val expanded = expandedOverride ?: (LocalConfiguration.current.screenWidthDp >= 700)
-    MaterialTheme(colorScheme=appColors) {
+    MaterialTheme(colorScheme=EvoluneTokens.appColors) {
         Scaffold(
-            containerColor=Cream,
+            containerColor=EvoluneTokens.Cream,
             bottomBar={
                 if(!expanded) EvoluneBottomNav(page,onPage)
             }
