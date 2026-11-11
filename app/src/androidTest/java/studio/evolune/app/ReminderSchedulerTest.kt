@@ -93,4 +93,41 @@ class ReminderSchedulerTest {
         }
     }
 
+    @Test fun twoChallengesRemainIndependentAndResetRemovesAllOptIns() = runBlocking {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        val ids = listOf(UUID.randomUUID().toString(), UUID.randomUUID().toString())
+        val db = Room.inMemoryDatabaseBuilder(context,EvoluneDatabase::class.java).build()
+        val zone = ZoneId.of("Asia/Kolkata")
+        val start = LocalDate.now(zone)
+        try {
+            InstrumentationRegistry.getInstrumentation().uiAutomation
+                .grantRuntimePermission(context.packageName,Manifest.permission.POST_NOTIFICATIONS)
+            ids.forEach { id ->
+                RoomEvoluneRepository(db.evoluneDao()).createChallenge(
+                    ChallengePlan(id,"Independent reminder",start,zone,
+                        MilestoneKind.CALENDAR_DAYS,21,
+                        listOf(ScheduleVersion(start,Recurrence.Daily,"Do one small thing")))
+                )
+            }
+            val chosen = LocalTime.now(zone).plusHours(3).withSecond(0).withNano(0)
+            ids.forEach { id ->
+                assertTrue(ReminderScheduler.enable(context,db.evoluneDao(),id,chosen))
+            }
+            assertTrue(ids.all { ReminderScheduler.isOptedIn(context,it) })
+            assertTrue(ids.all { ReminderScheduler.scheduledAt(context,it)>System.currentTimeMillis() })
+
+            ReminderScheduler.disable(context,ids.first())
+            assertFalse(ReminderScheduler.isOptedIn(context,ids.first()))
+            assertTrue(ReminderScheduler.isOptedIn(context,ids.last()))
+            assertTrue(ReminderScheduler.scheduledAt(context,ids.last())>System.currentTimeMillis())
+
+            ReminderScheduler.disableAll(context)
+            assertTrue(ids.none { ReminderScheduler.isOptedIn(context,it) })
+            assertTrue(ids.all { ReminderScheduler.scheduledAt(context,it)==-1L })
+        } finally {
+            ids.forEach { ReminderScheduler.disable(context,it) }
+            db.close()
+        }
+    }
+
 }
