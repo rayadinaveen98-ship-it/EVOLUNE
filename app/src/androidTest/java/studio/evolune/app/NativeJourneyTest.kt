@@ -85,6 +85,11 @@ class NativeJourneyTest {
             rule.onAllNodesWithText(marker,substring=true).fetchSemanticsNodes().isNotEmpty()
         }
         captureNative("challenge_detail_populated")
+        rule.onNodeWithText("Gentle reminders").performScrollTo().performClick()
+        rule.onNodeWithText("Enable reminder").assertExists()
+        rule.onNodeWithText("OFF · Notifications are not enabled", substring=true).assertExists()
+        captureNative("reminders_disabled")
+        rule.onNodeWithText("Back to challenge").performScrollTo().performClick()
         rule.onNodeWithText("Adjust plan").performScrollTo().performClick()
         rule.onNodeWithText("Adjust the path.").assertExists()
         captureNative("recovery_populated")
