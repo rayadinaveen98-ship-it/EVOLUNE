@@ -78,7 +78,8 @@ private fun EvoluneRoot(dao: EvoluneDao, repository: RoomEvoluneRepository) {
                 onLog = { outcome ->
                     val s = snapshot ?: return@TodayPage
                     execute { repository.recordPractice(s.plan.id, LocalDate.now(s.plan.zone), outcome) }
-                }, onAdjust = { page = "recovery" }
+                }, onAdjust = { page = "recovery" },
+                onJournal = { page = "journal" }
             )
             "challenges" -> ChallengeListPage(challenges, activeId,
                 onSelect = { activeId = it; page = "detail" }, onCreate = { page = "create" }
@@ -157,7 +158,7 @@ private fun EvoluneRoot(dao: EvoluneDao, repository: RoomEvoluneRepository) {
                 }
             }, onDelete = { entry -> execute { repository.deleteReflection(entry.id) } })
             "insights" -> InsightsPage(snapshot)
-            else -> TodayPage(snapshot, { page = "create" }, { page = "detail" }, {}, { page = "recovery" })
+            else -> TodayPage(snapshot, { page = "create" }, { page = "detail" }, {}, { page = "recovery" }, { page = "journal" })
         }
     }
 }
