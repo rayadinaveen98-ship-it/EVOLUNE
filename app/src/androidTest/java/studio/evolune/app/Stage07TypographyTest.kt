@@ -17,6 +17,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.captureToImage
@@ -26,6 +27,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -39,7 +41,8 @@ import org.junit.runner.RunWith
 
 /**
  * Synthetic QA: forces a logical 320dp content column and a 100%-200% system
- * text configuration. Real physical-device width/font and TalkBack still require
+ * font-scale configuration including Compose LocalDensity scaling. Real physical
+ * device and TalkBack still require
  * Stage 10 verification; this does not claim to simulate OEM rendering exactly.
  */
 @RunWith(AndroidJUnit4::class)
@@ -75,7 +78,11 @@ class Stage07TypographyTest {
         var created=false
         val cfg=config(320,1f)
         rule.setContent {
-            CompositionLocalProvider(LocalConfiguration provides cfg) {
+            val nativeDensity=LocalDensity.current
+            CompositionLocalProvider(
+                LocalConfiguration provides cfg,
+                LocalDensity provides Density(nativeDensity.density,1f)
+            ) {
                 Box(Modifier.width(320.dp).height(650.dp)) {
                     EvoluneChromeShell("today",onPage={},notice=null,
                         onDismissNotice={},expandedOverride=false) {
@@ -97,7 +104,11 @@ class Stage07TypographyTest {
         var created=false
         val cfg=config(320,2f)
         rule.setContent {
-            CompositionLocalProvider(LocalConfiguration provides cfg) {
+            val nativeDensity=LocalDensity.current
+            CompositionLocalProvider(
+                LocalConfiguration provides cfg,
+                LocalDensity provides Density(nativeDensity.density,2f)
+            ) {
                 Box(Modifier.width(320.dp).height(650.dp)) {
                     EvoluneChromeShell("today",onPage={chosen=it},
                         notice=null,onDismissNotice={},expandedOverride=false) {
@@ -121,7 +132,11 @@ class Stage07TypographyTest {
         var route:String?=null
         val cfg=config(853,1.4f)
         rule.setContent {
-            CompositionLocalProvider(LocalConfiguration provides cfg) {
+            val nativeDensity=LocalDensity.current
+            CompositionLocalProvider(
+                LocalConfiguration provides cfg,
+                LocalDensity provides Density(nativeDensity.density,1.4f)
+            ) {
                 Box(Modifier.width(392.dp).height(700.dp)) {
                     EvoluneChromeShell(page="recovery",
                         onPage={route=it},notice=null,
