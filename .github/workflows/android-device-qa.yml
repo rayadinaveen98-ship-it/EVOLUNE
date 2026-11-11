@@ -51,7 +51,7 @@ jobs:
             adb exec-out screencap -p > qa/native_screenshots/responsive_tablet_853dp.png
             adb shell wm size reset
             adb shell wm density reset
-            python3 -c 'from pathlib import Path; names=("today","challenges","growth","journal","insights","challenge_create","challenge_detail_populated","recovery_populated","review_populated","today_populated","responsive_320dp","responsive_tablet_853dp"); root=Path("qa/native_screenshots"); missing=[n for n in names if not (root / ((n+".png") if n.startswith("responsive_") else ("evolune_qa_"+n+".png"))).is_file() or (root / ((n+".png") if n.startswith("responsive_") else ("evolune_qa_"+n+".png"))).read_bytes()[:8] != bytes([137,80,78,71,13,10,26,10])]; assert not missing, "Missing or invalid native PNG: "+", ".join(missing)'
+            python3 -c 'from pathlib import Path; names=("today","challenges","growth","journal","insights","challenge_create","challenge_detail_populated","reminders_disabled","recovery_populated","review_populated","today_populated","responsive_320dp","responsive_tablet_853dp"); root=Path("qa/native_screenshots"); missing=[n for n in names if not (root / ((n+".png") if n.startswith("responsive_") else ("evolune_qa_"+n+".png"))).is_file() or (root / ((n+".png") if n.startswith("responsive_") else ("evolune_qa_"+n+".png"))).read_bytes()[:8] != bytes([137,80,78,71,13,10,26,10])]; assert not missing, "Missing or invalid native PNG: "+", ".join(missing)'
       - uses: actions/upload-artifact@v4
         if: always()
         with:
