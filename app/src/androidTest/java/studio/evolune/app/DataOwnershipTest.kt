@@ -67,6 +67,73 @@ class DataOwnershipTest {
         } finally { db.close() }
     }
 
+    @Test fun exportedDataCanBeValidatedAndRestoredWithoutLosingRevisionHistory() = runBlocking {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        val db = Room.inMemoryDatabaseBuilder(context, EvoluneDatabase::class.java).build()
+        try {
+            val dao = db.evoluneDao()
+            seed(dao)
+            val export = EvoluneExportJson.encode(dao.exportLocalData())
+            val validated = EvoluneImportJson.decode(export)
+            assertEquals(2, validated.practices.size)
+            dao.eraseAllLocalData()
+            assertTrue(dao.listChallenges().isEmpty())
+            dao.replaceAllLocalData(validated)
+            val after = dao.exportLocalData()
+            assertEquals(1, after.challenges.size)
+            assertEquals(2, after.practices.size)
+            assertEquals(1L, after.practices.first().revision)
+            assertEquals(2L, after.practices.last().revision)
+            assertEquals("My private journal: café & 🌿", after.journal.single().body)
+            assertEquals("Asia/Kolkata", after.challenges.single().zoneId)
+        } finally { db.close() }
+    }
+
+    @Test fun corruptOrWrongVersionBackupIsRejectedBeforeDatabaseMutation() = runBlocking {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        val db = Room.inMemoryDatabaseBuilder(context, EvoluneDatabase::class.java).build()
+        try {
+            val dao = db.evoluneDao()
+            seed(dao)
+            val good = JSONObject(EvoluneExportJson.encode(dao.exportLocalData()))
+            val badVersion = JSONObject(good.toString()).put("schemaVersion", 999)
+            try {
+                EvoluneImportJson.decode(badVersion.toString())
+                fail("Unknown schema should fail")
+            } catch (expected: IllegalArgumentException) { /* intentional */ }
+            val badLink = JSONObject(good.toString())
+            badLink.getJSONArray("journalEntries").getJSONObject(0)
+                .put("challengeId", "missing-challenge")
+            try {
+                EvoluneImportJson.decode(badLink.toString())
+                fail("Invalid foreign key should fail")
+            } catch (expected: IllegalArgumentException) { /* intentional */ }
+            assertEquals(1, dao.listChallenges().size)
+            assertEquals("My private journal: café & 🌿", dao.findJournal("journal-1")?.body)
+        } finally { db.close() }
+    }
+
+    @Test fun failingReplacementRollsBackAndPreservesEarlierUserData() = runBlocking {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        val db = Room.inMemoryDatabaseBuilder(context, EvoluneDatabase::class.java).build()
+        try {
+            val dao = db.evoluneDao()
+            seed(dao)
+            val saved = dao.exportLocalData()
+            // Database constraint catches duplicate primary key after clearing rows.
+            val invalid = saved.copy(challenges = saved.challenges + saved.challenges.first())
+            try {
+                dao.replaceAllLocalData(invalid)
+                fail("Duplicate challenge must abort restore")
+            } catch (expected: Exception) {
+                // Expected SQLite uniqueness violation or Room wrapper exception.
+            }
+            assertEquals(1, dao.listChallenges().size)
+            assertEquals(2, dao.exportLocalData().practices.size)
+            assertEquals("My private journal: café & 🌿", dao.findJournal("journal-1")?.body)
+        } finally { db.close() }
+    }
+
     @Test fun deliberateDataEraseClearsAllPrivateTablesAtomically() = runBlocking {
         val context = ApplicationProvider.getApplicationContext<Context>()
         val db = Room.inMemoryDatabaseBuilder(context, EvoluneDatabase::class.java).build()
