@@ -42,7 +42,7 @@ private val Forest = Color(0xFF36553E)
 private val Pale = Color(0xFFE7ECE2)
 private val Cream = Color(0xFFFAF8F3)
 private val Paper = Color(0xFFFFFEFA)
-private val Muted = Color(0xFF718077)
+private val Muted = Color(0xFF65746C)
 private val Line = Color(0xFFE5E2D9)
 private val Gold = Color(0xFFB89A63)
 
@@ -181,14 +181,14 @@ fun EvoluneShell(page: String, onPage: (String)->Unit, notice: String?, onDismis
 @Composable
 private fun Header(kicker: String, title: String, subtitle: String = "") {
     Column(Modifier.fillMaxWidth().padding(bottom=4.dp)) {
-        Text(kicker.uppercase(), fontSize=9.sp, letterSpacing=1.6.sp, color=Color(0xFF829085),
+        Text(kicker.uppercase(), fontSize=11.sp, letterSpacing=1.6.sp, color=Color(0xFF829085),
             fontWeight=FontWeight.Bold, lineHeight=13.sp)
         Spacer(Modifier.height(7.dp))
         Text(title, fontFamily=FontFamily.Serif, fontSize=30.sp, lineHeight=32.sp,
             letterSpacing=(-1.15f).sp, color=Ink)
         if (subtitle.isNotEmpty()) {
             Spacer(Modifier.height(6.dp))
-            Text(subtitle, color=Muted, fontSize=12.sp, lineHeight=18.sp)
+            Text(subtitle, color=Muted, fontSize=14.sp, lineHeight=21.sp)
         }
     }
 }
@@ -197,7 +197,7 @@ private fun Header(kicker: String, title: String, subtitle: String = "") {
 private fun Panel(content: @Composable ColumnScope.() -> Unit) {
     Surface(color=Paper, shape=RoundedCornerShape(20.dp), border=BorderStroke(1.dp,Line),
         modifier=Modifier.fillMaxWidth()) {
-        Column(Modifier.padding(17.dp), content=content)
+        Column(Modifier.padding(18.dp), content=content)
     }
 }
 
@@ -209,26 +209,26 @@ private fun MainScroll(content: @Composable ColumnScope.() -> Unit) {
             Modifier.widthIn(max=720.dp).fillMaxWidth().fillMaxHeight()
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal=20.dp, vertical=10.dp),
-            verticalArrangement=Arrangement.spacedBy(15.dp), content=content
+            verticalArrangement=Arrangement.spacedBy(16.dp), content=content
         )
     }
 }
 
 @Composable
 private fun PrimaryAction(text: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
-    Button(onClick=onClick, modifier=modifier.heightIn(min=43.dp),
+    Button(onClick=onClick, modifier=modifier.heightIn(min=50.dp),
         shape=RoundedCornerShape(11.dp),
         colors=ButtonDefaults.buttonColors(containerColor=Forest, contentColor=Paper)) {
-        Text(text, fontSize=12.sp, fontWeight=FontWeight.SemiBold)
+        Text(text, fontSize=14.sp, lineHeight=20.sp, fontWeight=FontWeight.SemiBold)
     }
 }
 
 @Composable
 private fun SecondaryAction(text: String, onClick: () -> Unit) {
-    OutlinedButton(onClick=onClick, shape=RoundedCornerShape(11.dp),
+    OutlinedButton(onClick=onClick, modifier=Modifier.heightIn(min=49.dp), shape=RoundedCornerShape(11.dp),
         colors=ButtonDefaults.outlinedButtonColors(containerColor=Color(0xFFF3F6F0), contentColor=Forest),
         border=BorderStroke(1.dp,Color(0xFFDDE5D9))) {
-        Text(text, fontSize=12.sp, fontWeight=FontWeight.SemiBold)
+        Text(text, fontSize=14.sp, lineHeight=20.sp, fontWeight=FontWeight.SemiBold)
     }
 }
 
@@ -596,15 +596,54 @@ fun TodayPage(
 @Composable
 fun ChallengeListPage(challenges: List<ChallengeEntity>, chosen: String?, onSelect: (String)->Unit, onCreate:()->Unit) {
     MainScroll {
-        Header("Challenge studio", "The changes you choose.", "Create your own practice, at your own pace.")
-        PrimaryAction("+ New challenge",onCreate)
-        if(challenges.isEmpty()) Panel { Text("No challenges yet. Start with a small, repeatable action.", color=Muted) }
-        for(ch in challenges) Panel {
-            Text(ch.title, fontSize=21.sp,fontFamily=FontFamily.Serif,color=Ink)
-            Spacer(Modifier.height(5.dp))
-            Text("${ch.target} ${if(ch.milestoneKind == MilestoneKind.CALENDAR_DAYS.name) "calendar days" else "full sessions"} · ${ch.startDate}",fontSize=12.sp,color=Muted)
-            Spacer(Modifier.height(9.dp))
-            SecondaryAction(if(ch.id==chosen) "View active challenge" else "Open challenge", { onSelect(ch.id) })
+        Header("Challenge studio", "The changes you choose.",
+            "A home for your practices, not a leaderboard.")
+        Panel {
+            Text("YOUR PRACTICES", fontSize=11.sp, fontWeight=FontWeight.Bold,
+                color=Forest, letterSpacing=1.1.sp)
+            Spacer(Modifier.height(8.dp))
+            Text(if(challenges.isEmpty()) "A place to begin"
+                 else "${challenges.size} " + if(challenges.size==1) "personal path" else "personal paths",
+                fontFamily=FontFamily.Serif, fontSize=25.sp, lineHeight=31.sp, color=Ink)
+            Spacer(Modifier.height(7.dp))
+            Text("Choose a small action, make it yours, and adjust the plan as life changes.",
+                fontSize=14.sp,lineHeight=21.sp,color=Muted)
+            Spacer(Modifier.height(16.dp))
+            TodayMainButton("New challenge",onCreate)
+        }
+        if(challenges.isEmpty()) {
+            Panel {
+                Text("Nothing scheduled yet",fontFamily=FontFamily.Serif,
+                    fontSize=21.sp,lineHeight=27.sp,color=Ink)
+                Spacer(Modifier.height(6.dp))
+                Text("There's nothing to catch up on. Your first practice starts whenever you choose.",
+                    fontSize=14.sp,lineHeight=21.sp,color=Muted)
+            }
+        } else {
+            Text("YOUR CHALLENGE LIBRARY",fontSize=11.sp,color=Forest,
+                fontWeight=FontWeight.Bold,letterSpacing=1.sp)
+            challenges.forEach { ch ->
+                Panel {
+                    if(ch.id==chosen) {
+                        Text("CURRENTLY SELECTED",fontSize=11.sp,
+                            color=Forest,fontWeight=FontWeight.Bold,letterSpacing=1.sp)
+                        Spacer(Modifier.height(7.dp))
+                    }
+                    Text(ch.title, fontSize=22.sp,lineHeight=28.sp,
+                        fontFamily=FontFamily.Serif,color=Ink)
+                    Spacer(Modifier.height(8.dp))
+                    Text("${ch.target} "+
+                        (if(ch.milestoneKind==MilestoneKind.CALENDAR_DAYS.name)
+                            "calendar days" else "full recorded sessions"),
+                        fontSize=14.sp,lineHeight=21.sp,color=Forest,
+                        fontWeight=FontWeight.SemiBold)
+                    Text("Started ${ch.startDate}",fontSize=13.sp,
+                        lineHeight=19.sp,color=Muted)
+                    Spacer(Modifier.height(14.dp))
+                    TodayQuietButton(if(ch.id==chosen)"View active challenge" else "Open challenge",
+                        {onSelect(ch.id)})
+                }
+            }
         }
     }
 }
@@ -616,52 +655,86 @@ fun ChallengeDetailPage(
     onBack:()->Unit, onLog:(PracticeOutcome)->Unit,
     onReminders:()->Unit
 ) {
-    if(s == null) {
+    if(s==null) {
         MainScroll {
-            Text("Choose a challenge to see its details.",color=Muted)
-            SecondaryAction("Back",onBack)
+            Header("Your practice","Choose your path.",
+                "Select a challenge to see its details.")
+            TodayQuietButton("Back to challenges",onBack)
         }
         return
     }
     val plan=s.plan
     val list=days(s)
     val sum=ChallengeEngine.summarize(list)
-    val displayedDay=java.time.temporal.ChronoUnit.DAYS.between(plan.startDate,
-        LocalDate.now(plan.zone)).toInt().coerceAtLeast(0)+1
+    val view=presentToday(s)
     val previewThrough=plan.startDate.plusDays(6)
     val preview=ChallengeEngine.opportunities(
         plan,ZonedDateTime.now(plan.zone),previewThrough,s.records,s.pauses)
     MainScroll {
         Header("Your practice",plan.title,
-            plan.target.toString()+" "+
+            "${plan.target} "+
             (if(plan.milestoneKind==MilestoneKind.CALENDAR_DAYS) "calendar days" else "completed sessions")+
-            " · "+plan.startDate.toString())
+            " · from "+plan.startDate.toString())
+
+        Panel {
+            Text("TODAY ON THIS PATH",fontSize=11.sp,color=Forest,
+                letterSpacing=1.sp,fontWeight=FontWeight.Bold)
+            Spacer(Modifier.height(9.dp))
+            Text(todayStatusText(view),fontSize=12.sp,
+                color=Forest,fontWeight=FontWeight.SemiBold)
+            Spacer(Modifier.height(7.dp))
+            Text(when(view.mode) {
+                TodayMode.SCHEDULED,TodayMode.RECORDED ->
+                    view.action ?: "Your planned practice"
+                TodayMode.STARTS_LATER -> "Your practice begins soon"
+                TodayMode.REST_DAY -> "No practice scheduled today"
+                TodayMode.PAUSED -> "Paused for today"
+                TodayMode.MILESTONE_ENDED -> "Calendar milestone complete"
+                TodayMode.EMPTY -> "Choose a small action"
+            },fontSize=22.sp,lineHeight=28.sp,fontFamily=FontFamily.Serif,color=Ink)
+            Spacer(Modifier.height(6.dp))
+            Text(view.milestone.orEmpty(),fontSize=14.sp,lineHeight=21.sp,color=Muted)
+            if(view.mode==TodayMode.SCHEDULED || view.mode==TodayMode.RECORDED) {
+                Spacer(Modifier.height(15.dp))
+                Text("Your record is editable without erasing its revision history.",
+                    fontSize=13.sp,lineHeight=19.sp,color=Muted)
+                Spacer(Modifier.height(11.dp))
+                OutcomeButtons(onLog)
+            }
+        }
+
         LandscapeHero(label="YOUR CURRENT PATH",overline="STILLWATER × ATELIER",
             headline="A little progress\nis still progress.")
-        Row(Modifier.fillMaxWidth(), horizontalArrangement=Arrangement.spacedBy(8.dp)) {
-            listOf(
-                ("Day" to (if(plan.milestoneKind==MilestoneKind.CALENDAR_DAYS)
-                    minOf(displayedDay,plan.target).toString() else displayedDay.toString())),
-                ("Recorded full" to sum.recordedFull.toString()),
-                ("Partial" to sum.partial.toString())
-            ).forEach { (label,number) ->
-                Surface(color=Pale,shape=RoundedCornerShape(13.dp),
-                    modifier=Modifier.weight(1f)) {
-                    Column(Modifier.padding(vertical=13.dp),
-                        horizontalAlignment=Alignment.CenterHorizontally) {
-                        Text(number,fontFamily=FontFamily.Serif,fontSize=24.sp,color=Ink)
-                        Text(label,color=Muted,fontSize=10.sp,maxLines=1)
+
+        Text("YOUR RECORD SO FAR",fontSize=11.sp,color=Forest,
+            fontWeight=FontWeight.Bold,letterSpacing=1.sp)
+        FlowRow(
+            modifier=Modifier.fillMaxWidth(),
+            horizontalArrangement=Arrangement.spacedBy(8.dp),
+            verticalArrangement=Arrangement.spacedBy(8.dp)
+        ) {
+            listOf("Full records" to sum.recordedFull,
+                "Partial" to sum.partial,
+                "Unreported" to sum.unreported,
+                "Intentional rest" to sum.rested).forEach { (label,count) ->
+                Surface(color=Pale,shape=RoundedCornerShape(15.dp),
+                    modifier=Modifier.widthIn(min=130.dp)) {
+                    Column(Modifier.padding(14.dp)) {
+                        Text(count.toString(),fontSize=29.sp,
+                            fontFamily=FontFamily.Serif,color=Ink,lineHeight=34.sp)
+                        Spacer(Modifier.height(5.dp))
+                        Text(label,fontSize=13.sp,lineHeight=19.sp,color=Forest)
                     }
                 }
             }
         }
         Panel {
-            Row(Modifier.fillMaxWidth(),verticalAlignment=Alignment.CenterVertically) {
-                Text("Your path",fontFamily=FontFamily.Serif,fontSize=20.sp,color=Ink)
-                Spacer(Modifier.weight(1f))
-                Text("FIRST SEVEN DAYS",fontSize=9.sp,color=Muted,letterSpacing=1.sp)
-            }
-            Spacer(Modifier.height(13.dp))
+            Text("Your first seven days",fontFamily=FontFamily.Serif,
+                fontSize=21.sp,color=Ink,lineHeight=26.sp)
+            Spacer(Modifier.height(7.dp))
+            Text("Each day has its own state. Unreported is never assumed missed.",
+                fontSize=13.sp,lineHeight=19.sp,color=Muted)
+            Spacer(Modifier.height(15.dp))
             Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(5.dp)) {
                 preview.forEach { day ->
                     val tone=when(day.state) {
@@ -673,56 +746,57 @@ fun ChallengeDetailPage(
                         else -> Color(0xFFF0F3ED)
                     }
                     Surface(color=tone,shape=RoundedCornerShape(11.dp),
-                        modifier=Modifier.weight(1f)) {
-                        Column(Modifier.height(48.dp),horizontalAlignment=Alignment.CenterHorizontally,
+                        modifier=Modifier.weight(1f)
+                            .semantics { contentDescription =
+                                "${day.date}: ${stateLabel(day.state)}" }) {
+                        Column(Modifier.heightIn(min=55.dp).padding(vertical=8.dp),
+                            horizontalAlignment=Alignment.CenterHorizontally,
                             verticalArrangement=Arrangement.Center) {
-                            Text(day.date.dayOfMonth.toString(),fontSize=13.sp,color=Forest,
-                                fontWeight=FontWeight.SemiBold)
-                            Text(if(day.state==OpportunityState.COMPLETED)"✓" else "·",
-                                fontSize=10.sp,color=Sage)
+                            Text(day.date.dayOfMonth.toString(),
+                                fontSize=13.sp,color=Forest,fontWeight=FontWeight.SemiBold)
+                            Text(when(day.state) {
+                                OpportunityState.COMPLETED -> "✓"
+                                OpportunityState.MISSED -> "×"
+                                else -> "·"
+                            },fontSize=13.sp,color=Forest)
                         }
                     }
                 }
             }
-            Spacer(Modifier.height(10.dp))
-            Text("These markers are scheduled opportunities, not an automatic measure of success.",
-                fontSize=10.sp,lineHeight=16.sp,color=Muted)
+            Spacer(Modifier.height(11.dp))
+            Text("Calendar dates are shown above; the full state names appear in history.",
+                fontSize=12.sp,lineHeight=18.sp,color=Muted)
         }
         Panel {
-            Text("Recorded full actions",fontSize=12.sp,color=Muted)
-            Spacer(Modifier.height(6.dp))
-            Text(sum.recordedFull.toString()+" / "+sum.eligibleOpportunities.toString(),
-                fontSize=30.sp,color=Ink,fontFamily=FontFamily.Serif)
-            Text(sum.unreported.toString()+" unreported · "+sum.partial.toString()+
-                " partial · "+sum.rested.toString()+" rest days",fontSize=11.sp,color=Muted)
+            Text("Adjust, reflect or set reminders",fontFamily=FontFamily.Serif,
+                fontSize=21.sp,lineHeight=27.sp,color=Ink)
+            Spacer(Modifier.height(8.dp))
+            Text("You stay in control of your pace and notifications.",
+                color=Muted,fontSize=14.sp,lineHeight=20.sp)
+            Spacer(Modifier.height(15.dp))
+            TodayMainButton("Adjust plan",onAdjust)
+            Spacer(Modifier.height(8.dp))
+            TodayQuietButton("Milestone review",onReview)
+            Spacer(Modifier.height(8.dp))
+            TodayQuietButton("Gentle reminders",onReminders)
+        }
+        Panel {
+            Text("Recent opportunities",fontSize=21.sp,fontFamily=FontFamily.Serif,
+                color=Ink,lineHeight=26.sp)
             Spacer(Modifier.height(12.dp))
-            FlowRow(horizontalArrangement=Arrangement.spacedBy(8.dp),
-                verticalArrangement=Arrangement.spacedBy(6.dp)) {
-                PrimaryAction("Adjust plan",onAdjust)
-                SecondaryAction("Milestone review",onReview)
-                SecondaryAction("Gentle reminders",onReminders)
-            }
-        }
-        Panel {
-            Text("Recent opportunities",fontSize=20.sp,fontFamily=FontFamily.Serif,color=Ink)
-            Spacer(Modifier.height(9.dp))
-            if(list.isEmpty()) Text("Your first practice hasn't started yet.",color=Muted)
+            if(list.isEmpty()) Text("Your first practice hasn't started yet.",
+                fontSize=14.sp,color=Muted)
             list.takeLast(7).reversed().forEach { day ->
-                Row(Modifier.fillMaxWidth().padding(vertical=7.dp),
-                    horizontalArrangement=Arrangement.SpaceBetween) {
-                    Text(day.date.format(DateTimeFormatter.ofPattern("EEE d MMM")),fontSize=12.sp)
-                    Text(stateLabel(day.state),fontSize=12.sp,color=Sage)
+                Column(Modifier.fillMaxWidth().padding(vertical=8.dp)) {
+                    Text(day.date.format(DateTimeFormatter.ofPattern("EEE d MMM")),
+                        fontSize=13.sp,color=Muted)
+                    Text(stateLabel(day.state),fontSize=14.sp,lineHeight=21.sp,
+                        fontWeight=FontWeight.SemiBold,color=Forest)
                 }
                 HorizontalDivider(color=Line)
             }
         }
-        val currentState=list.lastOrNull { it.date==LocalDate.now(plan.zone) }?.state
-        if(currentState!=null &&
-            currentState!=OpportunityState.NOT_SCHEDULED &&
-            currentState!=OpportunityState.PAUSED) {
-            Panel { OutcomeButtons(onLog) }
-        }
-        SecondaryAction("Back to challenges",onBack)
+        TodayQuietButton("Back to challenges",onBack)
     }
 }
 
@@ -731,6 +805,7 @@ data class CreateRequest(
     val recurrence: Recurrence, val cueTime: LocalTime?, val fallback: String?, val areaId: String?
 )
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun CreateChallengePage(areas: List<GrowthAreaEntity>, onBack:()->Unit, onCreate:(CreateRequest)->Unit) {
     var title by remember { mutableStateOf("") }
@@ -741,44 +816,107 @@ fun CreateChallengePage(areas: List<GrowthAreaEntity>, onBack:()->Unit, onCreate
     var cue by remember { mutableStateOf("") }
     var fallback by remember { mutableStateOf("") }
     var areaId by remember { mutableStateOf<String?>(null) }
+    var showOptional by remember { mutableStateOf(false) }
     var warning by remember { mutableStateOf("") }
     MainScroll {
-        Header("A fresh beginning", "Start with one thing.", "Define an action you can practice. It doesn't have to be perfect.")
+        Header("A fresh beginning", "Start with one thing.",
+            "Choose a repeatable practice. You can adjust future plans later.")
         Panel {
-            OutlinedTextField(value=title,onValueChange={title=it},label={Text("Challenge title")},singleLine=true,modifier=Modifier.fillMaxWidth())
-            Spacer(Modifier.height(12.dp))
-            OutlinedTextField(value=action,onValueChange={action=it},label={Text("My repeatable action")},placeholder={Text("Read for 10 minutes")},modifier=Modifier.fillMaxWidth())
-            Spacer(Modifier.height(12.dp))
-            OutlinedTextField(value=targetText,onValueChange={targetText=it.filter(Char::isDigit)},label={Text("Milestone number")},singleLine=true,modifier=Modifier.fillMaxWidth())
+            Text("01 · YOUR PRACTICE",fontSize=11.sp,fontWeight=FontWeight.Bold,
+                letterSpacing=1.sp,color=Forest)
             Spacer(Modifier.height(10.dp))
-            Text("Milestone means",color=Muted,fontSize=12.sp)
-            Row(horizontalArrangement=Arrangement.spacedBy(6.dp)) {
-                FilterChip(selected=mode==MilestoneKind.CALENDAR_DAYS,onClick={mode=MilestoneKind.CALENDAR_DAYS},label={Text("Calendar days")})
-                FilterChip(selected=mode==MilestoneKind.COMPLETED_SESSIONS,onClick={mode=MilestoneKind.COMPLETED_SESSIONS},label={Text("Full sessions")})
-            }
-            Text("A 21-day period isn't a guarantee that a habit is formed.",fontSize=11.sp,color=Muted)
+            Text("Begin with an action",fontSize=23.sp,lineHeight=29.sp,
+                fontFamily=FontFamily.Serif,color=Ink)
+            Spacer(Modifier.height(8.dp))
+            Text("Small and specific works better than vague pressure.",
+                fontSize=14.sp,lineHeight=21.sp,color=Muted)
+            Spacer(Modifier.height(15.dp))
+            OutlinedTextField(value=title,onValueChange={title=it},
+                label={Text("Challenge title")},singleLine=true,
+                modifier=Modifier.fillMaxWidth())
+            Spacer(Modifier.height(13.dp))
+            OutlinedTextField(value=action,onValueChange={action=it},
+                label={Text("My repeatable action")},
+                placeholder={Text("Read for 10 minutes")},
+                minLines=2,maxLines=4,modifier=Modifier.fillMaxWidth())
         }
         Panel {
-            Text("Choose practice days",fontSize=17.sp,fontFamily=FontFamily.Serif)
-            listOf("Every day" to Recurrence.Daily,"Weekdays" to Recurrence.Weekdays,"Weekends" to Recurrence.Weekends).forEach { (name,r) ->
-                Row(verticalAlignment=Alignment.CenterVertically) {
-                    RadioButton(selected=recurrence==r,onClick={recurrence=r})
-                    Text(name,modifier=Modifier.clickable{recurrence=r},fontSize=14.sp)
-                }
-            }
-            OutlinedTextField(value=cue,onValueChange={cue=it},label={Text("Optional time (HH:mm)")},singleLine=true,modifier=Modifier.fillMaxWidth())
+            Text("02 · YOUR RHYTHM",fontSize=11.sp,fontWeight=FontWeight.Bold,
+                letterSpacing=1.sp,color=Forest)
             Spacer(Modifier.height(9.dp))
-            OutlinedTextField(value=fallback,onValueChange={fallback=it},label={Text("Smaller backup action (optional)")},modifier=Modifier.fillMaxWidth())
-            if(areas.isNotEmpty()) {
-                Spacer(Modifier.height(12.dp)); Text("Growth area (optional)",fontSize=12.sp,color=Muted)
-                Row(horizontalArrangement=Arrangement.spacedBy(6.dp),modifier=Modifier.horizontalScroll(rememberScrollState())) {
-                    FilterChip(selected=areaId==null,onClick={areaId=null},label={Text("None")})
-                    areas.forEach { area -> FilterChip(selected=area.id==areaId,onClick={areaId=area.id},label={Text(area.name)}) }
+            Text("Choose how to count",fontSize=22.sp,lineHeight=28.sp,
+                fontFamily=FontFamily.Serif,color=Ink)
+            Spacer(Modifier.height(12.dp))
+            OutlinedTextField(value=targetText,
+                onValueChange={targetText=it.filter(Char::isDigit)},
+                label={Text("Milestone number")},singleLine=true,
+                modifier=Modifier.fillMaxWidth())
+            Spacer(Modifier.height(10.dp))
+            Text("Milestone means",fontSize=14.sp,color=Ink)
+            FlowRow(horizontalArrangement=Arrangement.spacedBy(8.dp),
+                verticalArrangement=Arrangement.spacedBy(6.dp)) {
+                FilterChip(selected=mode==MilestoneKind.CALENDAR_DAYS,
+                    onClick={mode=MilestoneKind.CALENDAR_DAYS},label={Text("Calendar days")})
+                FilterChip(selected=mode==MilestoneKind.COMPLETED_SESSIONS,
+                    onClick={mode=MilestoneKind.COMPLETED_SESSIONS},label={Text("Full sessions")})
+            }
+            Spacer(Modifier.height(8.dp))
+            Text("A 21-day period does not prove a permanent habit has formed.",
+                fontSize=13.sp,lineHeight=20.sp,color=Muted)
+            Spacer(Modifier.height(13.dp))
+            Text("Practice days",fontSize=14.sp,color=Forest,
+                fontWeight=FontWeight.SemiBold)
+            listOf("Every day" to Recurrence.Daily,
+                "Weekdays" to Recurrence.Weekdays,
+                "Weekends" to Recurrence.Weekends).forEach { (name,r) ->
+                Row(Modifier.fillMaxWidth().heightIn(min=50.dp)
+                    .clickable(role=Role.RadioButton){recurrence=r},
+                    verticalAlignment=Alignment.CenterVertically) {
+                    RadioButton(selected=recurrence==r,onClick={recurrence=r})
+                    Text(name,fontSize=15.sp,lineHeight=22.sp,color=Ink)
                 }
             }
         }
-        if(warning.isNotEmpty()) Text(warning,color=Color(0xFF9D4F40),fontSize=12.sp)
-        PrimaryAction("Create my challenge",{
+        Panel {
+            Text("03 · PERSONAL DETAILS",fontSize=11.sp,color=Forest,
+                fontWeight=FontWeight.Bold,letterSpacing=1.sp)
+            Spacer(Modifier.height(8.dp))
+            Text("Keep it your own",fontSize=22.sp,lineHeight=28.sp,
+                fontFamily=FontFamily.Serif,color=Ink)
+            Spacer(Modifier.height(10.dp))
+            if(areas.isNotEmpty()) {
+                Text("Growth area (optional)",fontSize=14.sp,color=Muted)
+                FlowRow(horizontalArrangement=Arrangement.spacedBy(7.dp),
+                    verticalArrangement=Arrangement.spacedBy(5.dp)) {
+                    FilterChip(selected=areaId==null,onClick={areaId=null},
+                        label={Text("None")})
+                    areas.forEach { area ->
+                        FilterChip(selected=areaId==area.id,
+                            onClick={areaId=area.id},label={Text(area.name)})
+                    }
+                }
+                Spacer(Modifier.height(10.dp))
+            }
+            TodayQuietButton(if(showOptional)"Hide optional details" else "Add optional details",{
+                showOptional=!showOptional
+            })
+            if(showOptional) {
+                Spacer(Modifier.height(14.dp))
+                OutlinedTextField(value=cue,onValueChange={cue=it},
+                    label={Text("Optional time (HH:mm)")},
+                    singleLine=true,modifier=Modifier.fillMaxWidth())
+                Spacer(Modifier.height(11.dp))
+                OutlinedTextField(value=fallback,onValueChange={fallback=it},
+                    label={Text("Smaller backup action (optional)")},
+                    modifier=Modifier.fillMaxWidth())
+                Spacer(Modifier.height(8.dp))
+                Text("A cue time does not enable notifications. Reminders stay opt-in.",
+                    fontSize=13.sp,lineHeight=20.sp,color=Muted)
+            }
+        }
+        if(warning.isNotEmpty()) Text(warning,color=Color(0xFF905C3E),
+            fontSize=14.sp,lineHeight=21.sp)
+        TodayMainButton("Create my challenge", {
             val count=targetText.toIntOrNull()
             val time=if(cue.isBlank()) null else runCatching { LocalTime.parse(cue.trim()) }.getOrNull()
             warning = when {
@@ -787,64 +925,173 @@ fun CreateChallengePage(areas: List<GrowthAreaEntity>, onBack:()->Unit, onCreate
                 cue.isNotBlank() && time == null -> "Use a valid time such as 07:30."
                 else -> ""
             }
-            if(warning.isEmpty()) onCreate(CreateRequest(title,action,count!!,mode,recurrence,time,fallback,areaId))
-        },Modifier.fillMaxWidth())
-        SecondaryAction("Back",onBack)
+            if(warning.isEmpty()) onCreate(CreateRequest(
+                title.trim(),action.trim(),count!!,mode,recurrence,time,
+                fallback.trim().ifEmpty{null},areaId
+            ))
+        })
+        TodayQuietButton("Back",onBack)
     }
 }
 
 @Composable
 fun RecoveryPage(s: ChallengeSnapshot?, onBack:()->Unit, onRevise:(String,Recurrence)->Unit, onPause:()->Unit) {
-    if(s==null){MainScroll{Text("No challenge selected.");SecondaryAction("Back",onBack)};return}
-    var action by remember(s.plan.id){mutableStateOf(s.plan.schedules.last().action)}
-    var recurrence by remember(s.plan.id){mutableStateOf(s.plan.schedules.last().recurrence)}
+    if(s==null) {
+        MainScroll {
+            Header("Your plan","No challenge selected.","Choose a challenge to adjust its future schedule.")
+            TodayQuietButton("Back without changes",onBack)
+        }
+        return
+    }
+    val latest=s.plan.schedules.last()
+    var action by remember(s.plan.id,latest.effectiveFrom) { mutableStateOf(latest.action) }
+    var recurrence by remember(s.plan.id,latest.effectiveFrom) { mutableStateOf(latest.recurrence) }
+    val ended = presentToday(s).mode == TodayMode.MILESTONE_ENDED
     MainScroll {
-        Header("A gentle restart", "Adjust the path.", "Your history stays exactly as you recorded it.")
-        LandscapeHero()
+        Header("A gentle restart", "Adjust the path.",
+            "Keep what you have learned. Change what comes next.")
         Panel {
-            Text("Smaller steps still matter",fontSize=20.sp,fontFamily=FontFamily.Serif)
-            OutlinedTextField(value=action,onValueChange={action=it},label={Text("Next action (from tomorrow)")},modifier=Modifier.fillMaxWidth())
-            Spacer(Modifier.height(10.dp))
-            Text("Practice days",fontSize=12.sp,color=Muted)
-            listOf("Daily" to Recurrence.Daily,"Weekdays" to Recurrence.Weekdays,"Weekends" to Recurrence.Weekends).forEach { (label,r) ->
-                Row(verticalAlignment=Alignment.CenterVertically){RadioButton(selected=recurrence==r,onClick={recurrence=r});Text(label)}
+            Text("YOUR CURRENT PRACTICE",fontSize=11.sp,letterSpacing=1.sp,
+                color=Forest,fontWeight=FontWeight.Bold)
+            Spacer(Modifier.height(8.dp))
+            Text(s.plan.title,fontFamily=FontFamily.Serif,
+                fontSize=23.sp,lineHeight=29.sp,color=Ink)
+            Spacer(Modifier.height(8.dp))
+            Text("Edits take effect on the next scheduled day, not in the history you already recorded.",
+                fontSize=14.sp,lineHeight=21.sp,color=Muted)
+        }
+        Panel {
+            Text("A sustainable next step",fontFamily=FontFamily.Serif,
+                fontSize=23.sp,lineHeight=29.sp,color=Ink)
+            Spacer(Modifier.height(8.dp))
+            Text("Choose a practice that feels realistic for your next chapter.",
+                fontSize=14.sp,lineHeight=21.sp,color=Muted)
+            Spacer(Modifier.height(15.dp))
+            OutlinedTextField(value=action,onValueChange={ action=it },
+                label={Text("Next action (from tomorrow)")},
+                minLines=2,maxLines=4,modifier=Modifier.fillMaxWidth())
+            Spacer(Modifier.height(16.dp))
+            Text("Practice days",color=Forest,fontSize=14.sp,
+                fontWeight=FontWeight.SemiBold)
+            listOf("Daily" to Recurrence.Daily,
+                "Weekdays" to Recurrence.Weekdays,
+                "Weekends" to Recurrence.Weekends).forEach { (label,r) ->
+                Row(
+                    Modifier.fillMaxWidth().heightIn(min=51.dp)
+                        .clickable(role=Role.RadioButton){recurrence=r},
+                    verticalAlignment=Alignment.CenterVertically
+                ) {
+                    RadioButton(selected=recurrence==r,onClick={recurrence=r})
+                    Text(label,color=Ink,fontSize=15.sp,lineHeight=22.sp)
+                }
             }
-            PrimaryAction("Save future plan", { if(action.isNotBlank()) onRevise(action,recurrence) },Modifier.fillMaxWidth())
+            Spacer(Modifier.height(12.dp))
+            if(action.isBlank()) {
+                Text("Enter one specific next action before saving.",
+                    color=Color(0xFF905C3E),fontSize=13.sp,lineHeight=19.sp)
+                Spacer(Modifier.height(8.dp))
+            }
+            if(ended) {
+                Text("This calendar milestone has ended. Review its history before starting a new challenge.",
+                    color=Muted,fontSize=14.sp,lineHeight=21.sp)
+            } else {
+                TodayMainButton("Save future plan", {
+                    if(action.isNotBlank()) onRevise(action.trim(),recurrence)
+                })
+            }
         }
-        Panel {
-            Text("Need some space?",fontFamily=FontFamily.Serif,fontSize=19.sp)
-            Text("Pause the next three days. Nothing is erased, and this isn't counted as completing them.",color=Muted,fontSize=12.sp)
-            Spacer(Modifier.height(8.dp)); SecondaryAction("Pause next three days",onPause)
+        if(!ended) {
+            Panel {
+                Text("Need a little space?",fontFamily=FontFamily.Serif,
+                    fontSize=22.sp,lineHeight=28.sp,color=Ink)
+                Spacer(Modifier.height(8.dp))
+                Text("Pause the next three days. It won't erase your history or count these days as completed.",
+                    color=Muted,fontSize=14.sp,lineHeight=21.sp)
+                Spacer(Modifier.height(14.dp))
+                TodayQuietButton("Pause next three days",onPause)
+            }
         }
-        SecondaryAction("Back without changes",onBack)
+        LandscapeHero(label="YOUR OWN RHYTHM",
+            headline="Rest belongs\non the path.")
+        TodayQuietButton("Back without changes",onBack)
     }
 }
 
 @Composable
 fun ReviewPage(s: ChallengeSnapshot?, onBack:()->Unit) {
-    if(s==null){MainScroll{Text("Choose a challenge first.");SecondaryAction("Back",onBack)};return}
+    if(s==null) {
+        MainScroll {
+            Header("Your reflection","No challenge selected.","Choose a challenge to see your recorded history.")
+            TodayQuietButton("Back to challenge",onBack)
+        }
+        return
+    }
     val summary=ChallengeEngine.summarize(days(s))
+    val plan=s.plan
     MainScroll {
-        Header("Your reflection", "Every phase has meaning.","A factual summary of what's been recorded so far.")
+        Header("Your reflection","Every phase has meaning.",
+            "A factual record of this journey so far, never a judgment.")
         Panel {
-            Text(s.plan.title,fontFamily=FontFamily.Serif,fontSize=20.sp)
+            Text("YOUR PATH",fontSize=11.sp,fontWeight=FontWeight.Bold,
+                letterSpacing=1.sp,color=Forest)
             Spacer(Modifier.height(10.dp))
+            Text(plan.title,fontFamily=FontFamily.Serif,
+                fontSize=25.sp,lineHeight=31.sp,color=Ink)
+            Spacer(Modifier.height(7.dp))
+            Text("${plan.target} " +
+                (if(plan.milestoneKind==MilestoneKind.CALENDAR_DAYS)
+                    "calendar-day milestone" else "full-session milestone")+
+                " · started ${plan.startDate}",fontSize=14.sp,
+                lineHeight=21.sp,color=Muted)
+            Spacer(Modifier.height(18.dp))
+            Surface(color=Pale,shape=RoundedCornerShape(15.dp),
+                modifier=Modifier.fillMaxWidth()) {
+                Column(Modifier.padding(16.dp)) {
+                    Text(summary.recordedFull.toString(),fontFamily=FontFamily.Serif,
+                        fontSize=43.sp,lineHeight=48.sp,color=Forest)
+                    Text("Full practices explicitly recorded",fontSize=14.sp,
+                        lineHeight=21.sp,color=Ink)
+                    Text("Backup actions are counted separately, not as full sessions.",
+                        fontSize=12.sp,lineHeight=18.sp,color=Muted)
+                }
+            }
+        }
+        Panel {
+            Text("The full picture",fontFamily=FontFamily.Serif,
+                fontSize=22.sp,lineHeight=27.sp,color=Ink)
+            Spacer(Modifier.height(11.dp))
             listOf(
-                "Recorded full actions" to summary.recordedFull,
-                "Partial sessions" to summary.partial,
-                "Backup sessions" to summary.recordedBackup,
+                "Full practices" to summary.recordedFull,
+                "Partial practices" to summary.partial,
+                "Backup practices" to summary.recordedBackup,
                 "Intentional rest" to summary.rested,
                 "Explicitly marked missed" to summary.explicitlyMissed,
-                "Not logged" to summary.unreported,
-                "Paused" to summary.paused,
-                "Eligible scheduled opportunities" to summary.eligibleOpportunities
-            ).forEach { (label,value)-> Row(Modifier.fillMaxWidth().padding(vertical=5.dp),horizontalArrangement=Arrangement.SpaceBetween){Text(label,fontSize=12.sp,color=Muted);Text("$value",fontSize=13.sp,fontWeight=FontWeight.SemiBold)} }
+                "Unreported" to summary.unreported,
+                "Paused opportunities" to summary.paused,
+                "Eligible opportunities through today" to summary.eligibleOpportunities
+            ).forEachIndexed { index, (label,value) ->
+                Row(Modifier.fillMaxWidth().padding(vertical=10.dp),
+                    verticalAlignment=Alignment.CenterVertically) {
+                    Text(label,modifier=Modifier.weight(1f),fontSize=14.sp,
+                        lineHeight=21.sp,color=Ink)
+                    Spacer(Modifier.width(12.dp))
+                    Text(value.toString(),fontFamily=FontFamily.Serif,
+                        fontSize=22.sp,color=Forest)
+                }
+                if(index<7) HorizontalDivider(color=Line)
+            }
         }
         Panel {
-            Text("A milestone is a moment to reflect—not proof of permanent habit formation.",fontSize=13.sp,color=Ink)
-            Text("You can continue, adjust the plan, or take a pause. Your choice.",fontSize=12.sp,color=Muted)
+            Text("Unreported isn't missed",fontFamily=FontFamily.Serif,
+                fontSize=21.sp,color=Ink)
+            Spacer(Modifier.height(8.dp))
+            Text("A day with no entry remains unknown until you decide to record it. Nothing is inferred about your effort.",
+                fontSize=14.sp,lineHeight=21.sp,color=Muted)
+            Spacer(Modifier.height(13.dp))
+            Text("A milestone is a point for reflection—not proof that a permanent habit has formed.",
+                fontSize=14.sp,lineHeight=21.sp,color=Ink)
         }
-        SecondaryAction("Back to challenge",onBack)
+        TodayQuietButton("Back to challenge",onBack)
     }
 }
 
@@ -852,15 +1099,52 @@ fun ReviewPage(s: ChallengeSnapshot?, onBack:()->Unit) {
 fun GrowthPage(areas:List<GrowthAreaEntity>,onCreateArea:(String)->Unit,onStart:()->Unit) {
     var title by remember { mutableStateOf("") }
     MainScroll {
-        Header("My growth", "Your direction, your pace.", "Choose the parts of life that feel meaningful to you.")
-        LandscapeHero()
+        Header("My growth", "Your direction, your pace.",
+            "Choose the parts of life that feel meaningful to you.")
         Panel {
-            Text("Create a growth area",fontFamily=FontFamily.Serif,fontSize=19.sp)
-            OutlinedTextField(value=title,onValueChange={title=it},label={Text("Area name")},modifier=Modifier.fillMaxWidth())
-            Spacer(Modifier.height(8.dp));PrimaryAction("Add area",{if(title.isNotBlank()){onCreateArea(title);title=""}})
+            Text("YOUR GROWTH SPACES",fontSize=11.sp,color=Forest,
+                letterSpacing=1.sp,fontWeight=FontWeight.Bold)
+            Spacer(Modifier.height(8.dp))
+            Text(if(areas.isEmpty()) "A place to explore"
+                else "${areas.size} " + if(areas.size==1)"area of growth" else "areas of growth",
+                fontFamily=FontFamily.Serif,fontSize=24.sp,lineHeight=30.sp,color=Ink)
+            Spacer(Modifier.height(7.dp))
+            Text("Name an area that matters to you. These are personal labels, not ratings or achievement scores.",
+                fontSize=14.sp,lineHeight=21.sp,color=Muted)
+            Spacer(Modifier.height(14.dp))
+            OutlinedTextField(value=title,onValueChange={title=it},
+                label={Text("Area name")},singleLine=true,
+                modifier=Modifier.fillMaxWidth())
+            Spacer(Modifier.height(10.dp))
+            TodayMainButton("Add area",{
+                if(title.isNotBlank()){onCreateArea(title.trim());title=""}
+            })
         }
-        if(areas.isEmpty()) Text("Examples: Learning, Mind & awareness, Daily foundations, Connection, Body & energy.",color=Muted,fontSize=12.sp)
-        areas.forEach { area -> Panel {Text(area.name,fontFamily=FontFamily.Serif,fontSize=20.sp);Spacer(Modifier.height(7.dp));SecondaryAction("Start a related challenge",onStart)} }
+        if(areas.isEmpty()) {
+            Panel {
+                Text("Not sure where to start?",fontFamily=FontFamily.Serif,
+                    fontSize=21.sp,lineHeight=27.sp,color=Ink)
+                Spacer(Modifier.height(7.dp))
+                Text("A few ideas: learning, body and energy, relationships, or everyday foundations. You can make your own.",
+                    color=Muted,fontSize=14.sp,lineHeight=21.sp)
+            }
+        } else {
+            Text("YOUR CHOSEN AREAS",fontSize=11.sp,color=Forest,
+                fontWeight=FontWeight.Bold,letterSpacing=1.sp)
+            areas.forEach { area ->
+                Panel {
+                    Text(area.name,fontFamily=FontFamily.Serif,
+                        fontSize=22.sp,lineHeight=28.sp,color=Ink)
+                    Spacer(Modifier.height(8.dp))
+                    Text("Your challenges can follow this direction, but an area doesn't require daily action.",
+                        color=Muted,fontSize=14.sp,lineHeight=21.sp)
+                    Spacer(Modifier.height(12.dp))
+                    TodayQuietButton("Create a challenge",onStart)
+                }
+            }
+        }
+        LandscapeHero(label="YOUR OWN DIRECTION",
+            headline="Growth is not\na straight line.")
     }
 }
 
@@ -876,25 +1160,49 @@ fun JournalPage(
     var body by remember { mutableStateOf("") }
     var mood by remember { mutableStateOf<String?>(null) }
     var energy by remember { mutableStateOf<Int?>(null) }
+    var pendingDelete by remember { mutableStateOf<JournalEntryEntity?>(null) }
     fun clear() { editing=null;body="";mood=null;energy=null;showingEditor=false }
+    val deletion = pendingDelete
+    if(deletion!=null) {
+        AlertDialog(
+            onDismissRequest={pendingDelete=null},
+            title={Text("Delete this reflection?",color=Ink)},
+            text={Text("This entry will be removed from this device. This cannot be undone. Other reflections are unchanged.",
+                color=Muted,fontSize=14.sp,lineHeight=21.sp)},
+            confirmButton={
+                TextButton(onClick={
+                    onDelete(deletion)
+                    if(editing?.id==deletion.id) clear()
+                    pendingDelete=null
+                }) { Text("Delete reflection",color=Color(0xFF995646)) }
+            },
+            dismissButton={
+                TextButton(onClick={pendingDelete=null}) { Text("Keep reflection",color=Forest) }
+            },
+            containerColor=Paper,shape=RoundedCornerShape(20.dp)
+        )
+    }
     MainScroll {
         Header("Private reflections · On this device", "Room to feel.\nSpace to think.",
             "Write as much or as little as you like. No mood check-in is ever required.")
+        Panel {
+            Text("YOUR PRIVATE PAGE",fontSize=11.sp,color=Forest,
+                fontWeight=FontWeight.Bold,letterSpacing=1.sp)
+            Spacer(Modifier.height(8.dp))
+            Text("Write when you want to.",fontFamily=FontFamily.Serif,
+                fontSize=22.sp,lineHeight=28.sp,color=Ink)
+            Spacer(Modifier.height(7.dp))
+            Text("A reflection, a thought, or a few words. Mood and energy are optional inside each entry.",
+                fontSize=14.sp,lineHeight=21.sp,color=Muted)
+            Spacer(Modifier.height(15.dp))
+            TodayMainButton("New reflection", {
+                clear()
+                showingEditor=true
+            })
+        }
         LandscapeHero(label="A QUIET PAGE",overline="YOUR LIVING JOURNAL",
             headline="Every day has\nits own story.",
             artwork=R.drawable.atelier_journal)
-        Row(Modifier.fillMaxWidth(), horizontalArrangement=Arrangement.spacedBy(9.dp)) {
-            PrimaryAction("✎  New reflection", {
-                clear()
-                showingEditor=true
-            },Modifier.weight(1f))
-            SecondaryAction("Mood & energy",{
-                if(!showingEditor) {
-                    clear()
-                    showingEditor=true
-                }
-            })
-        }
         if(showingEditor) {
             Panel {
                 Text(if(editing==null)"New reflection" else "Edit reflection",
@@ -908,7 +1216,7 @@ fun JournalPage(
                         focusedContainerColor=Paper,unfocusedContainerColor=Paper
                     ), modifier=Modifier.fillMaxWidth())
                 Spacer(Modifier.height(12.dp))
-                Text("How are you feeling? (optional)",fontSize=12.sp,color=Muted)
+                Text("How are you feeling? (optional)",fontSize=14.sp,color=Muted)
                 Row(Modifier.horizontalScroll(rememberScrollState()),
                     horizontalArrangement=Arrangement.spacedBy(6.dp)) {
                     listOf("Calm","Hopeful","Tired","Worried").forEach { m ->
@@ -917,7 +1225,7 @@ fun JournalPage(
                     }
                 }
                 Spacer(Modifier.height(9.dp))
-                Text("Energy (optional)",fontSize=12.sp,color=Muted)
+                Text("Energy (optional)",fontSize=14.sp,color=Muted)
                 Row(Modifier.horizontalScroll(rememberScrollState()),
                     horizontalArrangement=Arrangement.spacedBy(6.dp)) {
                     (1..5).forEach { n ->
@@ -935,7 +1243,7 @@ fun JournalPage(
         Row(Modifier.fillMaxWidth(),verticalAlignment=Alignment.CenterVertically) {
             Text("Your entries",fontFamily=FontFamily.Serif,fontSize=21.sp,color=Ink)
             Spacer(Modifier.weight(1f))
-            Text(entries.size.toString()+" PRIVATE",fontSize=10.sp,color=Muted,
+            Text(entries.size.toString()+" PRIVATE",fontSize=12.sp,color=Muted,
                 fontWeight=FontWeight.Bold,letterSpacing=1.sp)
         }
         if(entries.isEmpty()) {
@@ -952,8 +1260,8 @@ fun JournalPage(
                     .toLocalDate().format(DateTimeFormatter.ofPattern("MMM d, yyyy")),
                     fontSize=10.sp,color=Muted)
                 Spacer(Modifier.height(9.dp))
-                Text(entry.body,fontFamily=FontFamily.Serif,fontSize=16.sp,
-                    lineHeight=23.sp,color=Ink)
+                Text(entry.body,fontFamily=FontFamily.Serif,fontSize=17.sp,
+                    lineHeight=25.sp,color=Ink)
                 if(entry.mood!=null || entry.energy!=null) {
                     Spacer(Modifier.height(7.dp))
                     Text(listOfNotNull(entry.mood,entry.energy?.let{"Energy "+it+"/5"})
@@ -963,9 +1271,9 @@ fun JournalPage(
                     TextButton(onClick={
                         editing=entry;body=entry.body;mood=entry.mood;energy=entry.energy
                         showingEditor=true
-                    }) { Text("✎ Edit",color=Sage,fontSize=12.sp) }
-                    TextButton(onClick={onDelete(entry);if(editing?.id==entry.id)clear()}) {
-                        Text("Delete",color=Muted,fontSize=12.sp)
+                    }) { Text("Edit",color=Forest,fontSize=14.sp) }
+                    TextButton(onClick={pendingDelete=entry}) {
+                        Text("Delete",color=Color(0xFF905C3E),fontSize=14.sp)
                     }
                 }
             }
@@ -977,7 +1285,7 @@ fun JournalPage(
                     letterSpacing=1.5.sp)
                 Spacer(Modifier.height(7.dp))
                 Text("Your journal is stored in this device's private app database. No cloud sync or account is enabled in this build.",
-                    color=Muted,fontSize=12.sp,lineHeight=18.sp)
+                    color=Muted,fontSize=14.sp,lineHeight=21.sp)
                 Spacer(Modifier.height(10.dp))
                 SecondaryAction("Export or manage my data",onDataPrivacy)
             }
@@ -1000,63 +1308,75 @@ fun ReminderSettingsPage(
     val parsed = remember(timeValue) {
         runCatching { java.time.LocalTime.parse(timeValue.trim()) }.getOrNull()
     }
+    val status = when {
+        !enabled -> "OFF · Notifications are not enabled for this challenge"
+        !permissionAvailable -> "BLOCKED · Android notification permission is unavailable"
+        nextAt > 0L -> "ON · Approximate next reminder: "+
+            java.time.Instant.ofEpochMilli(nextAt)
+                .atZone(s?.plan?.zone ?: java.time.ZoneId.systemDefault())
+                .format(DateTimeFormatter.ofPattern("EEE d MMM · h:mm a"))
+        else -> "ON · No scheduled opportunity is currently due"
+    }
     MainScroll {
         Header("Optional · Quiet · Your choice","Gentle reminders",
-            "A small nudge for your planned practice. Never an obligation.")
+            "A useful nudge if you want one. Never a measure of discipline.")
         Panel {
-            Text("Your reminder",fontFamily=FontFamily.Serif,fontSize=21.sp,color=Ink)
-            Spacer(Modifier.height(7.dp))
-            Text(s?.plan?.title ?: "Choose a challenge first",
-                color=Muted,fontSize=12.sp,lineHeight=18.sp)
+            Text("CURRENT STATUS",fontSize=11.sp,color=Forest,
+                fontWeight=FontWeight.Bold,letterSpacing=1.sp)
             Spacer(Modifier.height(9.dp))
-            Text(
-                when {
-                    !enabled -> "OFF · Notifications are not enabled for this challenge"
-                    !permissionAvailable -> "BLOCKED · Android notification permission is unavailable"
-                    nextAt > 0L -> "ON · Approximate next reminder: "+
-                        java.time.Instant.ofEpochMilli(nextAt)
-                            .atZone(s?.plan?.zone ?: java.time.ZoneId.systemDefault())
-                            .format(DateTimeFormatter.ofPattern("EEE d MMM · h:mm a"))
-                    else -> "ON · No scheduled opportunity is currently due"
-                },color=Sage,fontSize=12.sp,lineHeight=19.sp
-            )
-            Spacer(Modifier.height(15.dp))
-            OutlinedTextField(
-                value=timeValue,
+            Text(s?.plan?.title ?: "Choose a challenge first",
+                fontFamily=FontFamily.Serif,fontSize=22.sp,
+                lineHeight=28.sp,color=Ink)
+            Spacer(Modifier.height(13.dp))
+            Surface(color=Pale,shape=RoundedCornerShape(13.dp),
+                modifier=Modifier.fillMaxWidth()) {
+                Text(status,modifier=Modifier.padding(14.dp),
+                    fontSize=14.sp,lineHeight=21.sp,color=Forest,
+                    fontWeight=FontWeight.SemiBold)
+            }
+            Spacer(Modifier.height(17.dp))
+            OutlinedTextField(value=timeValue,
                 onValueChange={timeValue=it.take(5)},
                 label={Text("Preferred time · 24-hour HH:mm")},
-                placeholder={Text("09:00")},
-                singleLine=true,
-                modifier=Modifier.fillMaxWidth()
-            )
+                placeholder={Text("09:00")},singleLine=true,
+                modifier=Modifier.fillMaxWidth())
             Spacer(Modifier.height(9.dp))
-            Text("Time is interpreted in the challenge's timezone. Android battery restrictions may delay delivery. Reminders are not exact alarms.",
-                color=Muted,fontSize=11.sp,lineHeight=17.sp)
-            Spacer(Modifier.height(14.dp))
-            PrimaryAction(if(enabled)"Update reminder" else "Enable reminder",{
-                if(parsed!=null)onEnable(parsed.toString())
-            },Modifier.fillMaxWidth())
+            Text("The time follows this challenge's timezone. Android may deliver inexact reminders later due to battery restrictions.",
+                color=Muted,fontSize=14.sp,lineHeight=21.sp)
             if(parsed==null) {
-                Spacer(Modifier.height(5.dp))
-                Text("Enter a valid time, for example 07:30 or 20:00.",
-                    color=Color(0xFF996044),fontSize=11.sp)
+                Spacer(Modifier.height(9.dp))
+                Text("Enter a valid time such as 07:30 or 20:00.",
+                    color=Color(0xFF905C3E),fontSize=13.sp,lineHeight=19.sp)
+            }
+            Spacer(Modifier.height(17.dp))
+            Button(
+                onClick={ if(parsed!=null) onEnable(parsed.toString()) },
+                enabled=parsed!=null && s!=null,
+                modifier=Modifier.fillMaxWidth().heightIn(min=52.dp),
+                shape=RoundedCornerShape(14.dp),
+                colors=ButtonDefaults.buttonColors(
+                    containerColor=Forest,contentColor=Paper)
+            ) {
+                Text(if(enabled)"Update reminder" else "Enable reminder",
+                    fontSize=14.sp,lineHeight=20.sp,
+                    fontWeight=FontWeight.SemiBold)
             }
             if(enabled) {
-                Spacer(Modifier.height(9.dp))
-                SecondaryAction("Turn off reminders",onDisable)
+                Spacer(Modifier.height(10.dp))
+                TodayQuietButton("Turn off reminders",onDisable)
             }
         }
-        Surface(color=Pale,shape=RoundedCornerShape(16.dp),
-            modifier=Modifier.fillMaxWidth()) {
-            Column(Modifier.padding(15.dp)) {
-                Text("PRIVACY FIRST",fontSize=9.sp,fontWeight=FontWeight.Bold,
-                    letterSpacing=1.2.sp,color=Sage)
-                Spacer(Modifier.height(7.dp))
-                Text("We never display your journal or mood in a notification. Your challenge stays available even if notifications are disabled.",
-                    fontSize=12.sp,lineHeight=19.sp,color=Muted)
-            }
+        Panel {
+            Text("You stay in control",fontFamily=FontFamily.Serif,
+                fontSize=21.sp,lineHeight=27.sp,color=Ink)
+            Spacer(Modifier.height(9.dp))
+            Text("Reminders are off unless you choose to enable them. Permission is requested only when needed, and your private journal or mood never appears in a notification.",
+                fontSize=14.sp,lineHeight=21.sp,color=Muted)
+            Spacer(Modifier.height(8.dp))
+            Text("Turning reminders off never deletes your challenge or its records.",
+                fontSize=13.sp,lineHeight=20.sp,color=Muted)
         }
-        SecondaryAction("Back to challenge",onBack)
+        TodayQuietButton("Back to challenge",onBack)
     }
 }
 
@@ -1079,10 +1399,10 @@ fun DataPrivacyPage(
             Text("Export my data",fontFamily=FontFamily.Serif,fontSize=21.sp,color=Ink)
             Spacer(Modifier.height(8.dp))
             Text("Save a JSON copy of your growth areas, challenges, all practice revisions, pauses and private journal entries. You choose where it is stored.",
-                color=Muted,fontSize=12.sp,lineHeight=19.sp)
+                color=Muted,fontSize=14.sp,lineHeight=21.sp)
             Spacer(Modifier.height(10.dp))
             Text("Important: exports include private reflections and are not encrypted by EVOLUNE. Store them securely.",
-                color=Color(0xFF905C3E),fontSize=11.sp,lineHeight=17.sp)
+                color=Color(0xFF905C3E),fontSize=13.sp,lineHeight=20.sp)
             Spacer(Modifier.height(13.dp))
             PrimaryAction("Choose export location",onExport,Modifier.fillMaxWidth())
         }
@@ -1090,14 +1410,14 @@ fun DataPrivacyPage(
             Text("Restore from an export",fontFamily=FontFamily.Serif,fontSize=21.sp,color=Ink)
             Spacer(Modifier.height(8.dp))
             Text("Choose an EVOLUNE version 1 JSON export. We validate every record before offering to restore it. Restoring replaces all current on-device data, including journal entries.",
-                color=Muted,fontSize=12.sp,lineHeight=19.sp)
+                color=Muted,fontSize=14.sp,lineHeight=21.sp)
             Spacer(Modifier.height(11.dp))
-            SecondaryAction("Choose backup JSON",onPickBackup)
+            TodayQuietButton("Choose backup JSON",onPickBackup)
             if(importPreview!=null) {
                 Spacer(Modifier.height(15.dp))
                 Surface(color=Pale,shape=RoundedCornerShape(12.dp)) {
                     Column(Modifier.padding(13.dp)) {
-                        Text("VALIDATED BACKUP",color=Sage,fontSize=9.sp,
+                        Text("VALIDATED BACKUP",color=Sage,fontSize=11.sp,
                             letterSpacing=1.1.sp,fontWeight=FontWeight.Bold)
                         Spacer(Modifier.height(5.dp))
                         Text(importPreview,fontSize=12.sp,lineHeight=18.sp,color=Ink)
@@ -1105,7 +1425,7 @@ fun DataPrivacyPage(
                 }
                 Spacer(Modifier.height(11.dp))
                 Text("Only continue if you intend to overwrite this device's existing EVOLUNE information. Export your current data first.",
-                    color=Color(0xFF905C3E),fontSize=11.sp,lineHeight=17.sp)
+                    color=Color(0xFF905C3E),fontSize=13.sp,lineHeight=20.sp)
                 Spacer(Modifier.height(8.dp))
                 OutlinedTextField(
                     value=replaceText,onValueChange={replaceText=it.take(32)},
@@ -1117,8 +1437,8 @@ fun DataPrivacyPage(
                 },enabled=replaceText=="REPLACE",
                     colors=ButtonDefaults.buttonColors(containerColor=Forest),
                     shape=RoundedCornerShape(12.dp),
-                    modifier=Modifier.fillMaxWidth()) {
-                    Text("Replace this device's data from backup")
+                    modifier=Modifier.fillMaxWidth().heightIn(min=52.dp)) {
+                    Text("Replace this device's data from backup",fontSize=14.sp)
                 }
                 TextButton(onClick={replaceText="";onCancelRestore()}) {
                     Text("Cancel restore",color=Muted,fontSize=12.sp)
@@ -1129,7 +1449,7 @@ fun DataPrivacyPage(
             Text("Erase local data",fontFamily=FontFamily.Serif,fontSize=21.sp,color=Ink)
             Spacer(Modifier.height(8.dp))
             Text("Permanently remove all growth areas, challenge and schedule history, and private journal entries from this installation. This cannot be undone. Export first if you need a copy.",
-                color=Muted,fontSize=12.sp,lineHeight=19.sp)
+                color=Muted,fontSize=14.sp,lineHeight=21.sp)
             Spacer(Modifier.height(12.dp))
             OutlinedTextField(value=deletionText,
                 onValueChange={ deletionText=it.take(32) },
@@ -1150,8 +1470,8 @@ fun DataPrivacyPage(
                 },enabled=deletionText=="DELETE",
                 colors=ButtonDefaults.buttonColors(
                     containerColor=Color(0xFF995646),contentColor=Color.White),
-                shape=RoundedCornerShape(12.dp),modifier=Modifier.fillMaxWidth()) {
-                Text("Permanently erase this device's data")
+                shape=RoundedCornerShape(12.dp),modifier=Modifier.fillMaxWidth().heightIn(min=52.dp)) {
+                Text("Permanently erase this device's data",fontSize=14.sp)
             }
         }
         Text("No account or server backup is configured. Uninstalling the app before exporting may permanently lose your records.",
@@ -1160,74 +1480,86 @@ fun DataPrivacyPage(
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun InsightsPage(s: ChallengeSnapshot?) {
     MainScroll {
         Header("Patterns, not verdicts", "See what\nis changing.",
-            "Every number has a story. You decide what it means.")
+            "A calm view of what you have actually recorded.")
         if(s==null) {
-            Surface(color=Pale, shape=RoundedCornerShape(20.dp),modifier=Modifier.fillMaxWidth()) {
-                Column(Modifier.padding(19.dp)) {
-                    Text("YOUR FIRST INSIGHT",fontSize=10.sp,color=Sage,
-                        fontWeight=FontWeight.Bold,letterSpacing=1.4.sp)
-                    Spacer(Modifier.height(10.dp))
-                    Text("0",fontFamily=FontFamily.Serif,fontSize=47.sp,color=Forest)
-                    Text("Recorded full practices so far",fontSize=12.sp,color=Muted)
-                    Spacer(Modifier.height(10.dp))
-                    Text("Create a challenge and record a practice to reveal patterns over time.",
-                        fontSize=12.sp,lineHeight=19.sp,color=Muted)
-                }
+            Panel {
+                Text("YOUR FIRST INSIGHT",fontSize=11.sp,color=Forest,
+                    fontWeight=FontWeight.Bold,letterSpacing=1.sp)
+                Spacer(Modifier.height(11.dp))
+                Text("Your story starts with a record.",fontFamily=FontFamily.Serif,
+                    fontSize=24.sp,lineHeight=30.sp,color=Ink)
+                Spacer(Modifier.height(8.dp))
+                Text("There is no challenge activity to summarize yet. Create a practice and log what actually happened to see meaningful patterns.",
+                    fontSize=14.sp,lineHeight=21.sp,color=Muted)
             }
         } else {
             val list=days(s)
             val summary=ChallengeEngine.summarize(list)
-            Surface(color=Pale,shape=RoundedCornerShape(21.dp),
-                modifier=Modifier.fillMaxWidth()) {
-                Column(Modifier.padding(20.dp)) {
-                    Text("RECORDED PRACTICES",fontSize=10.sp,color=Sage,
-                        fontWeight=FontWeight.Bold,letterSpacing=1.5.sp)
-                    Spacer(Modifier.height(7.dp))
-                    Text(summary.recordedFull.toString(),
-                        fontSize=52.sp,fontFamily=FontFamily.Serif,color=Forest)
-                    Text("Full actions you explicitly recorded",fontSize=12.sp,color=Muted)
+            Panel {
+                Text("THIS CHALLENGE",fontSize=11.sp,color=Forest,
+                    fontWeight=FontWeight.Bold,letterSpacing=1.sp)
+                Spacer(Modifier.height(8.dp))
+                Text(s.plan.title,fontFamily=FontFamily.Serif,
+                    fontSize=23.sp,lineHeight=28.sp,color=Ink)
+                Spacer(Modifier.height(15.dp))
+                Surface(color=Pale,shape=RoundedCornerShape(17.dp),
+                    modifier=Modifier.fillMaxWidth()) {
+                    Column(Modifier.padding(18.dp)) {
+                        Text(summary.recordedFull.toString(),
+                            fontSize=49.sp,lineHeight=55.sp,
+                            fontFamily=FontFamily.Serif,color=Forest)
+                        Spacer(Modifier.height(5.dp))
+                        Text("Full practices explicitly recorded",
+                            fontSize=15.sp,lineHeight=22.sp,color=Ink)
+                        Spacer(Modifier.height(8.dp))
+                        Text("Out of ${summary.eligibleOpportunities} eligible opportunities through today. This number describes records, not your worth.",
+                            fontSize=13.sp,lineHeight=20.sp,color=Muted)
+                    }
                 }
             }
-            Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(7.dp)) {
-                listOf("Partial" to summary.partial,
-                       "Unreported" to summary.unreported,
-                       "Rest" to summary.rested).forEach { (name,n) ->
-                    Surface(color=Pale,shape=RoundedCornerShape(13.dp),
-                        modifier=Modifier.weight(1f)) {
-                        Column(Modifier.padding(vertical=13.dp),horizontalAlignment=Alignment.CenterHorizontally) {
-                            Text(n.toString(),fontFamily=FontFamily.Serif,fontSize=23.sp,color=Ink)
-                            Text(name,fontSize=10.sp,color=Muted)
+            Text("MORE OF THE PICTURE",fontSize=11.sp,color=Forest,
+                fontWeight=FontWeight.Bold,letterSpacing=1.sp)
+            FlowRow(
+                modifier=Modifier.fillMaxWidth(),
+                horizontalArrangement=Arrangement.spacedBy(8.dp),
+                verticalArrangement=Arrangement.spacedBy(8.dp)
+            ) {
+                listOf(
+                    "Partial" to summary.partial,
+                    "Backup action" to summary.recordedBackup,
+                    "Intentional rest" to summary.rested,
+                    "Unreported" to summary.unreported,
+                    "Explicitly missed" to summary.explicitlyMissed,
+                    "Paused" to summary.paused
+                ).forEach { (label,count) ->
+                    Surface(color=Pale,shape=RoundedCornerShape(14.dp),
+                        modifier=Modifier.widthIn(min=135.dp)) {
+                        Column(Modifier.padding(15.dp)) {
+                            Text(count.toString(),fontFamily=FontFamily.Serif,
+                                fontSize=29.sp,lineHeight=34.sp,color=Ink)
+                            Spacer(Modifier.height(5.dp))
+                            Text(label,fontSize=14.sp,lineHeight=20.sp,color=Forest)
                         }
                     }
                 }
             }
-            Text("By challenge",fontFamily=FontFamily.Serif,fontSize=21.sp,color=Ink)
             Panel {
-                Text(s.plan.title,fontWeight=FontWeight.SemiBold,color=Ink,fontSize=13.sp)
-                Spacer(Modifier.height(5.dp))
-                Text(summary.recordedFull.toString()+" full records out of "+
-                    summary.eligibleOpportunities.toString()+" eligible opportunities so far",
-                    fontSize=11.sp,color=Muted,lineHeight=16.sp)
-                Spacer(Modifier.height(6.dp))
-                Text("Only the currently selected challenge is shown in this foundation build.",
-                    fontSize=10.sp,color=Muted,lineHeight=16.sp)
-            }
-            Surface(color=Pale,shape=RoundedCornerShape(16.dp),
-                modifier=Modifier.fillMaxWidth()) {
-                Column(Modifier.padding(16.dp)) {
-                    Text("REFLECTIVE NOTE",color=Sage,fontWeight=FontWeight.Bold,
-                        letterSpacing=1.4.sp,fontSize=9.sp)
-                    Spacer(Modifier.height(8.dp))
-                    Text("An unreported day is not evidence of failure. Consider what made a practice easier or harder.",
-                        color=Ink,fontSize=13.sp,lineHeight=19.sp)
-                }
+                Text("How to read your history",fontFamily=FontFamily.Serif,
+                    fontSize=22.sp,lineHeight=28.sp,color=Ink)
+                Spacer(Modifier.height(10.dp))
+                Text("Unreported means no entry was made—not that you missed the practice. A backup action is shown separately from a full action.",
+                    fontSize=14.sp,lineHeight=21.sp,color=Muted)
+                Spacer(Modifier.height(11.dp))
+                Text("Only your currently selected challenge is summarized here. This is not an overall wellbeing score.",
+                    fontSize=14.sp,lineHeight=21.sp,color=Muted)
             }
         }
-        Text("These are descriptions of recorded behavior, never scores for health, worth or habit formation.",
-            color=Muted,fontSize=11.sp,lineHeight=17.sp)
+        Text("Insights describe your recorded behavior. They do not diagnose health, predict future results, or prove that a habit is permanent.",
+            fontSize=13.sp,lineHeight=20.sp,color=Muted)
     }
 }
