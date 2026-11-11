@@ -1032,15 +1032,52 @@ fun ReviewPage(s: ChallengeSnapshot?, onBack:()->Unit) {
 fun GrowthPage(areas:List<GrowthAreaEntity>,onCreateArea:(String)->Unit,onStart:()->Unit) {
     var title by remember { mutableStateOf("") }
     MainScroll {
-        Header("My growth", "Your direction, your pace.", "Choose the parts of life that feel meaningful to you.")
-        LandscapeHero()
+        Header("My growth", "Your direction, your pace.",
+            "Choose the parts of life that feel meaningful to you.")
         Panel {
-            Text("Create a growth area",fontFamily=FontFamily.Serif,fontSize=19.sp)
-            OutlinedTextField(value=title,onValueChange={title=it},label={Text("Area name")},modifier=Modifier.fillMaxWidth())
-            Spacer(Modifier.height(8.dp));PrimaryAction("Add area",{if(title.isNotBlank()){onCreateArea(title);title=""}})
+            Text("YOUR GROWTH SPACES",fontSize=11.sp,color=Forest,
+                letterSpacing=1.sp,fontWeight=FontWeight.Bold)
+            Spacer(Modifier.height(8.dp))
+            Text(if(areas.isEmpty()) "A place to explore"
+                else "${areas.size} " + if(areas.size==1)"area of growth" else "areas of growth",
+                fontFamily=FontFamily.Serif,fontSize=24.sp,lineHeight=30.sp,color=Ink)
+            Spacer(Modifier.height(7.dp))
+            Text("Name an area that matters to you. These are personal labels, not ratings or achievement scores.",
+                fontSize=14.sp,lineHeight=21.sp,color=Muted)
+            Spacer(Modifier.height(14.dp))
+            OutlinedTextField(value=title,onValueChange={title=it},
+                label={Text("Area name")},singleLine=true,
+                modifier=Modifier.fillMaxWidth())
+            Spacer(Modifier.height(10.dp))
+            TodayMainButton("Add area",{
+                if(title.isNotBlank()){onCreateArea(title.trim());title=""}
+            })
         }
-        if(areas.isEmpty()) Text("Examples: Learning, Mind & awareness, Daily foundations, Connection, Body & energy.",color=Muted,fontSize=12.sp)
-        areas.forEach { area -> Panel {Text(area.name,fontFamily=FontFamily.Serif,fontSize=20.sp);Spacer(Modifier.height(7.dp));SecondaryAction("Start a related challenge",onStart)} }
+        if(areas.isEmpty()) {
+            Panel {
+                Text("Not sure where to start?",fontFamily=FontFamily.Serif,
+                    fontSize=21.sp,lineHeight=27.sp,color=Ink)
+                Spacer(Modifier.height(7.dp))
+                Text("A few ideas: learning, body and energy, relationships, or everyday foundations. You can make your own.",
+                    color=Muted,fontSize=14.sp,lineHeight=21.sp)
+            }
+        } else {
+            Text("YOUR CHOSEN AREAS",fontSize=11.sp,color=Forest,
+                fontWeight=FontWeight.Bold,letterSpacing=1.sp)
+            areas.forEach { area ->
+                Panel {
+                    Text(area.name,fontFamily=FontFamily.Serif,
+                        fontSize=22.sp,lineHeight=28.sp,color=Ink)
+                    Spacer(Modifier.height(8.dp))
+                    Text("Your challenges can follow this direction, but an area doesn't require daily action.",
+                        color=Muted,fontSize=14.sp,lineHeight=21.sp)
+                    Spacer(Modifier.height(12.dp))
+                    TodayQuietButton("Create a challenge",onStart)
+                }
+            }
+        }
+        LandscapeHero(label="YOUR OWN DIRECTION",
+            headline="Growth is not\na straight line.")
     }
 }
 
