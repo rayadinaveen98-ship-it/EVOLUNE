@@ -22,7 +22,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalMotionDurationScale
+import android.provider.Settings
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.text.font.FontFamily
@@ -135,7 +135,11 @@ internal fun OpenPathWelcome(onFinished: () -> Unit) {
     val preference = remember(context) {
         context.getSharedPreferences(OpenPathFirstRun.PREF_FILE, Context.MODE_PRIVATE)
     }
-    val animationScale = LocalMotionDurationScale.current.scaleFactor
+    // Android's Remove animations setting disables animator-based motion globally.
+    // System Settings remains the source of truth; QA-only overrides require debuggable builds.
+    val animationScale = Settings.Global.getFloat(
+        context.contentResolver, Settings.Global.ANIMATOR_DURATION_SCALE, 1f
+    )
     val fullMotionTestOverride =
         (context.applicationInfo.flags and android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0 &&
             preference.getBoolean(OpenPathFirstRun.FORCE_FULL_MOTION_QA, false)
