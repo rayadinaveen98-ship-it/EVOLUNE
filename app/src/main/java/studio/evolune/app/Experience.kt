@@ -1399,10 +1399,10 @@ fun DataPrivacyPage(
             Text("Export my data",fontFamily=FontFamily.Serif,fontSize=21.sp,color=Ink)
             Spacer(Modifier.height(8.dp))
             Text("Save a JSON copy of your growth areas, challenges, all practice revisions, pauses and private journal entries. You choose where it is stored.",
-                color=Muted,fontSize=12.sp,lineHeight=19.sp)
+                color=Muted,fontSize=14.sp,lineHeight=21.sp)
             Spacer(Modifier.height(10.dp))
             Text("Important: exports include private reflections and are not encrypted by EVOLUNE. Store them securely.",
-                color=Color(0xFF905C3E),fontSize=11.sp,lineHeight=17.sp)
+                color=Color(0xFF905C3E),fontSize=13.sp,lineHeight=20.sp)
             Spacer(Modifier.height(13.dp))
             PrimaryAction("Choose export location",onExport,Modifier.fillMaxWidth())
         }
@@ -1410,14 +1410,14 @@ fun DataPrivacyPage(
             Text("Restore from an export",fontFamily=FontFamily.Serif,fontSize=21.sp,color=Ink)
             Spacer(Modifier.height(8.dp))
             Text("Choose an EVOLUNE version 1 JSON export. We validate every record before offering to restore it. Restoring replaces all current on-device data, including journal entries.",
-                color=Muted,fontSize=12.sp,lineHeight=19.sp)
+                color=Muted,fontSize=14.sp,lineHeight=21.sp)
             Spacer(Modifier.height(11.dp))
-            SecondaryAction("Choose backup JSON",onPickBackup)
+            TodayQuietButton("Choose backup JSON",onPickBackup)
             if(importPreview!=null) {
                 Spacer(Modifier.height(15.dp))
                 Surface(color=Pale,shape=RoundedCornerShape(12.dp)) {
                     Column(Modifier.padding(13.dp)) {
-                        Text("VALIDATED BACKUP",color=Sage,fontSize=9.sp,
+                        Text("VALIDATED BACKUP",color=Sage,fontSize=11.sp,
                             letterSpacing=1.1.sp,fontWeight=FontWeight.Bold)
                         Spacer(Modifier.height(5.dp))
                         Text(importPreview,fontSize=12.sp,lineHeight=18.sp,color=Ink)
@@ -1425,7 +1425,7 @@ fun DataPrivacyPage(
                 }
                 Spacer(Modifier.height(11.dp))
                 Text("Only continue if you intend to overwrite this device's existing EVOLUNE information. Export your current data first.",
-                    color=Color(0xFF905C3E),fontSize=11.sp,lineHeight=17.sp)
+                    color=Color(0xFF905C3E),fontSize=13.sp,lineHeight=20.sp)
                 Spacer(Modifier.height(8.dp))
                 OutlinedTextField(
                     value=replaceText,onValueChange={replaceText=it.take(32)},
@@ -1437,8 +1437,8 @@ fun DataPrivacyPage(
                 },enabled=replaceText=="REPLACE",
                     colors=ButtonDefaults.buttonColors(containerColor=Forest),
                     shape=RoundedCornerShape(12.dp),
-                    modifier=Modifier.fillMaxWidth()) {
-                    Text("Replace this device's data from backup")
+                    modifier=Modifier.fillMaxWidth().heightIn(min=52.dp)) {
+                    Text("Replace this device's data from backup",fontSize=14.sp)
                 }
                 TextButton(onClick={replaceText="";onCancelRestore()}) {
                     Text("Cancel restore",color=Muted,fontSize=12.sp)
@@ -1449,7 +1449,7 @@ fun DataPrivacyPage(
             Text("Erase local data",fontFamily=FontFamily.Serif,fontSize=21.sp,color=Ink)
             Spacer(Modifier.height(8.dp))
             Text("Permanently remove all growth areas, challenge and schedule history, and private journal entries from this installation. This cannot be undone. Export first if you need a copy.",
-                color=Muted,fontSize=12.sp,lineHeight=19.sp)
+                color=Muted,fontSize=14.sp,lineHeight=21.sp)
             Spacer(Modifier.height(12.dp))
             OutlinedTextField(value=deletionText,
                 onValueChange={ deletionText=it.take(32) },
@@ -1470,8 +1470,8 @@ fun DataPrivacyPage(
                 },enabled=deletionText=="DELETE",
                 colors=ButtonDefaults.buttonColors(
                     containerColor=Color(0xFF995646),contentColor=Color.White),
-                shape=RoundedCornerShape(12.dp),modifier=Modifier.fillMaxWidth()) {
-                Text("Permanently erase this device's data")
+                shape=RoundedCornerShape(12.dp),modifier=Modifier.fillMaxWidth().heightIn(min=52.dp)) {
+                Text("Permanently erase this device's data",fontSize=14.sp)
             }
         }
         Text("No account or server backup is configured. Uninstalling the app before exporting may permanently lose your records.",
