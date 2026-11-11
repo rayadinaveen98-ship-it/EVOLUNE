@@ -34,6 +34,8 @@ jobs:
             gradle :core:data:connectedDebugAndroidTest :app:connectedDebugAndroidTest :app:assembleDebug --stacktrace --no-daemon
             mkdir -p qa/native_screenshots
             adb pull /sdcard/Pictures/EVOLUNE-QA/. qa/native_screenshots/
+            # Android test cleanup can remove the app. Install again before wm-size smoke checks.
+            gradle :app:installDebug --no-daemon
             # Screen-size overrides exercise 320dp phones and 800dp tablets on one emulator.
             adb shell wm size 640x1280
             adb shell wm density 320
