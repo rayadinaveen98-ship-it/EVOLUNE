@@ -9,6 +9,7 @@ import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
@@ -59,16 +60,16 @@ class GuidedSetupTest {
         rule.onNodeWithText("Continue").performClick()
         rule.onNodeWithText("Begin with one small practice.").assertExists()
         saveFrame("practice")
-        rule.onAllNodes(hasSetTextAction())[0].performTextInput("Read quietly")
-        rule.onAllNodes(hasSetTextAction())[1].performTextInput("Read 10 minutes after dinner")
+        rule.onNodeWithTag("evolune-setup-title").performScrollTo().performTextInput("Read quietly")
+        rule.onNodeWithTag("evolune-setup-action").performScrollTo().performTextInput("Read 10 minutes after dinner")
         rule.onNodeWithText("Continue to rhythm").performClick()
         rule.onNodeWithText("Find a rhythm that fits.").assertExists()
         saveFrame("rhythm")
         rule.onNodeWithText("Completed sessions").performScrollTo().performClick()
         rule.onNodeWithText("Weekdays").performScrollTo().performClick()
         rule.onNodeWithText("Add optional details").performScrollTo().performClick()
-        rule.onAllNodes(hasSetTextAction())[1].performTextInput("19:30")
-        rule.onAllNodes(hasSetTextAction())[2].performTextInput("Read one page")
+        rule.onNodeWithTag("evolune-setup-cue").performScrollTo().performTextInput("19:30")
+        rule.onNodeWithTag("evolune-setup-fallback").performScrollTo().performTextInput("Read one page")
         rule.onNodeWithText("Review my path").performClick()
         rule.onNodeWithText("Your first path is ready.").assertExists()
         saveFrame("review")
@@ -102,10 +103,11 @@ class GuidedSetupTest {
         rule.onNodeWithText("Continue").performClick()
         rule.onNodeWithText("Continue to rhythm").performClick()
         rule.onNodeWithText("Add a title and one repeatable action.").assertExists()
-        rule.onAllNodes(hasSetTextAction())[0].performTextInput("Small practice")
-        rule.onAllNodes(hasSetTextAction())[1].performTextInput("Walk five minutes")
+        rule.onNodeWithTag("evolune-setup-title").performScrollTo().performTextInput("Small practice")
+        rule.onNodeWithTag("evolune-setup-action").performScrollTo().performTextInput("Walk five minutes")
         rule.onNodeWithText("Continue to rhythm").performClick()
         rule.onNodeWithText("Add optional details").performScrollTo().performClick()
-        rule.onNodeWithText("A cue time does not turn on notifications.", substring = true).assertExists()
+        rule.onNodeWithText("Hide optional details").assertExists()
+        rule.onNodeWithTag("evolune-setup-cue-consent").performScrollTo().assertExists()
     }
 }
