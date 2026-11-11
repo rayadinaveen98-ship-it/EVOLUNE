@@ -21,10 +21,10 @@ Commit `9c9aee6e95387c09ea621f8a656e429d1e3971fe`:
 - Added a label to the My Growth shortcut.
 - Made the Today heading/action layout stack vertically on narrow screens with large text.
 
-**These fixes require fresh emulator screenshots and a11y review before being marked verified.** A screenshot existing or a build passing does not establish a screen-reader or minimum contrast pass.
+**Retest verified:** [Android CI 42999466754](https://github.com/rayadinave98-ship-it/EVOLUNE/actions/runs/42999466754) **passed**, and [Android emulator QA 42999466755](https://github.com/rayadinave98-ship-it/EVOLUNE/actions/runs/42999466755) **passed**, with **28 tests and zero failures/errors** (6 data + 22 app). QA artifact **13845567852** includes the new 320dp/140% and wide-tablet captures. Those PNGs were opened and reviewed: the navigation labels are now all visible and Today adapts its heading/action layout; the long “Challenges” label has an awkward two-line break, so refinement remains desirable. This is rendering evidence, **not** a TalkBack, touch-target, color-contrast or full a11y signoff.
 
 ## Remaining Stage 07/08 accessibility checklist
-- Confirm full, legible tab labels at 320dp / 140% and 200% text.
+- [x] All tab labels rendered at 320dp / 140% after fix; [ ] improve long-word wrapping and verify 200% text.
 - Inspect Journal, Challenge Create, Recovery, Review, Data & Privacy and Reminders at font scale 1.4 and 2.0.
 - TalkBack focus/readout order, accessibility labels and touch target sizing.
 - Keyboard navigation and Android IME overlap with entry fields, especially sensitive `DELETE` and `REPLACE` confirmations.
