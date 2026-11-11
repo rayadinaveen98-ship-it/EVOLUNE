@@ -51,131 +51,19 @@ private val appColors = lightColorScheme(
     surface = Paper, onSurface = Ink, secondary = Gold, surfaceVariant = Color(0xFFEEF1E9)
 )
 
-/** Simple original outline icon set; no emoji, default Material purple or external icon dependency. */
+/** Kept as a legacy page-level callsite, now delegated to the single Stage 06 icon family. */
 @Composable
 private fun NavGlyph(route: String, color: Color = Sage) {
-    Canvas(Modifier.size(19.dp)) {
-        val k = size.width / 24f
-        fun line(x1: Float, y1: Float, x2: Float, y2: Float) {
-            drawLine(color, Offset(x1*k,y1*k), Offset(x2*k,y2*k), strokeWidth = 1.65f*k, cap = StrokeCap.Round)
-        }
-        fun outline(vararg xy: Float) {
-            val p = Path()
-            if (xy.size >= 4) {
-                p.moveTo(xy[0]*k,xy[1]*k)
-                var i=2
-                while (i < xy.size) { p.lineTo(xy[i]*k,xy[i+1]*k); i+=2 }
-                drawPath(p, color, style=Stroke(width=1.65f*k, cap=StrokeCap.Round))
-            }
-        }
-        when(route) {
-            "today" -> {
-                outline(3f,11f,12f,4f,21f,11f)
-                outline(5.5f,10f,5.5f,20f,18.5f,20f,18.5f,10f)
-                outline(10f,20f,10f,14f,14f,14f,14f,20f)
-            }
-            "growth" -> {
-                line(12f,21f,12f,10f)
-                outline(12f,15f,8f,10f,6f,7f)
-                outline(12f,13f,16f,8f,19f,6f)
-                drawCircle(color, radius=2f*k, center=Offset(7f*k,6.5f*k), style=Stroke(width=1.4f*k))
-                drawCircle(color, radius=2f*k, center=Offset(19f*k,5.5f*k), style=Stroke(width=1.4f*k))
-            }
-            "challenges" -> {
-                outline(4f,8f,12f,3.5f,20f,8f,12f,12.5f,4f,8f)
-                outline(4f,12.5f,12f,17f,20f,12.5f)
-                outline(4f,17f,12f,21.5f,20f,17f)
-            }
-            "journal" -> {
-                outline(4f,20f,8.5f,19f,19f,8.5f,15f,4.5f,4.5f,15f,4f,20f)
-                line(12.9f,6.6f,17f,10.7f)
-                line(4f,22f,20f,22f)
-            }
-            else -> {
-                outline(3f,19f,8f,13f,12f,16f,20f,6f)
-                line(3f,22f,21f,22f)
-            }
-        }
-    }
+    EvoluneGlyph(route, color, Modifier.size(19.dp))
 }
 
+/** Public shell signature preserved for MainActivity and existing Android tests. */
 @Composable
-fun EvoluneShell(page: String, onPage: (String)->Unit, notice: String?, onDismissNotice: ()->Unit, content: @Composable () -> Unit) {
-    val selected = when(page) {
-        "detail", "create", "recovery", "review", "reminders" -> "challenges"
-        "data" -> "journal"
-        else -> page
-    }
-    val largeText = LocalConfiguration.current.fontScale >= 1.25f
-    MaterialTheme(colorScheme = appColors) {
-        Scaffold(
-            containerColor = Cream,
-            bottomBar = {
-                Surface(color = Paper, border = BorderStroke(0.5.dp, Line)) {
-                    Box(Modifier.fillMaxWidth().navigationBarsPadding(), contentAlignment=Alignment.Center) {
-                        Row(Modifier.widthIn(max=760.dp).fillMaxWidth()
-                            .height(if (largeText) 96.dp else 73.dp)
-                            .padding(horizontal=4.dp, vertical=5.dp),
-                            horizontalArrangement = Arrangement.SpaceEvenly) {
-                            listOf("today" to "Today", "growth" to "My Growth",
-                                "challenges" to "Challenges", "journal" to "Journal",
-                                "insights" to "Insights").forEach { (route,label) ->
-                                val isActive = selected == route
-                                Column(
-                                    Modifier.weight(1f).fillMaxHeight()
-                                        .semantics { contentDescription = label }
-                                        .clickable(role = Role.Tab) { onPage(route) },
-                                    horizontalAlignment=Alignment.CenterHorizontally,
-                                    verticalArrangement=Arrangement.Center
-                                ) {
-                                    Box(
-                                        Modifier.size(33.dp).clip(RoundedCornerShape(50))
-                                            .background(if(isActive) Pale else Color.Transparent),
-                                        contentAlignment=Alignment.Center
-                                    ) { NavGlyph(route, if(isActive) Forest else Color(0xFF96A299)) }
-                                    Text(label, fontSize=10.sp,
-                                        lineHeight=if (largeText) 13.sp else 13.sp,
-                                        maxLines=if (largeText) 2 else 1,
-                                        textAlign=TextAlign.Center,
-                                        color=if(isActive) Forest else Muted,
-                                        fontWeight=if(isActive) FontWeight.Bold else FontWeight.Medium)
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        ) { padding ->
-            Column(Modifier.fillMaxSize().padding(padding)) {
-                Row(
-                    Modifier.fillMaxWidth().padding(start=20.dp,end=20.dp,top=12.dp,bottom=12.dp),
-                    verticalAlignment=Alignment.CenterVertically
-                ) {
-                    Text("◒", fontSize=21.sp,color=Sage)
-                    Spacer(Modifier.width(8.dp))
-                    Text("E V O L U N E", fontSize=11.sp, color=Ink, letterSpacing=1.2.sp,
-                        fontWeight=FontWeight.Bold)
-                    Spacer(Modifier.weight(1f))
-                    Box(Modifier.size(34.dp).clip(RoundedCornerShape(50)).background(Pale)
-                        .semantics { contentDescription = "Open My Growth" }
-                        .clickable(role = Role.Button) { onPage("growth") },
-                        contentAlignment=Alignment.Center) {
-                        NavGlyph("growth", Sage)
-                    }
-                }
-                if (notice != null) {
-                    Surface(color=Color(0xFFFFEDE1), modifier=Modifier.fillMaxWidth().padding(horizontal=18.dp),
-                        shape=RoundedCornerShape(12.dp)) {
-                        Row(Modifier.padding(12.dp), verticalAlignment=Alignment.CenterVertically) {
-                            Text(notice, color=Ink, modifier=Modifier.weight(1f), fontSize=12.sp)
-                            TextButton(onClick=onDismissNotice){Text("Close")}
-                        }
-                    }
-                }
-                Box(Modifier.fillMaxSize()) { content() }
-            }
-        }
-    }
+fun EvoluneShell(
+    page: String, onPage: (String)->Unit, notice: String?,
+    onDismissNotice: ()->Unit, content: @Composable () -> Unit
+) {
+    EvoluneChromeShell(page,onPage,notice,onDismissNotice,content=content)
 }
 
 @Composable
@@ -195,10 +83,7 @@ private fun Header(kicker: String, title: String, subtitle: String = "") {
 
 @Composable
 private fun Panel(content: @Composable ColumnScope.() -> Unit) {
-    Surface(color=Paper, shape=RoundedCornerShape(20.dp), border=BorderStroke(1.dp,Line),
-        modifier=Modifier.fillMaxWidth()) {
-        Column(Modifier.padding(18.dp), content=content)
-    }
+    EvolunePanel(content)
 }
 
 @Composable
@@ -216,21 +101,14 @@ private fun MainScroll(content: @Composable ColumnScope.() -> Unit) {
 
 @Composable
 private fun PrimaryAction(text: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
-    Button(onClick=onClick, modifier=modifier.heightIn(min=50.dp),
-        shape=RoundedCornerShape(11.dp),
-        colors=ButtonDefaults.buttonColors(containerColor=Forest, contentColor=Paper)) {
-        Text(text, fontSize=14.sp, lineHeight=20.sp, fontWeight=FontWeight.SemiBold)
-    }
+    EvoluneAction(text,onClick,modifier,style=EvoluneActionStyle.Primary)
 }
 
 @Composable
 private fun SecondaryAction(text: String, onClick: () -> Unit) {
-    OutlinedButton(onClick=onClick, modifier=Modifier.heightIn(min=49.dp), shape=RoundedCornerShape(11.dp),
-        colors=ButtonDefaults.outlinedButtonColors(containerColor=Color(0xFFF3F6F0), contentColor=Forest),
-        border=BorderStroke(1.dp,Color(0xFFDDE5D9))) {
-        Text(text, fontSize=14.sp, lineHeight=20.sp, fontWeight=FontWeight.SemiBold)
-    }
+    EvoluneAction(text,onClick,style=EvoluneActionStyle.Quiet)
 }
+
 
 /** Approved Stillwater scene, with the readable editorial overlay used in the HTML baseline. */
 @Composable
@@ -348,27 +226,14 @@ private fun todayStatusText(view: TodayViewState): String = when (view.mode) {
 
 @Composable
 private fun TodayMainButton(label: String, onClick: () -> Unit) {
-    Button(
-        onClick = onClick, modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp),
-        shape = RoundedCornerShape(14.dp),
-        colors = ButtonDefaults.buttonColors(containerColor = Forest, contentColor = Paper)
-    ) {
-        Text(label, fontSize = 14.sp, lineHeight = 19.sp,
-            fontWeight = FontWeight.SemiBold, textAlign = TextAlign.Center)
-    }
+    EvoluneAction(label,onClick,modifier=Modifier.fillMaxWidth(),
+        style=EvoluneActionStyle.Primary)
 }
 
 @Composable
 private fun TodayQuietButton(label: String, onClick: () -> Unit) {
-    OutlinedButton(
-        onClick = onClick, modifier = Modifier.fillMaxWidth().heightIn(min = 49.dp),
-        shape = RoundedCornerShape(14.dp),
-        colors = ButtonDefaults.outlinedButtonColors(contentColor = Forest),
-        border = BorderStroke(1.dp, Color(0xFFC8D6C9))
-    ) {
-        Text(label, fontSize = 14.sp, lineHeight = 19.sp,
-            fontWeight = FontWeight.Medium, textAlign = TextAlign.Center)
-    }
+    EvoluneAction(label,onClick,modifier=Modifier.fillMaxWidth(),
+        style=EvoluneActionStyle.Quiet)
 }
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -831,14 +696,12 @@ fun CreateChallengePage(areas: List<GrowthAreaEntity>, onBack:()->Unit, onCreate
             Text("Small and specific works better than vague pressure.",
                 fontSize=14.sp,lineHeight=21.sp,color=Muted)
             Spacer(Modifier.height(15.dp))
-            OutlinedTextField(value=title,onValueChange={title=it},
-                label={Text("Challenge title")},singleLine=true,
-                modifier=Modifier.fillMaxWidth())
+            EvoluneInput(value=title,onValueChange={title=it},
+                label="Challenge title",singleLine=true)
             Spacer(Modifier.height(13.dp))
-            OutlinedTextField(value=action,onValueChange={action=it},
-                label={Text("My repeatable action")},
-                placeholder={Text("Read for 10 minutes")},
-                minLines=2,maxLines=4,modifier=Modifier.fillMaxWidth())
+            EvoluneInput(value=action,onValueChange={action=it},
+                label="My repeatable action",placeholder="Read for 10 minutes",
+                minLines=2,maxLines=4)
         }
         Panel {
             Text("02 · YOUR RHYTHM",fontSize=11.sp,fontWeight=FontWeight.Bold,
@@ -847,18 +710,17 @@ fun CreateChallengePage(areas: List<GrowthAreaEntity>, onBack:()->Unit, onCreate
             Text("Choose how to count",fontSize=22.sp,lineHeight=28.sp,
                 fontFamily=FontFamily.Serif,color=Ink)
             Spacer(Modifier.height(12.dp))
-            OutlinedTextField(value=targetText,
+            EvoluneInput(value=targetText,
                 onValueChange={targetText=it.filter(Char::isDigit)},
-                label={Text("Milestone number")},singleLine=true,
-                modifier=Modifier.fillMaxWidth())
+                label="Milestone number",singleLine=true)
             Spacer(Modifier.height(10.dp))
             Text("Milestone means",fontSize=14.sp,color=Ink)
             FlowRow(horizontalArrangement=Arrangement.spacedBy(8.dp),
                 verticalArrangement=Arrangement.spacedBy(6.dp)) {
-                FilterChip(selected=mode==MilestoneKind.CALENDAR_DAYS,
-                    onClick={mode=MilestoneKind.CALENDAR_DAYS},label={Text("Calendar days")})
-                FilterChip(selected=mode==MilestoneKind.COMPLETED_SESSIONS,
-                    onClick={mode=MilestoneKind.COMPLETED_SESSIONS},label={Text("Full sessions")})
+                EvoluneChoice(selected=mode==MilestoneKind.CALENDAR_DAYS,
+                    onClick={mode=MilestoneKind.CALENDAR_DAYS},label="Calendar days")
+                EvoluneChoice(selected=mode==MilestoneKind.COMPLETED_SESSIONS,
+                    onClick={mode=MilestoneKind.COMPLETED_SESSIONS},label="Full sessions")
             }
             Spacer(Modifier.height(8.dp))
             Text("A 21-day period does not prove a permanent habit has formed.",
@@ -888,11 +750,10 @@ fun CreateChallengePage(areas: List<GrowthAreaEntity>, onBack:()->Unit, onCreate
                 Text("Growth area (optional)",fontSize=14.sp,color=Muted)
                 FlowRow(horizontalArrangement=Arrangement.spacedBy(7.dp),
                     verticalArrangement=Arrangement.spacedBy(5.dp)) {
-                    FilterChip(selected=areaId==null,onClick={areaId=null},
-                        label={Text("None")})
+                    EvoluneChoice(selected=areaId==null,onClick={areaId=null},label="None")
                     areas.forEach { area ->
-                        FilterChip(selected=areaId==area.id,
-                            onClick={areaId=area.id},label={Text(area.name)})
+                        EvoluneChoice(selected=areaId==area.id,
+                            onClick={areaId=area.id},label=area.name)
                     }
                 }
                 Spacer(Modifier.height(10.dp))
@@ -902,13 +763,11 @@ fun CreateChallengePage(areas: List<GrowthAreaEntity>, onBack:()->Unit, onCreate
             })
             if(showOptional) {
                 Spacer(Modifier.height(14.dp))
-                OutlinedTextField(value=cue,onValueChange={cue=it},
-                    label={Text("Optional time (HH:mm)")},
-                    singleLine=true,modifier=Modifier.fillMaxWidth())
+                EvoluneInput(value=cue,onValueChange={cue=it},
+                    label="Optional time (HH:mm)",singleLine=true)
                 Spacer(Modifier.height(11.dp))
-                OutlinedTextField(value=fallback,onValueChange={fallback=it},
-                    label={Text("Smaller backup action (optional)")},
-                    modifier=Modifier.fillMaxWidth())
+                EvoluneInput(value=fallback,onValueChange={fallback=it},
+                    label="Smaller backup action (optional)")
                 Spacer(Modifier.height(8.dp))
                 Text("A cue time does not enable notifications. Reminders stay opt-in.",
                     fontSize=13.sp,lineHeight=20.sp,color=Muted)
@@ -1112,9 +971,8 @@ fun GrowthPage(areas:List<GrowthAreaEntity>,onCreateArea:(String)->Unit,onStart:
             Text("Name an area that matters to you. These are personal labels, not ratings or achievement scores.",
                 fontSize=14.sp,lineHeight=21.sp,color=Muted)
             Spacer(Modifier.height(14.dp))
-            OutlinedTextField(value=title,onValueChange={title=it},
-                label={Text("Area name")},singleLine=true,
-                modifier=Modifier.fillMaxWidth())
+            EvoluneInput(value=title,onValueChange={title=it},
+                label="Area name",singleLine=true)
             Spacer(Modifier.height(10.dp))
             TodayMainButton("Add area",{
                 if(title.isNotBlank()){onCreateArea(title.trim());title=""}
@@ -1164,22 +1022,16 @@ fun JournalPage(
     fun clear() { editing=null;body="";mood=null;energy=null;showingEditor=false }
     val deletion = pendingDelete
     if(deletion!=null) {
-        AlertDialog(
-            onDismissRequest={pendingDelete=null},
-            title={Text("Delete this reflection?",color=Ink)},
-            text={Text("This entry will be removed from this device. This cannot be undone. Other reflections are unchanged.",
-                color=Muted,fontSize=14.sp,lineHeight=21.sp)},
-            confirmButton={
-                TextButton(onClick={
-                    onDelete(deletion)
-                    if(editing?.id==deletion.id) clear()
-                    pendingDelete=null
-                }) { Text("Delete reflection",color=Color(0xFF995646)) }
+        EvoluneDestructiveDialog(
+            title="Delete this reflection?",
+            message="This entry will be removed from this device. This cannot be undone. Other reflections are unchanged.",
+            actionLabel="Delete reflection",
+            onConfirm={
+                onDelete(deletion)
+                if(editing?.id==deletion.id)clear()
+                pendingDelete=null
             },
-            dismissButton={
-                TextButton(onClick={pendingDelete=null}) { Text("Keep reflection",color=Forest) }
-            },
-            containerColor=Paper,shape=RoundedCornerShape(20.dp)
+            onCancel={pendingDelete=null}
         )
     }
     MainScroll {
@@ -1208,20 +1060,16 @@ fun JournalPage(
                 Text(if(editing==null)"New reflection" else "Edit reflection",
                     fontFamily=FontFamily.Serif,fontSize=21.sp,color=Ink)
                 Spacer(Modifier.height(10.dp))
-                OutlinedTextField(value=body,onValueChange={body=it},
-                    label={Text("What would you like to remember?")},
-                    minLines=3,shape=RoundedCornerShape(12.dp),
-                    colors=OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor=Sage,unfocusedBorderColor=Line,
-                        focusedContainerColor=Paper,unfocusedContainerColor=Paper
-                    ), modifier=Modifier.fillMaxWidth())
+                EvoluneInput(value=body,onValueChange={body=it},
+                    label="What would you like to remember?",
+                    minLines=3,maxLines=12)
                 Spacer(Modifier.height(12.dp))
                 Text("How are you feeling? (optional)",fontSize=14.sp,color=Muted)
                 Row(Modifier.horizontalScroll(rememberScrollState()),
                     horizontalArrangement=Arrangement.spacedBy(6.dp)) {
                     listOf("Calm","Hopeful","Tired","Worried").forEach { m ->
-                        FilterChip(selected=mood==m,onClick={mood=if(mood==m)null else m},
-                            label={Text(m)},shape=RoundedCornerShape(10.dp))
+                        EvoluneChoice(selected=mood==m,
+                            onClick={mood=if(mood==m)null else m},label=m)
                     }
                 }
                 Spacer(Modifier.height(9.dp))
@@ -1229,8 +1077,8 @@ fun JournalPage(
                 Row(Modifier.horizontalScroll(rememberScrollState()),
                     horizontalArrangement=Arrangement.spacedBy(6.dp)) {
                     (1..5).forEach { n ->
-                        FilterChip(selected=energy==n,onClick={energy=if(energy==n)null else n},
-                            label={Text(n.toString())},shape=RoundedCornerShape(10.dp))
+                        EvoluneChoice(selected=energy==n,
+                            onClick={energy=if(energy==n)null else n},label=n.toString())
                     }
                 }
                 Spacer(Modifier.height(12.dp))
@@ -1335,11 +1183,10 @@ fun ReminderSettingsPage(
                     fontWeight=FontWeight.SemiBold)
             }
             Spacer(Modifier.height(17.dp))
-            OutlinedTextField(value=timeValue,
+            EvoluneInput(value=timeValue,
                 onValueChange={timeValue=it.take(5)},
-                label={Text("Preferred time · 24-hour HH:mm")},
-                placeholder={Text("09:00")},singleLine=true,
-                modifier=Modifier.fillMaxWidth())
+                label="Preferred time · 24-hour HH:mm",
+                placeholder="09:00",singleLine=true,isError=parsed==null)
             Spacer(Modifier.height(9.dp))
             Text("The time follows this challenge's timezone. Android may deliver inexact reminders later due to battery restrictions.",
                 color=Muted,fontSize=14.sp,lineHeight=21.sp)

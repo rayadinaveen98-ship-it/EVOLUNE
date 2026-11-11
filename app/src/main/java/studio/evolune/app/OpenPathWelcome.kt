@@ -100,7 +100,7 @@ private fun Path.stoneThree() {
 
 /** Original Stage 01 geometry, not an independently redrawn approximation. */
 @Composable
-private fun AnimatedOpenPath(progressMs: Long, static: Boolean, modifier: Modifier = Modifier) {
+private fun AnimatedOpenPath(progressMs: Long, static: Boolean, modifier: Modifier = Modifier, stoneColor: Color = Paper, dotColor: Color = Brass) {
     val stones = remember {
         listOf(Path().apply { stoneOne() }, Path().apply { stoneTwo() }, Path().apply { stoneThree() })
     }
@@ -113,15 +113,29 @@ private fun AnimatedOpenPath(progressMs: Long, static: Boolean, modifier: Modifi
                 scale(scaleFactor, scaleFactor, pivot = Offset.Zero)
                 translate(top = (1f - fraction) * 8f)
             }) {
-                drawPath(path, Paper.copy(alpha = fraction))
+                drawPath(path, stoneColor.copy(alpha = fraction))
             }
         }
         val fraction = if (static) 1f else entrance(progressMs, 2_420L, 850L)
         withTransform({ scale(scaleFactor, scaleFactor, pivot = Offset.Zero) }) {
-            drawCircle(Brass.copy(alpha = fraction), radius = 5.1f,
+            drawCircle(dotColor.copy(alpha = fraction), radius = 5.1f,
                 center = Offset(57.5f, 30.5f))
         }
     }
+}
+
+/** Selected Stage 01 Open Path silhouette reused verbatim in the native app header.
+ *  Final launcher icon and commercial wordmark approval remain separately gated.
+ */
+@Composable
+internal fun OpenPathSmallMark(modifier: Modifier = Modifier) {
+    AnimatedOpenPath(
+        progressMs = OpenPathFirstRun.DURATION_MS,
+        static = true,
+        modifier = modifier,
+        stoneColor = Color(0xFF36553E),
+        dotColor = Brass
+    )
 }
 
 /**

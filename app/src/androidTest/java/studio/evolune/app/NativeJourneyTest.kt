@@ -142,6 +142,7 @@ class NativeJourneyTest {
     }
 
     @Test fun mainDestinationsAreNavigable() {
+        captureNative("stage06_real_today_initial")
         rule.onNodeWithText("A gentle day", substring = true).assertIsDisplayed()
         captureNative("today")
 
@@ -170,6 +171,7 @@ class NativeJourneyTest {
         val marker = "Gentle morning breathing"
         rule.onNodeWithText("Challenges").performClick()
         rule.onNodeWithText("New challenge", substring=true).performClick()
+        captureNative("stage06_real_create_clicked")
         captureNative("challenge_create")
         // First two editable fields on this view are title and action.
         rule.onAllNodes(hasSetTextAction())[0].performTextInput(marker)
@@ -200,6 +202,7 @@ class NativeJourneyTest {
     @Test fun dataPrivacyIsUserAccessibleButErasureNeedsTypedConfirmation() {
         rule.onNodeWithText("Journal").performClick()
         rule.onNodeWithText("Export or manage my data").performScrollTo().performClick()
+        captureNative("stage06_real_privacy_clicked")
         rule.onNodeWithText("Data & privacy").assertExists()
         rule.onNodeWithText("Choose export location").assertExists()
         rule.onNodeWithText("Type DELETE to confirm").assertExists()
@@ -212,6 +215,7 @@ class NativeJourneyTest {
         val marker = "EVOLUNE device QA " + System.nanoTime()
         rule.onNodeWithText("Journal").performClick()
         rule.onNodeWithText("New reflection",substring=true).performClick()
+        captureNative("stage06_real_journal_editor")
         rule.onAllNodes(hasSetTextAction())[0].performTextInput(marker)
         rule.onNodeWithText("Save reflection").performScrollTo().performClick()
 
