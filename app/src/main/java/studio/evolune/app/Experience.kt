@@ -385,32 +385,114 @@ fun ChallengeListPage(challenges: List<ChallengeEntity>, chosen: String?, onSele
 }
 
 @Composable
-fun ChallengeDetailPage(s: ChallengeSnapshot?, onAdjust:()->Unit, onReview:()->Unit, onBack:()->Unit, onLog:(PracticeOutcome)->Unit) {
-    if(s == null) { MainScroll { Text("Choose a challenge to see its details."); SecondaryAction("Back",onBack) }; return }
-    val plan = s.plan; val list = days(s); val sum = ChallengeEngine.summarize(list)
+fun ChallengeDetailPage(
+    s: ChallengeSnapshot?, onAdjust:()->Unit, onReview:()->Unit,
+    onBack:()->Unit, onLog:(PracticeOutcome)->Unit
+) {
+    if(s == null) {
+        MainScroll {
+            Text("Choose a challenge to see its details.",color=Muted)
+            SecondaryAction("Back",onBack)
+        }
+        return
+    }
+    val plan=s.plan
+    val list=days(s)
+    val sum=ChallengeEngine.summarize(list)
+    val displayedDay=java.time.temporal.ChronoUnit.DAYS.between(plan.startDate,
+        LocalDate.now(plan.zone)).toInt().coerceAtLeast(0)+1
+    val previewThrough=plan.startDate.plusDays(6)
+    val preview=ChallengeEngine.opportunities(
+        plan,ZonedDateTime.now(plan.zone),previewThrough,s.records,s.pauses)
     MainScroll {
-        Header("Your practice", plan.title,"${plan.target} ${if(plan.milestoneKind==MilestoneKind.CALENDAR_DAYS)"calendar days" else "completed sessions"} · ${plan.startDate}")
-        Panel {
-            Text("Recorded full actions",color=Muted,fontSize=12.sp)
-            Text("${sum.recordedFull} / ${sum.eligibleOpportunities}",fontSize=30.sp,color=Ink,fontFamily=FontFamily.Serif)
-            Text("${sum.unreported} unreported · ${sum.partial} partial · ${sum.rested} rest days",fontSize=12.sp,color=Muted)
-            Spacer(Modifier.height(10.dp))
-            Row(horizontalArrangement=Arrangement.spacedBy(8.dp)) { PrimaryAction("Adjust plan",onAdjust); SecondaryAction("Milestone review",onReview) }
+        Header("Your practice",plan.title,
+            plan.target.toString()+" "+
+            (if(plan.milestoneKind==MilestoneKind.CALENDAR_DAYS) "calendar days" else "completed sessions")+
+            " · "+plan.startDate.toString())
+        LandscapeHero(label="YOUR CURRENT PATH",overline="STILLWATER × ATELIER",
+            headline="A little progress\nis still progress.")
+        Row(Modifier.fillMaxWidth(), horizontalArrangement=Arrangement.spacedBy(8.dp)) {
+            listOf(
+                ("Day" to (if(plan.milestoneKind==MilestoneKind.CALENDAR_DAYS)
+                    minOf(displayedDay,plan.target).toString() else displayedDay.toString())),
+                ("Recorded full" to sum.recordedFull.toString()),
+                ("Partial" to sum.partial.toString())
+            ).forEach { (label,number) ->
+                Surface(color=Pale,shape=RoundedCornerShape(13.dp),
+                    modifier=Modifier.weight(1f)) {
+                    Column(Modifier.padding(vertical=13.dp),
+                        horizontalAlignment=Alignment.CenterHorizontally) {
+                        Text(number,fontFamily=FontFamily.Serif,fontSize=24.sp,color=Ink)
+                        Text(label,color=Muted,fontSize=10.sp,maxLines=1)
+                    }
+                }
+            }
         }
         Panel {
-            Text("Recent opportunities",fontSize=18.sp,fontFamily=FontFamily.Serif)
+            Row(Modifier.fillMaxWidth(),verticalAlignment=Alignment.CenterVertically) {
+                Text("Your path",fontFamily=FontFamily.Serif,fontSize=20.sp,color=Ink)
+                Spacer(Modifier.weight(1f))
+                Text("FIRST SEVEN DAYS",fontSize=9.sp,color=Muted,letterSpacing=1.sp)
+            }
+            Spacer(Modifier.height(13.dp))
+            Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(5.dp)) {
+                preview.forEach { day ->
+                    val tone=when(day.state) {
+                        OpportunityState.COMPLETED -> Color(0xFFD2E4D3)
+                        OpportunityState.PARTIAL,OpportunityState.COMPLETED_BACKUP -> Color(0xFFF0E5C9)
+                        OpportunityState.PAUSED -> Color(0xFFE7E6E1)
+                        OpportunityState.RESTED -> Color(0xFFDDEAE8)
+                        OpportunityState.MISSED -> Color(0xFFEADDD5)
+                        else -> Color(0xFFF0F3ED)
+                    }
+                    Surface(color=tone,shape=RoundedCornerShape(11.dp),
+                        modifier=Modifier.weight(1f)) {
+                        Column(Modifier.height(48.dp),horizontalAlignment=Alignment.CenterHorizontally,
+                            verticalArrangement=Arrangement.Center) {
+                            Text(day.date.dayOfMonth.toString(),fontSize=13.sp,color=Forest,
+                                fontWeight=FontWeight.SemiBold)
+                            Text(if(day.state==OpportunityState.COMPLETED)"✓" else "·",
+                                fontSize=10.sp,color=Sage)
+                        }
+                    }
+                }
+            }
             Spacer(Modifier.height(10.dp))
+            Text("These markers are scheduled opportunities, not an automatic measure of success.",
+                fontSize=10.sp,lineHeight=16.sp,color=Muted)
+        }
+        Panel {
+            Text("Recorded full actions",fontSize=12.sp,color=Muted)
+            Spacer(Modifier.height(6.dp))
+            Text(sum.recordedFull.toString()+" / "+sum.eligibleOpportunities.toString(),
+                fontSize=30.sp,color=Ink,fontFamily=FontFamily.Serif)
+            Text(sum.unreported.toString()+" unreported · "+sum.partial.toString()+
+                " partial · "+sum.rested.toString()+" rest days",fontSize=11.sp,color=Muted)
+            Spacer(Modifier.height(12.dp))
+            Row(horizontalArrangement=Arrangement.spacedBy(8.dp)) {
+                PrimaryAction("Adjust plan",onAdjust)
+                SecondaryAction("Milestone review",onReview)
+            }
+        }
+        Panel {
+            Text("Recent opportunities",fontSize=20.sp,fontFamily=FontFamily.Serif,color=Ink)
+            Spacer(Modifier.height(9.dp))
             if(list.isEmpty()) Text("Your first practice hasn't started yet.",color=Muted)
-            list.takeLast(15).reversed().forEach { day ->
-                Row(Modifier.fillMaxWidth().padding(vertical=7.dp),horizontalArrangement=Arrangement.SpaceBetween) {
-                    Text(day.date.format(DateTimeFormatter.ofPattern("EEE d MMM")),fontSize=13.sp)
+            list.takeLast(7).reversed().forEach { day ->
+                Row(Modifier.fillMaxWidth().padding(vertical=7.dp),
+                    horizontalArrangement=Arrangement.SpaceBetween) {
+                    Text(day.date.format(DateTimeFormatter.ofPattern("EEE d MMM")),fontSize=12.sp)
                     Text(stateLabel(day.state),fontSize=12.sp,color=Sage)
                 }
                 HorizontalDivider(color=Line)
             }
         }
-        val todayState = list.lastOrNull { it.date == LocalDate.now(plan.zone) }?.state
-        if(todayState != null && todayState != OpportunityState.NOT_SCHEDULED && todayState != OpportunityState.PAUSED) Panel { OutcomeButtons(onLog) }
+        val currentState=list.lastOrNull { it.date==LocalDate.now(plan.zone) }?.state
+        if(currentState!=null &&
+            currentState!=OpportunityState.NOT_SCHEDULED &&
+            currentState!=OpportunityState.PAUSED) {
+            Panel { OutcomeButtons(onLog) }
+        }
         SecondaryAction("Back to challenges",onBack)
     }
 }
