@@ -812,21 +812,69 @@ fun JournalPage(
 }
 
 @Composable
-fun DataPrivacyPage(onBack:()->Unit, onExport:()->Unit, onErase:()->Unit) {
+fun DataPrivacyPage(
+    onBack:()->Unit,
+    onExport:()->Unit,
+    onPickBackup:()->Unit,
+    importPreview:String?,
+    onRestore:()->Unit,
+    onCancelRestore:()->Unit,
+    onErase:()->Unit
+) {
     var deletionText by remember { mutableStateOf("") }
+    var replaceText by remember(importPreview) { mutableStateOf("") }
     MainScroll {
         Header("Your information · Your choice", "Data & privacy",
             "Keep your personal writing and challenge history under your control.")
         Panel {
             Text("Export my data",fontFamily=FontFamily.Serif,fontSize=21.sp,color=Ink)
             Spacer(Modifier.height(8.dp))
-            Text("Save a JSON copy of your growth areas, challenges, every practice revision, pauses and journal entries. You choose where it is stored.",
+            Text("Save a JSON copy of your growth areas, challenges, all practice revisions, pauses and private journal entries. You choose where it is stored.",
                 color=Muted,fontSize=12.sp,lineHeight=19.sp)
             Spacer(Modifier.height(10.dp))
-            Text("Important: exports contain private reflections and are not encrypted by EVOLUNE. Store the file securely. Import/restore is not yet supported.",
+            Text("Important: exports include private reflections and are not encrypted by EVOLUNE. Store them securely.",
                 color=Color(0xFF905C3E),fontSize=11.sp,lineHeight=17.sp)
             Spacer(Modifier.height(13.dp))
             PrimaryAction("Choose export location",onExport,Modifier.fillMaxWidth())
+        }
+        Panel {
+            Text("Restore from an export",fontFamily=FontFamily.Serif,fontSize=21.sp,color=Ink)
+            Spacer(Modifier.height(8.dp))
+            Text("Choose an EVOLUNE version 1 JSON export. We validate every record before offering to restore it. Restoring replaces all current on-device data, including journal entries.",
+                color=Muted,fontSize=12.sp,lineHeight=19.sp)
+            Spacer(Modifier.height(11.dp))
+            SecondaryAction("Choose backup JSON",onPickBackup)
+            if(importPreview!=null) {
+                Spacer(Modifier.height(15.dp))
+                Surface(color=Pale,shape=RoundedCornerShape(12.dp)) {
+                    Column(Modifier.padding(13.dp)) {
+                        Text("VALIDATED BACKUP",color=Sage,fontSize=9.sp,
+                            letterSpacing=1.1.sp,fontWeight=FontWeight.Bold)
+                        Spacer(Modifier.height(5.dp))
+                        Text(importPreview,fontSize=12.sp,lineHeight=18.sp,color=Ink)
+                    }
+                }
+                Spacer(Modifier.height(11.dp))
+                Text("Only continue if you intend to overwrite this device's existing EVOLUNE information. Export your current data first.",
+                    color=Color(0xFF905C3E),fontSize=11.sp,lineHeight=17.sp)
+                Spacer(Modifier.height(8.dp))
+                OutlinedTextField(
+                    value=replaceText,onValueChange={replaceText=it.take(32)},
+                    label={Text("Type REPLACE to restore")},
+                    singleLine=true,modifier=Modifier.fillMaxWidth())
+                Spacer(Modifier.height(9.dp))
+                Button(onClick={
+                    if(replaceText=="REPLACE") { replaceText="";onRestore() }
+                },enabled=replaceText=="REPLACE",
+                    colors=ButtonDefaults.buttonColors(containerColor=Forest),
+                    shape=RoundedCornerShape(12.dp),
+                    modifier=Modifier.fillMaxWidth()) {
+                    Text("Replace this device's data from backup")
+                }
+                TextButton(onClick={replaceText="";onCancelRestore()}) {
+                    Text("Cancel restore",color=Muted,fontSize=12.sp)
+                }
+            }
         }
         Panel {
             Text("Erase local data",fontFamily=FontFamily.Serif,fontSize=21.sp,color=Ink)
