@@ -2,7 +2,8 @@
 
 **Working branch:** `feature/android-phase3c`  
 **Baseline:** Existing native Compose screens + Room/engine from main (preserved, not rewritten).  
-**Decision:** Repair the actual Android CI build before expanding screen features.\n**Update 2026-11-11:** Verified GitHub Actions run [42950543150](https://github.com/rayadinaveen98-ship-it/EVOLUNE/actions/runs/42950543150) completed successfully for domain/data JVM tests, Android compilation and debug APK upload. Android emulator/device execution is a separate, unverified gate.
+**Decision:** Repair the actual Android CI build before expanding screen features.
+**Update 2026-11-11:** Verified GitHub Actions run [42950543150](https://github.com/rayadinaveen98-ship-it/EVOLUNE/actions/runs/42950543150) completed successfully for domain/data JVM tests, Android compilation and debug APK upload. Android emulator/device execution is a separate, unverified gate.
 
 ## Audit
 
