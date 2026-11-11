@@ -26,6 +26,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import studio.evolune.data.*
@@ -103,13 +106,15 @@ fun EvoluneShell(page: String, onPage: (String)->Unit, notice: String?, onDismis
         "data" -> "journal"
         else -> page
     }
+    val largeText = LocalConfiguration.current.fontScale >= 1.25f
     MaterialTheme(colorScheme = appColors) {
         Scaffold(
             containerColor = Cream,
             bottomBar = {
                 Surface(color = Paper, border = BorderStroke(0.5.dp, Line)) {
                     Box(Modifier.fillMaxWidth().navigationBarsPadding(), contentAlignment=Alignment.Center) {
-                        Row(Modifier.widthIn(max=760.dp).fillMaxWidth().height(73.dp)
+                        Row(Modifier.widthIn(max=760.dp).fillMaxWidth()
+                            .height(if (largeText) 96.dp else 73.dp)
                             .padding(horizontal=4.dp, vertical=5.dp),
                             horizontalArrangement = Arrangement.SpaceEvenly) {
                             listOf("today" to "Today", "growth" to "My Growth",
@@ -117,7 +122,9 @@ fun EvoluneShell(page: String, onPage: (String)->Unit, notice: String?, onDismis
                                 "insights" to "Insights").forEach { (route,label) ->
                                 val isActive = selected == route
                                 Column(
-                                    Modifier.weight(1f).fillMaxHeight().clickable { onPage(route) },
+                                    Modifier.weight(1f).fillMaxHeight()
+                                        .semantics { contentDescription = label }
+                                        .clickable(role = Role.Tab) { onPage(route) },
                                     horizontalAlignment=Alignment.CenterHorizontally,
                                     verticalArrangement=Arrangement.Center
                                 ) {
@@ -126,7 +133,10 @@ fun EvoluneShell(page: String, onPage: (String)->Unit, notice: String?, onDismis
                                             .background(if(isActive) Pale else Color.Transparent),
                                         contentAlignment=Alignment.Center
                                     ) { NavGlyph(route, if(isActive) Forest else Color(0xFF96A299)) }
-                                    Text(label, fontSize=10.sp, lineHeight=13.sp, maxLines=1,
+                                    Text(label, fontSize=10.sp,
+                                        lineHeight=if (largeText) 13.sp else 13.sp,
+                                        maxLines=if (largeText) 2 else 1,
+                                        textAlign=TextAlign.Center,
                                         color=if(isActive) Forest else Muted,
                                         fontWeight=if(isActive) FontWeight.Bold else FontWeight.Medium)
                                 }
@@ -147,7 +157,9 @@ fun EvoluneShell(page: String, onPage: (String)->Unit, notice: String?, onDismis
                         fontWeight=FontWeight.Bold)
                     Spacer(Modifier.weight(1f))
                     Box(Modifier.size(34.dp).clip(RoundedCornerShape(50)).background(Pale)
-                        .clickable { onPage("growth") }, contentAlignment=Alignment.Center) {
+                        .semantics { contentDescription = "Open My Growth" }
+                        .clickable(role = Role.Button) { onPage("growth") },
+                        contentAlignment=Alignment.Center) {
                         NavGlyph("growth", Sage)
                     }
                 }
@@ -329,12 +341,25 @@ fun TodayPage(
         Header(dateLabel + " · YOUR DAY", "A gentle day\nto begin again.",
             "One small step is enough to begin.")
         LandscapeHero()
-        Row(Modifier.fillMaxWidth(),verticalAlignment=Alignment.CenterVertically) {
-            Text("Your one thing",fontFamily=FontFamily.Serif,fontSize=21.sp,color=Ink)
-            Spacer(Modifier.weight(1f))
-            TextButton(onClick=if(s==null)onCreate else onOpen) {
-                Text(if(s==null)"Begin a practice" else "View your path  →",
-                    color=Sage,fontSize=11.sp,fontWeight=FontWeight.Bold)
+        val compactHeader = LocalConfiguration.current.fontScale >= 1.25f &&
+            LocalConfiguration.current.screenWidthDp <= 400
+        if (compactHeader) {
+            Column(Modifier.fillMaxWidth(),verticalArrangement=Arrangement.spacedBy(2.dp)) {
+                Text("Your one thing",fontFamily=FontFamily.Serif,fontSize=21.sp,color=Ink)
+                TextButton(onClick=if(s==null)onCreate else onOpen,
+                    modifier=Modifier.align(Alignment.Start)) {
+                    Text(if(s==null)"Begin a practice" else "View your path  →",
+                        color=Sage,fontSize=11.sp,fontWeight=FontWeight.Bold)
+                }
+            }
+        } else {
+            Row(Modifier.fillMaxWidth(),verticalAlignment=Alignment.CenterVertically) {
+                Text("Your one thing",fontFamily=FontFamily.Serif,fontSize=21.sp,color=Ink)
+                Spacer(Modifier.weight(1f))
+                TextButton(onClick=if(s==null)onCreate else onOpen) {
+                    Text(if(s==null)"Begin a practice" else "View your path  →",
+                        color=Sage,fontSize=11.sp,fontWeight=FontWeight.Bold)
+                }
             }
         }
         if(s==null) {
