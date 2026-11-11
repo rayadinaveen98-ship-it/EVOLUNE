@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "EVOLUNE V2 candidate design tokens",
+  "status": "candidate-unapproved",
+  "artDirection": "Stillwater + Atelier",
+  "color": {
+    "ink.strong": "#26392D",
+    "ink.brand": "#36553E",
+    "ink.secondary": "#65746C",
+    "sage.decorative": "#64816B",
+    "cream.canvas": "#FAF8F3",
+    "paper.card": "#FFFEFA",
+    "pale.sage": "#E7ECE2",
+    "line.soft": "#E5E2D9",
+    "accent.clay": "#B89A63",
+    "status.attention": "#905C3E"
+  },
+  "spacingDp": [
+    4,
+    8,
+    12,
+    16,
+    20,
+    24,
+    32,
+    40,
+    48
+  ],
+  "radiusDp": {
+    "chip": 10,
+    "button": 12,
+    "field": 12,
+    "card": 20,
+    "hero": 22
+  },
+  "strokeDp": {
+    "normal": 1,
+    "icon": 1.75
+  },
+  "touchTargetMinDp": 48,
+  "typeSp": {
+    "display": 38,
+    "pageTitle": 30,
+    "sectionTitle": 22,
+    "cardTitle": 18,
+    "body": 16,
+    "secondary": 14,
+    "button": 15,
+    "label": 12
+  },
+  "motionMs": {
+    "quick": 140,
+    "standard": 220,
+    "reflective": 420
+  },
+  "layout": {
+    "compactMaxWidthDp": 599,
+    "mediumMaxWidthDp": 839,
+    "expandedMinWidthDp": 840,
+    "phoneMarginDp": 20,
+    "tabletMarginDp": 28,
+    "readingMaxWidthDp": 720
+  },
+  "flags": {
+    "darkPaletteApproved": false,
+    "logoApproved": false,
+    "fontPairApproved": false,
+    "commercialTrademarkCleared": false
+  },
+  "note": "Palette and motion proposal only; not a production theme. Contrast must be validated for every real foreground/background. Font candidates are not bundled."
+}
