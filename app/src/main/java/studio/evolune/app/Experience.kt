@@ -204,7 +204,11 @@ private fun SecondaryAction(text: String, onClick: () -> Unit) {
 
 /** Approved Stillwater scene, with the readable editorial overlay used in the HTML baseline. */
 @Composable
-private fun LandscapeHero() {
+private fun LandscapeHero(
+    label: String = "YOUR GROWTH SPACE",
+    overline: String = "STILLWATER × ATELIER",
+    headline: String = "Every small step\nbelongs here."
+) {
     Box(Modifier.fillMaxWidth().height(195.dp).clip(RoundedCornerShape(19.dp))) {
         Image(painterResource(R.drawable.stillwater_banner),
             contentDescription="Quiet Stillwater landscape with stone steps, a tree and distant hills",
@@ -212,16 +216,16 @@ private fun LandscapeHero() {
         Box(Modifier.fillMaxSize().background(Brush.verticalGradient(
             listOf(Color(0x00112318), Color(0x16112318), Color(0xBD11251A))
         )))
-        Text("YOUR GROWTH SPACE",
+        Text(label,
             modifier=Modifier.align(Alignment.TopEnd).padding(12.dp)
                 .clip(RoundedCornerShape(30.dp)).background(Color(0xE8FFFDF6))
                 .padding(horizontal=11.dp,vertical=7.dp),
             fontSize=9.sp,color=Forest,fontWeight=FontWeight.Bold)
         Column(Modifier.align(Alignment.BottomStart).padding(start=16.dp,bottom=17.dp)) {
-            Text("STILLWATER × ATELIER",fontSize=9.sp,color=Paper,
+            Text(overline,fontSize=9.sp,color=Paper,
                 fontWeight=FontWeight.Bold,letterSpacing=1.3.sp)
             Spacer(Modifier.height(6.dp))
-            Text("Every small step\nbelongs here.",fontFamily=FontFamily.Serif,
+            Text(headline,fontFamily=FontFamily.Serif,
                 fontSize=21.sp,lineHeight=23.sp,color=Paper)
         }
     }
@@ -550,40 +554,117 @@ fun GrowthPage(areas:List<GrowthAreaEntity>,onCreateArea:(String)->Unit,onStart:
 }
 
 @Composable
-fun JournalPage(entries: List<JournalEntryEntity>,onSave:(JournalEntryEntity?,String,String?,Int?)->Unit,onDelete:(JournalEntryEntity)->Unit) {
+fun JournalPage(
+    entries: List<JournalEntryEntity>,
+    onSave:(JournalEntryEntity?,String,String?,Int?)->Unit,
+    onDelete:(JournalEntryEntity)->Unit
+) {
     var editing by remember { mutableStateOf<JournalEntryEntity?>(null) }
+    var showingEditor by remember { mutableStateOf(false) }
     var body by remember { mutableStateOf("") }
     var mood by remember { mutableStateOf<String?>(null) }
     var energy by remember { mutableStateOf<Int?>(null) }
-    fun clear(){editing=null;body="";mood=null;energy=null}
+    fun clear() { editing=null;body="";mood=null;energy=null;showingEditor=false }
     MainScroll {
-        Header("A private place", "The living journal.","Your reflections are optional. They are not psychological diagnoses.")
-        Panel {
-            Text(if(editing==null) "New reflection" else "Edit reflection",fontFamily=FontFamily.Serif,fontSize=20.sp)
-            Spacer(Modifier.height(10.dp))
-            OutlinedTextField(value=body,onValueChange={body=it},label={Text("What would you like to remember?")},minLines=3,modifier=Modifier.fillMaxWidth())
-            Spacer(Modifier.height(10.dp))
-            Text("How are you feeling? (optional)",fontSize=12.sp,color=Muted)
-            Row(Modifier.horizontalScroll(rememberScrollState()),horizontalArrangement=Arrangement.spacedBy(5.dp)) {
-                listOf("Calm","Hopeful","Tired","Worried").forEach { m -> FilterChip(selected=mood==m,onClick={mood=if(mood==m)null else m},label={Text(m)}) }
-            }
-            Text("Energy (optional)",fontSize=12.sp,color=Muted)
-            Row(horizontalArrangement=Arrangement.spacedBy(5.dp)) { (1..5).forEach {n->FilterChip(selected=energy==n,onClick={energy=if(energy==n)null else n},label={Text("$n")})} }
-            PrimaryAction(if(editing==null) "Save reflection" else "Save changes",{
-                if(body.isNotBlank()) {onSave(editing,body,mood,energy);clear()}
+        Header("Private reflections · On this device", "Room to feel.\nSpace to think.",
+            "Write as much or as little as you like. No mood check-in is ever required.")
+        LandscapeHero(label="A QUIET PAGE",overline="YOUR LIVING JOURNAL",
+            headline="Every day has\nits own story.")
+        Row(Modifier.fillMaxWidth(), horizontalArrangement=Arrangement.spacedBy(9.dp)) {
+            PrimaryAction("✎  New reflection", {
+                clear()
+                showingEditor=true
+            },Modifier.weight(1f))
+            SecondaryAction("Mood & energy",{
+                if(!showingEditor) {
+                    clear()
+                    showingEditor=true
+                }
             })
-            if(editing!=null) SecondaryAction("Cancel editing",{clear()})
         }
-        Text("Entries are stored in this device's private app database. Cloud backup is disabled.",fontSize=11.sp,color=Muted)
+        if(showingEditor) {
+            Panel {
+                Text(if(editing==null)"New reflection" else "Edit reflection",
+                    fontFamily=FontFamily.Serif,fontSize=21.sp,color=Ink)
+                Spacer(Modifier.height(10.dp))
+                OutlinedTextField(value=body,onValueChange={body=it},
+                    label={Text("What would you like to remember?")},
+                    minLines=3,shape=RoundedCornerShape(12.dp),
+                    colors=OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor=Sage,unfocusedBorderColor=Line,
+                        focusedContainerColor=Paper,unfocusedContainerColor=Paper
+                    ), modifier=Modifier.fillMaxWidth())
+                Spacer(Modifier.height(12.dp))
+                Text("How are you feeling? (optional)",fontSize=12.sp,color=Muted)
+                Row(Modifier.horizontalScroll(rememberScrollState()),
+                    horizontalArrangement=Arrangement.spacedBy(6.dp)) {
+                    listOf("Calm","Hopeful","Tired","Worried").forEach { m ->
+                        FilterChip(selected=mood==m,onClick={mood=if(mood==m)null else m},
+                            label={Text(m)},shape=RoundedCornerShape(10.dp))
+                    }
+                }
+                Spacer(Modifier.height(9.dp))
+                Text("Energy (optional)",fontSize=12.sp,color=Muted)
+                Row(Modifier.horizontalScroll(rememberScrollState()),
+                    horizontalArrangement=Arrangement.spacedBy(6.dp)) {
+                    (1..5).forEach { n ->
+                        FilterChip(selected=energy==n,onClick={energy=if(energy==n)null else n},
+                            label={Text(n.toString())},shape=RoundedCornerShape(10.dp))
+                    }
+                }
+                Spacer(Modifier.height(12.dp))
+                PrimaryAction(if(editing==null)"Save reflection" else "Save changes", {
+                    if(body.isNotBlank()){onSave(editing,body,mood,energy);clear()}
+                },Modifier.fillMaxWidth())
+                TextButton(onClick={clear()}) { Text("Cancel",fontSize=12.sp,color=Sage) }
+            }
+        }
+        Row(Modifier.fillMaxWidth(),verticalAlignment=Alignment.CenterVertically) {
+            Text("Your entries",fontFamily=FontFamily.Serif,fontSize=21.sp,color=Ink)
+            Spacer(Modifier.weight(1f))
+            Text(entries.size.toString()+" PRIVATE",fontSize=10.sp,color=Muted,
+                fontWeight=FontWeight.Bold,letterSpacing=1.sp)
+        }
+        if(entries.isEmpty()) {
+            Panel {
+                Text("A quiet page for whenever you're ready.",fontFamily=FontFamily.Serif,
+                    fontSize=17.sp,color=Ink)
+                Text("Your thoughts can be brief, detailed or left unwritten. This space is yours.",
+                    fontSize=12.sp,color=Muted,lineHeight=19.sp)
+            }
+        }
         entries.forEach { entry ->
             Panel {
-                Text(entry.body,fontSize=14.sp,color=Ink)
-                Spacer(Modifier.height(8.dp))
-                Text(listOfNotNull(entry.mood, entry.energy?.let {"Energy $it/5"}).joinToString(" · "),color=Muted,fontSize=11.sp)
-                Row(horizontalArrangement=Arrangement.spacedBy(9.dp)) {
-                    SecondaryAction("Edit",{editing=entry;body=entry.body;mood=entry.mood;energy=entry.energy})
-                    SecondaryAction("Delete",{onDelete(entry);if(editing?.id==entry.id)clear()})
+                Text(Instant.ofEpochMilli(entry.createdAtEpochMs).atZone(ZoneId.systemDefault())
+                    .toLocalDate().format(DateTimeFormatter.ofPattern("MMM d, yyyy")),
+                    fontSize=10.sp,color=Muted)
+                Spacer(Modifier.height(9.dp))
+                Text(entry.body,fontFamily=FontFamily.Serif,fontSize=16.sp,
+                    lineHeight=23.sp,color=Ink)
+                if(entry.mood!=null || entry.energy!=null) {
+                    Spacer(Modifier.height(7.dp))
+                    Text(listOfNotNull(entry.mood,entry.energy?.let{"Energy "+it+"/5"})
+                        .joinToString(" · "),color=Muted,fontSize=11.sp)
                 }
+                Row(horizontalArrangement=Arrangement.spacedBy(9.dp)) {
+                    TextButton(onClick={
+                        editing=entry;body=entry.body;mood=entry.mood;energy=entry.energy
+                        showingEditor=true
+                    }) { Text("✎ Edit",color=Sage,fontSize=12.sp) }
+                    TextButton(onClick={onDelete(entry);if(editing?.id==entry.id)clear()}) {
+                        Text("Delete",color=Muted,fontSize=12.sp)
+                    }
+                }
+            }
+        }
+        Surface(color=Color(0xFFEAF0E7),shape=RoundedCornerShape(17.dp),
+            border=BorderStroke(1.dp,Line),modifier=Modifier.fillMaxWidth()) {
+            Column(Modifier.padding(16.dp)) {
+                Text("PRIVACY, CLEARLY",fontSize=10.sp,color=Sage,fontWeight=FontWeight.Bold,
+                    letterSpacing=1.5.sp)
+                Spacer(Modifier.height(7.dp))
+                Text("Your journal is stored in this device's private app database. No cloud sync or account is enabled in this build.",
+                    color=Muted,fontSize=12.sp,lineHeight=18.sp)
             }
         }
     }
