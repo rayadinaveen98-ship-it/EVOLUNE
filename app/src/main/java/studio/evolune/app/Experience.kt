@@ -306,14 +306,14 @@ fun TodayPage(
             "One meaningful step. At a pace you can sustain.")
 
         Panel {
-            Text("YOUR NEXT SMALL STEP", fontSize = 11.sp, fontWeight = FontWeight.Bold,
+            Text("YOUR NEXT SMALL STEP", fontSize=12.sp, fontWeight = FontWeight.Bold,
                 letterSpacing = 1.1.sp, color = Forest, lineHeight = 16.sp)
             Spacer(Modifier.height(12.dp))
             Surface(
                 color = Pale, shape = RoundedCornerShape(11.dp),
                 border = BorderStroke(0.7.dp, Color(0xFFDAE3D9))
             ) {
-                Text(todayStatusText(view), color = Forest, fontSize = 11.sp,
+                Text(todayStatusText(view), color = Forest, fontSize=12.sp,
                     fontWeight = FontWeight.Bold, letterSpacing = 0.4.sp,
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp))
             }
@@ -430,7 +430,7 @@ fun TodayPage(
         if (s != null && view.nextScheduled != null) {
             Panel {
                 Text("COMING UP", color = Forest, fontWeight = FontWeight.Bold,
-                    letterSpacing = 1.sp, fontSize = 11.sp)
+                    letterSpacing = 1.sp, fontSize=12.sp)
                 Spacer(Modifier.height(7.dp))
                 Text(EvoluneFormatting.date(view.nextScheduled,"EEEE · MMM d"),
                     fontFamily = FontFamily.Serif, color = Ink,
@@ -487,7 +487,7 @@ fun ChallengeListPage(challenges: List<ChallengeEntity>, chosen: String?, onSele
         Header("Challenge studio", "The changes you choose.",
             "A home for your practices, not a leaderboard.")
         Panel {
-            Text("YOUR PRACTICES", fontSize=11.sp, fontWeight=FontWeight.Bold,
+            Text("YOUR PRACTICES", fontSize=12.sp, fontWeight=FontWeight.Bold,
                 color=Forest, letterSpacing=1.1.sp)
             Spacer(Modifier.height(8.dp))
             Text(if(challenges.isEmpty()) "A place to begin"
@@ -508,12 +508,12 @@ fun ChallengeListPage(challenges: List<ChallengeEntity>, chosen: String?, onSele
                     fontSize=14.sp,lineHeight=21.sp,color=Muted)
             }
         } else {
-            Text("YOUR CHALLENGE LIBRARY",fontSize=11.sp,color=Forest,
+            Text("YOUR CHALLENGE LIBRARY",fontSize=12.sp,color=Forest,
                 fontWeight=FontWeight.Bold,letterSpacing=1.sp)
             challenges.forEach { ch ->
                 Panel {
                     if(ch.id==chosen) {
-                        Text("CURRENTLY SELECTED",fontSize=11.sp,
+                        Text("CURRENTLY SELECTED",fontSize=12.sp,
                             color=Forest,fontWeight=FontWeight.Bold,letterSpacing=1.sp)
                         Spacer(Modifier.height(7.dp))
                     }
@@ -565,7 +565,7 @@ fun ChallengeDetailPage(
             " · from "+EvoluneFormatting.date(plan.startDate))
 
         Panel {
-            Text("TODAY ON THIS PATH",fontSize=11.sp,color=Forest,
+            Text("TODAY ON THIS PATH",fontSize=12.sp,color=Forest,
                 letterSpacing=1.sp,fontWeight=FontWeight.Bold)
             Spacer(Modifier.height(9.dp))
             Text(todayStatusText(view),fontSize=12.sp,
@@ -594,7 +594,7 @@ fun ChallengeDetailPage(
         LandscapeHero(label="YOUR CURRENT PATH",overline="STILLWATER × ATELIER",
             headline="A little progress\nis still progress.")
 
-        Text("YOUR RECORD SO FAR",fontSize=11.sp,color=Forest,
+        Text("YOUR RECORD SO FAR",fontSize=12.sp,color=Forest,
             fontWeight=FontWeight.Bold,letterSpacing=1.sp)
         FlowRow(
             modifier=Modifier.fillMaxWidth(),
@@ -710,7 +710,7 @@ fun CreateChallengePage(areas: List<GrowthAreaEntity>, onBack:()->Unit, onCreate
         Header("A fresh beginning", "Start with one thing.",
             "Choose a repeatable practice. You can adjust future plans later.")
         Panel {
-            Text("01 · YOUR PRACTICE",fontSize=11.sp,fontWeight=FontWeight.Bold,
+            Text("01 · YOUR PRACTICE",fontSize=12.sp,fontWeight=FontWeight.Bold,
                 letterSpacing=1.sp,color=Forest)
             Spacer(Modifier.height(10.dp))
             Text("Begin with an action",fontSize=23.sp,lineHeight=29.sp,
@@ -727,7 +727,7 @@ fun CreateChallengePage(areas: List<GrowthAreaEntity>, onBack:()->Unit, onCreate
                 minLines=2,maxLines=4)
         }
         Panel {
-            Text("02 · YOUR RHYTHM",fontSize=11.sp,fontWeight=FontWeight.Bold,
+            Text("02 · YOUR RHYTHM",fontSize=12.sp,fontWeight=FontWeight.Bold,
                 letterSpacing=1.sp,color=Forest)
             Spacer(Modifier.height(9.dp))
             Text("Choose how to count",fontSize=22.sp,lineHeight=28.sp,
@@ -763,7 +763,7 @@ fun CreateChallengePage(areas: List<GrowthAreaEntity>, onBack:()->Unit, onCreate
             }
         }
         Panel {
-            Text("03 · PERSONAL DETAILS",fontSize=11.sp,color=Forest,
+            Text("03 · PERSONAL DETAILS",fontSize=12.sp,color=Forest,
                 fontWeight=FontWeight.Bold,letterSpacing=1.sp)
             Spacer(Modifier.height(8.dp))
             Text("Keep it your own",fontSize=22.sp,lineHeight=28.sp,
@@ -833,7 +833,7 @@ fun RecoveryPage(s: ChallengeSnapshot?, onBack:()->Unit, onRevise:(String,Recurr
         Header("A gentle restart", "Adjust the path.",
             "Keep what you have learned. Change what comes next.")
         Panel {
-            Text("YOUR CURRENT PRACTICE",fontSize=11.sp,letterSpacing=1.sp,
+            Text("YOUR CURRENT PRACTICE",fontSize=12.sp,letterSpacing=1.sp,
                 color=Forest,fontWeight=FontWeight.Bold)
             Spacer(Modifier.height(8.dp))
             Text(s.plan.title,fontFamily=FontFamily.Serif,
@@ -914,7 +914,7 @@ fun ReviewPage(s: ChallengeSnapshot?, onBack:()->Unit) {
         Header("Your reflection","Every phase has meaning.",
             "A factual record of this journey so far, never a judgment.")
         Panel {
-            Text("YOUR PATH",fontSize=11.sp,fontWeight=FontWeight.Bold,
+            Text("YOUR PATH",fontSize=12.sp,fontWeight=FontWeight.Bold,
                 letterSpacing=1.sp,color=Forest)
             Spacer(Modifier.height(10.dp))
             Text(plan.title,fontFamily=FontFamily.Serif,
@@ -984,7 +984,7 @@ fun GrowthPage(areas:List<GrowthAreaEntity>,onCreateArea:(String)->Unit,onStart:
         Header("My growth", "Your direction, your pace.",
             "Choose the parts of life that feel meaningful to you.")
         Panel {
-            Text("YOUR GROWTH SPACES",fontSize=11.sp,color=Forest,
+            Text("YOUR GROWTH SPACES",fontSize=12.sp,color=Forest,
                 letterSpacing=1.sp,fontWeight=FontWeight.Bold)
             Spacer(Modifier.height(8.dp))
             Text(if(areas.isEmpty()) "A place to explore"
@@ -1010,7 +1010,7 @@ fun GrowthPage(areas:List<GrowthAreaEntity>,onCreateArea:(String)->Unit,onStart:
                     color=Muted,fontSize=14.sp,lineHeight=21.sp)
             }
         } else {
-            Text("YOUR CHOSEN AREAS",fontSize=11.sp,color=Forest,
+            Text("YOUR CHOSEN AREAS",fontSize=12.sp,color=Forest,
                 fontWeight=FontWeight.Bold,letterSpacing=1.sp)
             areas.forEach { area ->
                 Panel {
@@ -1061,7 +1061,7 @@ fun JournalPage(
         Header("Private reflections · On this device", "Room to feel.\nSpace to think.",
             "Write as much or as little as you like. No mood check-in is ever required.")
         Panel {
-            Text("YOUR PRIVATE PAGE",fontSize=11.sp,color=Forest,
+            Text("YOUR PRIVATE PAGE",fontSize=12.sp,color=Forest,
                 fontWeight=FontWeight.Bold,letterSpacing=1.sp)
             Spacer(Modifier.height(8.dp))
             Text("Write when you want to.",fontFamily=FontFamily.Serif,
@@ -1129,14 +1129,14 @@ fun JournalPage(
             Panel {
                 Text(Instant.ofEpochMilli(entry.createdAtEpochMs).atZone(ZoneId.systemDefault())
                     .toLocalDate().format(DateTimeFormatter.ofPattern("MMM d, yyyy")),
-                    fontSize=10.sp,color=Muted)
+                    fontSize=12.sp,color=Muted)
                 Spacer(Modifier.height(9.dp))
                 Text(entry.body,fontFamily=FontFamily.Serif,fontSize=17.sp,
                     lineHeight=25.sp,color=Ink)
                 if(entry.mood!=null || entry.energy!=null) {
                     Spacer(Modifier.height(7.dp))
                     Text(listOfNotNull(entry.mood,entry.energy?.let{"Energy "+it+"/5"})
-                        .joinToString(" · "),color=Muted,fontSize=11.sp)
+                        .joinToString(" · "),color=Muted,fontSize=12.sp)
                 }
                 Row(horizontalArrangement=Arrangement.spacedBy(9.dp)) {
                     TextButton(onClick={
@@ -1152,7 +1152,7 @@ fun JournalPage(
         Surface(color=Color(0xFFEAF0E7),shape=RoundedCornerShape(17.dp),
             border=BorderStroke(1.dp,Line),modifier=Modifier.fillMaxWidth()) {
             Column(Modifier.padding(16.dp)) {
-                Text("PRIVACY, CLEARLY",fontSize=10.sp,color=Sage,fontWeight=FontWeight.Bold,
+                Text("PRIVACY, CLEARLY",fontSize=12.sp,color=Sage,fontWeight=FontWeight.Bold,
                     letterSpacing=1.5.sp)
                 Spacer(Modifier.height(7.dp))
                 Text("Your journal is stored in this device's private app database. No cloud sync or account is enabled in this build.",
@@ -1192,7 +1192,7 @@ fun ReminderSettingsPage(
         Header("Optional · Quiet · Your choice","Gentle reminders",
             "A useful nudge if you want one. Never a measure of discipline.")
         Panel {
-            Text("CURRENT STATUS",fontSize=11.sp,color=Forest,
+            Text("CURRENT STATUS",fontSize=12.sp,color=Forest,
                 fontWeight=FontWeight.Bold,letterSpacing=1.sp)
             Spacer(Modifier.height(9.dp))
             Text(s?.plan?.title ?: "Choose a challenge first",
@@ -1287,7 +1287,7 @@ fun DataPrivacyPage(
                 Spacer(Modifier.height(15.dp))
                 Surface(color=Pale,shape=RoundedCornerShape(12.dp)) {
                     Column(Modifier.padding(13.dp)) {
-                        Text("VALIDATED BACKUP",color=Sage,fontSize=11.sp,
+                        Text("VALIDATED BACKUP",color=Sage,fontSize=12.sp,
                             letterSpacing=1.1.sp,fontWeight=FontWeight.Bold)
                         Spacer(Modifier.height(5.dp))
                         Text(importPreview,fontSize=12.sp,lineHeight=18.sp,color=Ink)
@@ -1345,7 +1345,7 @@ fun DataPrivacyPage(
             }
         }
         Text("No account or server backup is configured. Uninstalling the app before exporting may permanently lose your records.",
-            fontSize=11.sp,color=Muted,lineHeight=17.sp)
+            fontSize=12.sp,color=Muted,lineHeight=17.sp)
         SecondaryAction("Back to Journal",onBack)
     }
 }
@@ -1358,7 +1358,7 @@ fun InsightsPage(s: ChallengeSnapshot?) {
             "A calm view of what you have actually recorded.")
         if(s==null) {
             Panel {
-                Text("YOUR FIRST INSIGHT",fontSize=11.sp,color=Forest,
+                Text("YOUR FIRST INSIGHT",fontSize=12.sp,color=Forest,
                     fontWeight=FontWeight.Bold,letterSpacing=1.sp)
                 Spacer(Modifier.height(11.dp))
                 Text("Your story starts with a record.",fontFamily=FontFamily.Serif,
@@ -1371,7 +1371,7 @@ fun InsightsPage(s: ChallengeSnapshot?) {
             val list=days(s)
             val summary=ChallengeEngine.summarize(list)
             Panel {
-                Text("THIS CHALLENGE",fontSize=11.sp,color=Forest,
+                Text("THIS CHALLENGE",fontSize=12.sp,color=Forest,
                     fontWeight=FontWeight.Bold,letterSpacing=1.sp)
                 Spacer(Modifier.height(8.dp))
                 Text(s.plan.title,fontFamily=FontFamily.Serif,
@@ -1392,7 +1392,7 @@ fun InsightsPage(s: ChallengeSnapshot?) {
                     }
                 }
             }
-            Text("MORE OF THE PICTURE",fontSize=11.sp,color=Forest,
+            Text("MORE OF THE PICTURE",fontSize=12.sp,color=Forest,
                 fontWeight=FontWeight.Bold,letterSpacing=1.sp)
             FlowRow(
                 modifier=Modifier.fillMaxWidth(),
