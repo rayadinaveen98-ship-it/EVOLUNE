@@ -83,10 +83,7 @@ private fun Header(kicker: String, title: String, subtitle: String = "") {
 
 @Composable
 private fun Panel(content: @Composable ColumnScope.() -> Unit) {
-    Surface(color=Paper, shape=RoundedCornerShape(20.dp), border=BorderStroke(1.dp,Line),
-        modifier=Modifier.fillMaxWidth()) {
-        Column(Modifier.padding(18.dp), content=content)
-    }
+    EvolunePanel(content)
 }
 
 @Composable
@@ -699,14 +696,12 @@ fun CreateChallengePage(areas: List<GrowthAreaEntity>, onBack:()->Unit, onCreate
             Text("Small and specific works better than vague pressure.",
                 fontSize=14.sp,lineHeight=21.sp,color=Muted)
             Spacer(Modifier.height(15.dp))
-            OutlinedTextField(value=title,onValueChange={title=it},
-                label={Text("Challenge title")},singleLine=true,
-                modifier=Modifier.fillMaxWidth())
+            EvoluneInput(value=title,onValueChange={title=it},
+                label="Challenge title",singleLine=true)
             Spacer(Modifier.height(13.dp))
-            OutlinedTextField(value=action,onValueChange={action=it},
-                label={Text("My repeatable action")},
-                placeholder={Text("Read for 10 minutes")},
-                minLines=2,maxLines=4,modifier=Modifier.fillMaxWidth())
+            EvoluneInput(value=action,onValueChange={action=it},
+                label="My repeatable action",placeholder="Read for 10 minutes",
+                minLines=2,maxLines=4)
         }
         Panel {
             Text("02 · YOUR RHYTHM",fontSize=11.sp,fontWeight=FontWeight.Bold,
@@ -715,18 +710,17 @@ fun CreateChallengePage(areas: List<GrowthAreaEntity>, onBack:()->Unit, onCreate
             Text("Choose how to count",fontSize=22.sp,lineHeight=28.sp,
                 fontFamily=FontFamily.Serif,color=Ink)
             Spacer(Modifier.height(12.dp))
-            OutlinedTextField(value=targetText,
+            EvoluneInput(value=targetText,
                 onValueChange={targetText=it.filter(Char::isDigit)},
-                label={Text("Milestone number")},singleLine=true,
-                modifier=Modifier.fillMaxWidth())
+                label="Milestone number",singleLine=true)
             Spacer(Modifier.height(10.dp))
             Text("Milestone means",fontSize=14.sp,color=Ink)
             FlowRow(horizontalArrangement=Arrangement.spacedBy(8.dp),
                 verticalArrangement=Arrangement.spacedBy(6.dp)) {
-                FilterChip(selected=mode==MilestoneKind.CALENDAR_DAYS,
-                    onClick={mode=MilestoneKind.CALENDAR_DAYS},label={Text("Calendar days")})
-                FilterChip(selected=mode==MilestoneKind.COMPLETED_SESSIONS,
-                    onClick={mode=MilestoneKind.COMPLETED_SESSIONS},label={Text("Full sessions")})
+                EvoluneChoice(selected=mode==MilestoneKind.CALENDAR_DAYS,
+                    onClick={mode=MilestoneKind.CALENDAR_DAYS},label="Calendar days")
+                EvoluneChoice(selected=mode==MilestoneKind.COMPLETED_SESSIONS,
+                    onClick={mode=MilestoneKind.COMPLETED_SESSIONS},label="Full sessions")
             }
             Spacer(Modifier.height(8.dp))
             Text("A 21-day period does not prove a permanent habit has formed.",
@@ -756,11 +750,10 @@ fun CreateChallengePage(areas: List<GrowthAreaEntity>, onBack:()->Unit, onCreate
                 Text("Growth area (optional)",fontSize=14.sp,color=Muted)
                 FlowRow(horizontalArrangement=Arrangement.spacedBy(7.dp),
                     verticalArrangement=Arrangement.spacedBy(5.dp)) {
-                    FilterChip(selected=areaId==null,onClick={areaId=null},
-                        label={Text("None")})
+                    EvoluneChoice(selected=areaId==null,onClick={areaId=null},label="None")
                     areas.forEach { area ->
-                        FilterChip(selected=areaId==area.id,
-                            onClick={areaId=area.id},label={Text(area.name)})
+                        EvoluneChoice(selected=areaId==area.id,
+                            onClick={areaId=area.id},label=area.name)
                     }
                 }
                 Spacer(Modifier.height(10.dp))
@@ -770,13 +763,11 @@ fun CreateChallengePage(areas: List<GrowthAreaEntity>, onBack:()->Unit, onCreate
             })
             if(showOptional) {
                 Spacer(Modifier.height(14.dp))
-                OutlinedTextField(value=cue,onValueChange={cue=it},
-                    label={Text("Optional time (HH:mm)")},
-                    singleLine=true,modifier=Modifier.fillMaxWidth())
+                EvoluneInput(value=cue,onValueChange={cue=it},
+                    label="Optional time (HH:mm)",singleLine=true)
                 Spacer(Modifier.height(11.dp))
-                OutlinedTextField(value=fallback,onValueChange={fallback=it},
-                    label={Text("Smaller backup action (optional)")},
-                    modifier=Modifier.fillMaxWidth())
+                EvoluneInput(value=fallback,onValueChange={fallback=it},
+                    label="Smaller backup action (optional)")
                 Spacer(Modifier.height(8.dp))
                 Text("A cue time does not enable notifications. Reminders stay opt-in.",
                     fontSize=13.sp,lineHeight=20.sp,color=Muted)
@@ -980,9 +971,8 @@ fun GrowthPage(areas:List<GrowthAreaEntity>,onCreateArea:(String)->Unit,onStart:
             Text("Name an area that matters to you. These are personal labels, not ratings or achievement scores.",
                 fontSize=14.sp,lineHeight=21.sp,color=Muted)
             Spacer(Modifier.height(14.dp))
-            OutlinedTextField(value=title,onValueChange={title=it},
-                label={Text("Area name")},singleLine=true,
-                modifier=Modifier.fillMaxWidth())
+            EvoluneInput(value=title,onValueChange={title=it},
+                label="Area name",singleLine=true)
             Spacer(Modifier.height(10.dp))
             TodayMainButton("Add area",{
                 if(title.isNotBlank()){onCreateArea(title.trim());title=""}
@@ -1032,22 +1022,16 @@ fun JournalPage(
     fun clear() { editing=null;body="";mood=null;energy=null;showingEditor=false }
     val deletion = pendingDelete
     if(deletion!=null) {
-        AlertDialog(
-            onDismissRequest={pendingDelete=null},
-            title={Text("Delete this reflection?",color=Ink)},
-            text={Text("This entry will be removed from this device. This cannot be undone. Other reflections are unchanged.",
-                color=Muted,fontSize=14.sp,lineHeight=21.sp)},
-            confirmButton={
-                TextButton(onClick={
-                    onDelete(deletion)
-                    if(editing?.id==deletion.id) clear()
-                    pendingDelete=null
-                }) { Text("Delete reflection",color=Color(0xFF995646)) }
+        EvoluneDestructiveDialog(
+            title="Delete this reflection?",
+            message="This entry will be removed from this device. This cannot be undone. Other reflections are unchanged.",
+            actionLabel="Delete reflection",
+            onConfirm={
+                onDelete(deletion)
+                if(editing?.id==deletion.id)clear()
+                pendingDelete=null
             },
-            dismissButton={
-                TextButton(onClick={pendingDelete=null}) { Text("Keep reflection",color=Forest) }
-            },
-            containerColor=Paper,shape=RoundedCornerShape(20.dp)
+            onCancel={pendingDelete=null}
         )
     }
     MainScroll {
@@ -1076,20 +1060,16 @@ fun JournalPage(
                 Text(if(editing==null)"New reflection" else "Edit reflection",
                     fontFamily=FontFamily.Serif,fontSize=21.sp,color=Ink)
                 Spacer(Modifier.height(10.dp))
-                OutlinedTextField(value=body,onValueChange={body=it},
-                    label={Text("What would you like to remember?")},
-                    minLines=3,shape=RoundedCornerShape(12.dp),
-                    colors=OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor=Sage,unfocusedBorderColor=Line,
-                        focusedContainerColor=Paper,unfocusedContainerColor=Paper
-                    ), modifier=Modifier.fillMaxWidth())
+                EvoluneInput(value=body,onValueChange={body=it},
+                    label="What would you like to remember?",
+                    minLines=3,maxLines=12)
                 Spacer(Modifier.height(12.dp))
                 Text("How are you feeling? (optional)",fontSize=14.sp,color=Muted)
                 Row(Modifier.horizontalScroll(rememberScrollState()),
                     horizontalArrangement=Arrangement.spacedBy(6.dp)) {
                     listOf("Calm","Hopeful","Tired","Worried").forEach { m ->
-                        FilterChip(selected=mood==m,onClick={mood=if(mood==m)null else m},
-                            label={Text(m)},shape=RoundedCornerShape(10.dp))
+                        EvoluneChoice(selected=mood==m,
+                            onClick={mood=if(mood==m)null else m},label=m)
                     }
                 }
                 Spacer(Modifier.height(9.dp))
@@ -1097,8 +1077,8 @@ fun JournalPage(
                 Row(Modifier.horizontalScroll(rememberScrollState()),
                     horizontalArrangement=Arrangement.spacedBy(6.dp)) {
                     (1..5).forEach { n ->
-                        FilterChip(selected=energy==n,onClick={energy=if(energy==n)null else n},
-                            label={Text(n.toString())},shape=RoundedCornerShape(10.dp))
+                        EvoluneChoice(selected=energy==n,
+                            onClick={energy=if(energy==n)null else n},label=n.toString())
                     }
                 }
                 Spacer(Modifier.height(12.dp))
@@ -1203,11 +1183,10 @@ fun ReminderSettingsPage(
                     fontWeight=FontWeight.SemiBold)
             }
             Spacer(Modifier.height(17.dp))
-            OutlinedTextField(value=timeValue,
+            EvoluneInput(value=timeValue,
                 onValueChange={timeValue=it.take(5)},
-                label={Text("Preferred time · 24-hour HH:mm")},
-                placeholder={Text("09:00")},singleLine=true,
-                modifier=Modifier.fillMaxWidth())
+                label="Preferred time · 24-hour HH:mm",
+                placeholder="09:00",singleLine=true,isError=parsed==null)
             Spacer(Modifier.height(9.dp))
             Text("The time follows this challenge's timezone. Android may deliver inexact reminders later due to battery restrictions.",
                 color=Muted,fontSize=14.sp,lineHeight=21.sp)
