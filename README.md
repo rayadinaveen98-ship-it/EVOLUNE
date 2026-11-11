@@ -17,7 +17,7 @@ EVOLUNE is an Android-first, personal self-development experience for choosing m
 
 ## Current status
 
-**Native Android v0.5 development build — verified CI and emulator QA (2026-11-11).** Stillwater + Atelier HTML v0.3 remains the visual reference. Native Compose includes custom challenges, Today, Growth, Recovery, Milestone Review, private Journal, Insights, approved Stillwater/Atelier artwork, and responsive phone/tablet rendering. [Android CI](https://github.com/rayadinave98-ship-it/EVOLUNE/actions/runs/42975113458) and [emulator QA](https://github.com/rayadinave98-ship-it/EVOLUNE/actions/runs/42975112550) **passed** (9 Android tests, 12 screenshots). **Visual approval, export/backup, reminder reliability, wider-device QA and release preparation are still pending.** Debug build only; do not use for irreplaceable private journal entries. Source remains in [draft PR #2](https://github.com/rayadinave98-ship-it/EVOLUNE/pull/2) and is **not merged to main**. See the [current roadmap v0.2](docs/ROADMAP.md).
+**Android v1 development milestone — Data ownership (2026-11-11).** The existing Stillwater + Atelier native v0.5 visual baseline is preserved. A versioned local JSON export, strict validated import/restore with explicit REPLACE confirmation, and atomic deletion with explicit DELETE confirmation have been added to the review branch. [Android CI 42992160733](https://github.com/rayadinaveen98-ship-it/EVOLUNE/actions/runs/42992160733) and [Android emulator QA 42992160422](https://github.com/rayadinaveen98-ship-it/EVOLUNE/actions/runs/42992160422) **passed** (15 Android instrumented tests, zero failures). This is **not** release completion: manual document-picker/reinstall tests, notifications, accessibility, wider QA, consenting pilot and signed release remain. Source is still in [draft PR #2](https://github.com/rayadinaveen98-ship-it/EVOLUNE/pull/2), unmerged.
 
 
 ## Project documents
@@ -34,6 +34,11 @@ EVOLUNE is an Android-first, personal self-development experience for choosing m
 - [Staged roadmap](docs/ROADMAP.md)
 - [Android architecture v0.1](docs/ANDROID_ARCHITECTURE_V01.md)
 - [Phase 3B Room persistence source, tests and verification gaps](docs/PHASE3B_PERSISTENCE.md)
+- [Locked first-version scope](docs/MVP_SCOPE_V1.md)
+- [Versioned local data ownership and Android verification](docs/V1_DATA_OWNERSHIP_VERIFICATION.md)
+- [Privacy and release-risk register](docs/V1_SAFETY_AND_RELEASE_RISKS.md)
+- [Reminder scheduling contract](docs/V1_REMINDER_DELIVERY_CONTRACT.md)
+- [Limited pilot protocol (not yet conducted)](docs/V1_LIMITED_PILOT_PROTOCOL.md)
 - [Native v0.4 visual parity, emulator evidence and remaining gaps](docs/PHASE3E_NATIVE_VISUAL_PARITY.md)
 - [Phase 3C verified build and remaining gaps](docs/PHASE3C_BUILD_VERIFICATION.md)
 - [Phase 3D device QA checklist and evidence status](docs/PHASE3D_DEVICE_QA.md)
