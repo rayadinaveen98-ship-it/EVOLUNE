@@ -34,7 +34,7 @@ jobs:
             gradle :core:data:connectedDebugAndroidTest :app:connectedDebugAndroidTest :app:assembleDebug --stacktrace --no-daemon
             mkdir -p qa/native_screenshots
             adb pull /sdcard/Pictures/EVOLUNE-QA/. qa/native_screenshots/
-            python3 -c 'from pathlib import Path; names=("today","challenges","growth","journal","insights"); root=Path("qa/native_screenshots"); missing=[n for n in names if not (root / ("evolune_qa_"+n+".png")).is_file() or (root / ("evolune_qa_"+n+".png")).read_bytes()[:8] != b"\\x89PNG\\r\\n\\x1a\\n"]; assert not missing, "Missing or invalid native PNG: "+", ".join(missing)'
+            python3 -c 'from pathlib import Path; names=("today","challenges","growth","journal","insights"); root=Path("qa/native_screenshots"); missing=[n for n in names if not (root / ("evolune_qa_"+n+".png")).is_file() or (root / ("evolune_qa_"+n+".png")).read_bytes()[:8] != bytes([137,80,78,71,13,10,26,10])]; assert not missing, "Missing or invalid native PNG: "+", ".join(missing)'
       - uses: actions/upload-artifact@v4
         if: always()
         with:
