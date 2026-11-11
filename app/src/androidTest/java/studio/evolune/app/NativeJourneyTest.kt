@@ -31,12 +31,23 @@ class NativeJourneyTest {
     @get:Rule val rule = createAndroidComposeRule<MainActivity>()
 
     @Before fun dismissFirstRunForExistingJourneyTests() {
-        rule.waitUntil(timeoutMillis = 10_000) {
+        rule.waitUntil(timeoutMillis = 15_000) {
             rule.onAllNodesWithText("Skip intro").fetchSemanticsNodes().isNotEmpty() ||
+                rule.onAllNodesWithText("Explore first").fetchSemanticsNodes().isNotEmpty() ||
                 rule.onAllNodesWithText("A gentle day", substring=true).fetchSemanticsNodes().isNotEmpty()
         }
         if (rule.onAllNodesWithText("Skip intro").fetchSemanticsNodes().isNotEmpty()) {
             rule.onNodeWithText("Skip intro").performClick()
+        }
+        rule.waitUntil(timeoutMillis = 15_000) {
+            rule.onAllNodesWithText("Explore first").fetchSemanticsNodes().isNotEmpty() ||
+                rule.onAllNodesWithText("A gentle day", substring=true).fetchSemanticsNodes().isNotEmpty()
+        }
+        if (rule.onAllNodesWithText("Explore first").fetchSemanticsNodes().isNotEmpty()) {
+            rule.onNodeWithText("Explore first").performClick()
+        }
+        rule.waitUntil(timeoutMillis = 10_000) {
+            rule.onAllNodesWithText("A gentle day", substring=true).fetchSemanticsNodes().isNotEmpty()
         }
     }
 
