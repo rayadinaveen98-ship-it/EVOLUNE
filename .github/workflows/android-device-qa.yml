@@ -32,13 +32,9 @@ jobs:
           disable-animations: true
           script: |
             gradle :core:data:connectedDebugAndroidTest :app:connectedDebugAndroidTest :app:assembleDebug --stacktrace --no-daemon
-            gradle :app:installDebug --no-daemon
             mkdir -p qa/native_screenshots
-            for screen in today challenges growth journal insights; do adb exec-out run-as studio.evolune.app cat files/evolune-qa/${screen}.png > qa/native_screenshots/${screen}.png || rm -f qa/native_screenshots/${screen}.png; done
-            adb shell am force-stop studio.evolune.app
-            adb shell am start -W -n studio.evolune.app/.MainActivity
-            sleep 5
-            adb exec-out screencap -p > qa/native_screenshots/first_launch_after_restart.png
+            adb pull /sdcard/Pictures/EVOLUNE-QA/. qa/native_screenshots/
+            python3 -c 'from pathlib import Path; names=("today","challenges","growth","journal","insights"); root=Path("qa/native_screenshots"); missing=[n for n in names if not (root / ("evolune_qa_"+n+".png")).is_file() or (root / ("evolune_qa_"+n+".png")).read_bytes()[:8] != b"\\x89PNG\\r\\n\\x1a\\n"]; assert not missing, "Missing or invalid native PNG: "+", ".join(missing)'
       - uses: actions/upload-artifact@v4
         if: always()
         with:
