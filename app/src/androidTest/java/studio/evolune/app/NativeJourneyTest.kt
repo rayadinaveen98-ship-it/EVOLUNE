@@ -71,6 +71,33 @@ class NativeJourneyTest {
         rule.onNodeWithText("A gentle day", substring = true).assertExists()
     }
 
+
+    @Test fun newChallengeCreatesRealDetailRecoveryReviewAndTodayScreens() {
+        val marker = "Visual QA breathing " + System.nanoTime()
+        rule.onNodeWithText("Challenges").performClick()
+        rule.onNodeWithText("New challenge", substring=true).performClick()
+        captureNative("challenge_create")
+        // First two editable fields on this view are title and action.
+        rule.onAllNodes(hasSetTextAction())[0].performTextInput(marker)
+        rule.onAllNodes(hasSetTextAction())[1].performTextInput("Breathe slowly for three minutes")
+        rule.onNodeWithText("Create my challenge").performScrollTo().performClick()
+        rule.waitUntil(timeoutMillis=15000) {
+            rule.onAllNodesWithText(marker,substring=true).fetchSemanticsNodes().isNotEmpty()
+        }
+        captureNative("challenge_detail_populated")
+        rule.onNodeWithText("Adjust plan").performScrollTo().performClick()
+        rule.onNodeWithText("Adjust the path.").assertExists()
+        captureNative("recovery_populated")
+        rule.onNodeWithText("Back without changes").performScrollTo().performClick()
+        rule.onNodeWithText("Milestone review").performScrollTo().performClick()
+        rule.onNodeWithText("Every phase has meaning.").assertExists()
+        captureNative("review_populated")
+        rule.onNodeWithText("Today").performClick()
+        rule.onNodeWithText("A gentle day",substring=true).assertExists()
+        captureNative("today_populated")
+    }
+
+
     @Test fun privateJournalEntrySurvivesActivityRecreation() {
         val marker = "EVOLUNE device QA " + System.nanoTime()
         rule.onNodeWithText("Journal").performClick()
