@@ -297,10 +297,24 @@ internal fun EvoluneNotice(message: String, onDismiss: () -> Unit) {
     }
 }
 
+@Composable
+private fun EvoluneScreenArea(
+    onPage: (String)->Unit,
+    notice: String?,
+    onDismissNotice: ()->Unit,
+    content: @Composable ()->Unit
+) {
+    // Same column/remaining-page structure as the Stage 05 phone shell.
+    Column(Modifier.fillMaxSize()) {
+        EvoluneTopBar(onGrowth={onPage("growth")})
+        if(notice!=null) EvoluneNotice(notice,onDismissNotice)
+        Box(Modifier.fillMaxSize()) { content() }
+    }
+}
+
 /**
- * One responsive app shell:
- * Compact/medium window: bottom bar; expanded window: left rail.
- * Leaves existing page/state/navigation callbacks unchanged.
+ * Keep the proven compact phone layout separate from the wide-screen rail.
+ * This avoids an unnecessary weighted Row wrapper around phone page content.
  */
 @Composable
 internal fun EvoluneChromeShell(
@@ -313,18 +327,19 @@ internal fun EvoluneChromeShell(
     MaterialTheme(colorScheme=EvoluneTokens.appColors) {
         Scaffold(
             containerColor=EvoluneTokens.Cream,
-            bottomBar={
-                if(!expanded) EvoluneBottomNav(page,onPage)
-            }
+            bottomBar={if(!expanded) EvoluneBottomNav(page,onPage)}
         ) { padding ->
-            Row(Modifier.fillMaxSize().padding(padding)) {
-                if(expanded) EvoluneSideRail(page,onPage)
-                Column(Modifier.weight(1f).fillMaxHeight()) {
-                    EvoluneTopBar(onGrowth={onPage("growth")})
-                    if(notice!=null) EvoluneNotice(notice,onDismissNotice)
-                    // Match the previously verified parent layout contract:
-                    // its scrollable page occupies the remaining shell surface.
-                    Box(Modifier.fillMaxSize()) { content() }
+            if(expanded) {
+                Row(Modifier.fillMaxSize().padding(padding)) {
+                    EvoluneSideRail(page,onPage)
+                    Box(Modifier.weight(1f).fillMaxHeight()) {
+                        EvoluneScreenArea(onPage,notice,onDismissNotice,content)
+                    }
+                }
+            } else {
+                // Deliberately match the previously tested Scaffold > Column hierarchy.
+                Box(Modifier.fillMaxSize().padding(padding)) {
+                    EvoluneScreenArea(onPage,notice,onDismissNotice,content)
                 }
             }
         }
