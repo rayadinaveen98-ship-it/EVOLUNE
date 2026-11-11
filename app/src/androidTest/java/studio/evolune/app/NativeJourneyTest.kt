@@ -48,14 +48,14 @@ class NativeJourneyTest {
     }
 
     @Test fun mainDestinationsAreNavigable() {
-        rule.onNodeWithText("Make room for growth.").assertIsDisplayed()
+        rule.onNodeWithText("A gentle day", substring = true).assertIsDisplayed()
         captureNative("today")
 
         rule.onNodeWithText("Challenges").performClick()
         rule.onNodeWithText("The changes you choose.").assertExists()
         captureNative("challenges")
 
-        rule.onNodeWithText("Growth").performClick()
+        rule.onNodeWithText("My Growth").performClick()
         rule.onNodeWithText("Your direction, your pace.").assertExists()
         captureNative("growth")
 
@@ -64,16 +64,17 @@ class NativeJourneyTest {
         captureNative("insights")
 
         rule.onNodeWithText("Journal").performClick()
-        rule.onNodeWithText("The living journal.").assertExists()
+        rule.onNodeWithText("Room to feel.", substring=true).assertExists()
         captureNative("journal")
 
         rule.onNodeWithText("Today").performClick()
-        rule.onNodeWithText("Make room for growth.").assertExists()
+        rule.onNodeWithText("A gentle day", substring = true).assertExists()
     }
 
     @Test fun privateJournalEntrySurvivesActivityRecreation() {
         val marker = "EVOLUNE device QA " + System.nanoTime()
         rule.onNodeWithText("Journal").performClick()
+        rule.onNodeWithText("New reflection",substring=true).performClick()
         rule.onAllNodes(hasSetTextAction())[0].performTextInput(marker)
         rule.onNodeWithText("Save reflection").performScrollTo().performClick()
 
@@ -83,7 +84,7 @@ class NativeJourneyTest {
         }
         rule.activityRule.scenario.recreate()
         rule.waitUntil(timeoutMillis = 15000) {
-            rule.onAllNodesWithText("The living journal.").fetchSemanticsNodes().isNotEmpty()
+            rule.onAllNodesWithText("Room to feel.", substring=true).fetchSemanticsNodes().isNotEmpty()
         }
         rule.onNodeWithText(marker).assertExists()
     }
