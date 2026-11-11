@@ -9,6 +9,9 @@ import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.hasSetTextAction
+import androidx.compose.ui.test.onAllNodes
+import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
@@ -17,11 +20,13 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import java.time.LocalDate
 import java.time.ZoneId
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import studio.evolune.data.ChallengeEntity
+import studio.evolune.data.JournalEntryEntity
 import studio.evolune.data.ChallengeSnapshot
 import studio.evolune.domain.ChallengePlan
 import studio.evolune.domain.MilestoneKind
@@ -127,4 +132,38 @@ class Stage05ScreenFamilyTest {
         rule.onNodeWithText("Unreported isn't missed").assertExists()
         screenshot("review")
     }
+    @Test fun growthAreaCreationUsesActualCallback() {
+        var chosen: String? = null
+        rule.setContent {
+            GrowthPage(emptyList(),onCreateArea={ chosen=it },onStart={})
+        }
+        rule.onNodeWithText("Your direction, your pace.").assertExists()
+        screenshot("growth_empty")
+        rule.onAllNodes(hasSetTextAction())[0].performTextInput("Learning")
+        rule.onNodeWithText("Add area").performScrollTo().performClick()
+        assertEquals("Learning",chosen)
+    }
+
+    @Test fun journalRequiresExplicitConfirmationBeforeDeletion() {
+        val entry=JournalEntryEntity(
+            id="stage05-private",body="An optional journal note",
+            createdAtEpochMs=0L,updatedAtEpochMs=0L
+        )
+        var deleted=false
+        rule.setContent {
+            JournalPage(listOf(entry),onSave={_,_,_,_->},
+                onDelete={deleted=true},onDataPrivacy={})
+        }
+        rule.onNodeWithText("An optional journal note").assertExists()
+        screenshot("journal")
+        rule.onNodeWithText("Delete").performScrollTo().performClick()
+        rule.onNodeWithText("Delete this reflection?").assertExists()
+        assertFalse(deleted)
+        rule.onNodeWithText("Keep reflection").performClick()
+        assertFalse(deleted)
+        rule.onNodeWithText("Delete").performScrollTo().performClick()
+        rule.onNodeWithText("Delete reflection").performClick()
+        assertTrue(deleted)
+    }
+
 }
