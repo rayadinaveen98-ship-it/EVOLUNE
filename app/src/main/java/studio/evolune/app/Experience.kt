@@ -159,7 +159,7 @@ private fun Header(kicker: String, title: String, subtitle: String = "") {
             fontWeight=FontWeight.Bold, lineHeight=13.sp)
         Spacer(Modifier.height(7.dp))
         Text(title, fontFamily=FontFamily.Serif, fontSize=30.sp, lineHeight=32.sp,
-            letterSpacing=(-1.15).sp, color=Ink)
+            letterSpacing=(-1.15f).sp, color=Ink)
         if (subtitle.isNotEmpty()) {
             Spacer(Modifier.height(6.dp))
             Text(subtitle, color=Muted, fontSize=12.sp, lineHeight=18.sp)
