@@ -99,7 +99,7 @@ private fun NavGlyph(route: String, color: Color = Sage) {
 @Composable
 fun EvoluneShell(page: String, onPage: (String)->Unit, notice: String?, onDismissNotice: ()->Unit, content: @Composable () -> Unit) {
     val selected = when(page) {
-        "detail", "create", "recovery", "review" -> "challenges"
+        "detail", "create", "recovery", "review", "reminders" -> "challenges"
         "data" -> "journal"
         else -> page
     }
@@ -441,7 +441,8 @@ fun ChallengeListPage(challenges: List<ChallengeEntity>, chosen: String?, onSele
 @Composable
 fun ChallengeDetailPage(
     s: ChallengeSnapshot?, onAdjust:()->Unit, onReview:()->Unit,
-    onBack:()->Unit, onLog:(PracticeOutcome)->Unit
+    onBack:()->Unit, onLog:(PracticeOutcome)->Unit,
+    onReminders:()->Unit
 ) {
     if(s == null) {
         MainScroll {
@@ -527,6 +528,7 @@ fun ChallengeDetailPage(
                 verticalArrangement=Arrangement.spacedBy(6.dp)) {
                 PrimaryAction("Adjust plan",onAdjust)
                 SecondaryAction("Milestone review",onReview)
+                SecondaryAction("Gentle reminders",onReminders)
             }
         }
         Panel {
@@ -808,6 +810,81 @@ fun JournalPage(
                 SecondaryAction("Export or manage my data",onDataPrivacy)
             }
         }
+    }
+}
+
+@Composable
+fun ReminderSettingsPage(
+    s: ChallengeSnapshot?,
+    enabled: Boolean,
+    permissionAvailable: Boolean,
+    selectedTime: String,
+    nextAt: Long,
+    onEnable: (String)->Unit,
+    onDisable: ()->Unit,
+    onBack: ()->Unit
+) {
+    var timeValue by remember(s?.plan?.id,selectedTime) { mutableStateOf(selectedTime) }
+    val parsed = remember(timeValue) {
+        runCatching { java.time.LocalTime.parse(timeValue.trim()) }.getOrNull()
+    }
+    MainScroll {
+        Header("Optional · Quiet · Your choice","Gentle reminders",
+            "A small nudge for your planned practice. Never an obligation.")
+        Panel {
+            Text("Your reminder",fontFamily=FontFamily.Serif,fontSize=21.sp,color=Ink)
+            Spacer(Modifier.height(7.dp))
+            Text(s?.plan?.title ?: "Choose a challenge first",
+                color=Muted,fontSize=12.sp,lineHeight=18.sp)
+            Spacer(Modifier.height(9.dp))
+            Text(
+                when {
+                    !enabled -> "OFF · Notifications are not enabled for this challenge"
+                    !permissionAvailable -> "BLOCKED · Android notification permission is unavailable"
+                    nextAt > 0L -> "ON · Approximate next reminder: "+
+                        java.time.Instant.ofEpochMilli(nextAt)
+                            .atZone(s?.plan?.zone ?: java.time.ZoneId.systemDefault())
+                            .format(DateTimeFormatter.ofPattern("EEE d MMM · h:mm a"))
+                    else -> "ON · No scheduled opportunity is currently due"
+                },color=Sage,fontSize=12.sp,lineHeight=19.sp
+            )
+            Spacer(Modifier.height(15.dp))
+            OutlinedTextField(
+                value=timeValue,
+                onValueChange={timeValue=it.take(5)},
+                label={Text("Preferred time · 24-hour HH:mm")},
+                placeholder={Text("09:00")},
+                singleLine=true,
+                modifier=Modifier.fillMaxWidth()
+            )
+            Spacer(Modifier.height(9.dp))
+            Text("Time is interpreted in the challenge's timezone. Android battery restrictions may delay delivery. Reminders are not exact alarms.",
+                color=Muted,fontSize=11.sp,lineHeight=17.sp)
+            Spacer(Modifier.height(14.dp))
+            PrimaryAction(if(enabled)"Update reminder" else "Enable reminder",{
+                if(parsed!=null)onEnable(parsed.toString())
+            },Modifier.fillMaxWidth())
+            if(parsed==null) {
+                Spacer(Modifier.height(5.dp))
+                Text("Enter a valid time, for example 07:30 or 20:00.",
+                    color=Color(0xFF996044),fontSize=11.sp)
+            }
+            if(enabled) {
+                Spacer(Modifier.height(9.dp))
+                SecondaryAction("Turn off reminders",onDisable)
+            }
+        }
+        Surface(color=Pale,shape=RoundedCornerShape(16.dp),
+            modifier=Modifier.fillMaxWidth()) {
+            Column(Modifier.padding(15.dp)) {
+                Text("PRIVACY FIRST",fontSize=9.sp,fontWeight=FontWeight.Bold,
+                    letterSpacing=1.2.sp,color=Sage)
+                Spacer(Modifier.height(7.dp))
+                Text("We never display your journal or mood in a notification. Your challenge stays available even if notifications are disabled.",
+                    fontSize=12.sp,lineHeight=19.sp,color=Muted)
+            }
+        }
+        SecondaryAction("Back to challenge",onBack)
     }
 }
 
