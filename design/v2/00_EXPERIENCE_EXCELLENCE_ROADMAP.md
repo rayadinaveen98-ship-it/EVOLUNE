@@ -30,6 +30,9 @@ This is a **visual, language, brand, onboarding presentation and interaction-qua
 - **Consistency & production assets:** Stages 06–09. Components, typography, artwork/motion, settings.
 - **Consolidation:** Stage 10. One comprehensive design QA cycle and final parity review.
 
+### Android launch policy for Stage 02
+The Android system splash is a platform-controlled startup surface, **not** a forced cinematic video. Android's own guidance recommends an animated splash icon of approximately **1 second or less**. Any longer atmospheric “welcome experience” belongs **after** the app is ready, as a first-run, user-skippable introduction; returning users must not be delayed artificially.
+
 ### Cross-cutting constraints
 - Preserve Stillwater atmosphere (living path, water, daylit landscape) and Atelier readability (paper, warm tactile material, editorial content).
 - One strong primary action per task; no non-functional “Start” buttons.
