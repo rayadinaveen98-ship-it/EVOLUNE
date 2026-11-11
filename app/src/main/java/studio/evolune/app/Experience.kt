@@ -326,7 +326,7 @@ fun TodayPage(
                     Spacer(Modifier.height(8.dp))
                     Text("Choose something small and repeatable. There is no required streak or deadline.",
                         fontSize = 15.sp, lineHeight = 22.sp, color = Muted)
-                    Spacer(Modifier.height(18.dp))
+                    Spacer(Modifier.height(12.dp))
                     TodayMainButton("Create your first challenge", onCreate)
                 }
                 else -> {
