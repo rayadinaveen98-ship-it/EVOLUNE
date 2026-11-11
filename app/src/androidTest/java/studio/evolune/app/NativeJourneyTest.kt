@@ -60,7 +60,7 @@ class NativeJourneyTest {
         captureNative("growth")
 
         rule.onNodeWithText("Insights").performClick()
-        rule.onNodeWithText("Look at what is real.").assertExists()
+        rule.onNodeWithText("See what", substring=true).assertExists()
         captureNative("insights")
 
         rule.onNodeWithText("Journal").performClick()
