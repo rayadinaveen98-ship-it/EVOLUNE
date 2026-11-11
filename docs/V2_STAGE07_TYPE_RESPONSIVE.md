@@ -20,7 +20,7 @@ This is **the existing Stage 07** from the ten-stage V2 experience roadmap. No a
 
 ## Verification sources / gates
 
-- New **Stage07TypographyTest** uses a constrained 320dp Compose column with synthetic 100% and 200% system-text configurations; verifies Today heading/action, all destination semantics and navigation callbacks; also checks simulated expanded rail at 140%, plus date/clock helpers. Creates native screenshots under `EVOLUNE-QA`.
+- New **Stage07TypographyTest** uses a constrained 320dp Compose column with both LocalConfiguration and LocalDensity set to 100% and 200% system-text scaling; verifies Today heading/action, all destination semantics and navigation callbacks; also checks simulated expanded rail at 140%, plus date/clock helpers. Creates native screenshots under `EVOLUNE-QA`.
 - Existing **Stage03–06 instrumented regression tests** remain unchanged and must all pass on the final branch SHA.
 - Device emulator workflow now captures **actual system font scale 2.0 at 320dp**, in addition to 1.0 and 1.4 and tablet/landscape widths. For diagnostic clarity it writes synthetic **debug-only** first-run-completed flags into private prefs after APK installation so those screenshots show the Today/navigation screen, not the setup gate. No real user data is accessed; these QA artifacts must never be confused with production onboarding behavior.
 - Actual 320dp/200% and tablet captures must be **visually inspected** for clipping, headline wrapping, tab layout, bottom CTA overlap, dialogs and Journal; screenshot existence alone is not visual approval. Pixel Launcher background ANR overlays were observed in a previous run; the QA workflow now suppresses **background** ANR dialogs, not foreground app errors. Clean post-onboarding captures remain an exit gate.
@@ -28,7 +28,7 @@ This is **the existing Stage 07** from the ten-stage V2 experience roadmap. No a
 
 
 ## Verified intermediate evidence and corrections
-- First Stage 07 source compile was successful, but the initial emulator run had two Guided Setup interaction failures. These were corrected by automatic scroll-to-new-optional-details and stable semantics tags for all setup fields, with focused tests using these tags.
+- Final font-scale QA explicitly sets native Compose `LocalDensity` **and** screen configuration; a configuration-only override did not actually scale rendered glyphs, so it was strengthened before closing Stage 07.\n- First Stage 07 source compile was successful, but the initial emulator run had two Guided Setup interaction failures. These were corrected by automatic scroll-to-new-optional-details and stable semantics tags for all setup fields, with focused tests using these tags.
 - Subsequent Stage 07 [emulator run 43046610602](https://github.com/rayadinaveen98-ship-it/EVOLUNE/actions/runs/43046610602) passed **58/58 tests**: 7 Room + 51 app. This was prior to the latest 200%-font stacked navigation and Pixel Launcher QA changes, and should **not** be treated as evidence for that later SHA.
 - Review of its real 200%-font 320dp screenshots revealed unreadable one-row tab labels and background Pixel Launcher ANR dialogs. The two-row layout and background-dialog mitigation are on the latest source branch and require a fresh successful exact-head run and clean screenshot review.
 
