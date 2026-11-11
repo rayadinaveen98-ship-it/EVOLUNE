@@ -56,4 +56,41 @@ class ReminderSchedulerTest {
             db.close()
         }
     }
+    @Test fun optedInAlarmReconstructsAfterDatabaseReopenAndStopsAfterChallengeDeletion() = runBlocking {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        val id = UUID.randomUUID().toString()
+        val databaseName = "evolune-reminder-restart-$id.db"
+        val zone = ZoneId.of("Asia/Kolkata")
+        val date = LocalDate.now(zone)
+        val chosen = LocalTime.now(zone).plusHours(3).withSecond(0).withNano(0)
+        InstrumentationRegistry.getInstrumentation().uiAutomation
+            .grantRuntimePermission(context.packageName,Manifest.permission.POST_NOTIFICATIONS)
+        var db = Room.databaseBuilder(context,EvoluneDatabase::class.java,databaseName).build()
+        try {
+            RoomEvoluneRepository(db.evoluneDao()).createChallenge(
+                ChallengePlan(id,"Restart reminder check",date,zone,
+                    MilestoneKind.CALENDAR_DAYS,21,
+                    listOf(ScheduleVersion(date,Recurrence.Daily,"Practice gently")))
+            )
+            assertTrue(ReminderScheduler.enable(context,db.evoluneDao(),id,chosen))
+            val first=ReminderScheduler.scheduledAt(context,id)
+            assertTrue(first > System.currentTimeMillis())
+            db.close()
+
+            db = Room.databaseBuilder(context,EvoluneDatabase::class.java,databaseName).build()
+            ReminderScheduler.rescheduleAll(context,db.evoluneDao())
+            assertTrue(ReminderScheduler.isOptedIn(context,id))
+            assertTrue(ReminderScheduler.scheduledAt(context,id)>System.currentTimeMillis())
+
+            db.evoluneDao().deleteChallenge(id)
+            ReminderScheduler.rescheduleAll(context,db.evoluneDao())
+            assertFalse(ReminderScheduler.isOptedIn(context,id))
+            assertEquals(-1L,ReminderScheduler.scheduledAt(context,id))
+        } finally {
+            ReminderScheduler.disable(context,id)
+            db.close()
+            context.deleteDatabase(databaseName)
+        }
+    }
+
 }
