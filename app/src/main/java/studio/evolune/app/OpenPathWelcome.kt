@@ -42,6 +42,7 @@ internal object OpenPathFirstRun {
     const val KEY_COMPLETED = "intro_completed"
     const val KEY_STARTED_UPTIME = "started_elapsed_realtime"
     const val FORCE_REDUCED_MOTION_QA = "force_reduced_motion_qa"
+    const val FORCE_FULL_MOTION_QA = "force_full_motion_qa"
     const val DURATION_MS = 5_800L
 
     fun completed(context: Context): Boolean =
@@ -135,8 +136,12 @@ internal fun OpenPathWelcome(onFinished: () -> Unit) {
         context.getSharedPreferences(OpenPathFirstRun.PREF_FILE, Context.MODE_PRIVATE)
     }
     val animationScale = LocalMotionDurationScale.current.scaleFactor
-    val reducedMotion = animationScale == 0f ||
-        preference.getBoolean(OpenPathFirstRun.FORCE_REDUCED_MOTION_QA, false)
+    val fullMotionTestOverride =
+        (context.applicationInfo.flags and android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0 &&
+            preference.getBoolean(OpenPathFirstRun.FORCE_FULL_MOTION_QA, false)
+    val reducedMotion = !fullMotionTestOverride &&
+        (animationScale == 0f ||
+            preference.getBoolean(OpenPathFirstRun.FORCE_REDUCED_MOTION_QA, false))
     val startedAt = remember { OpenPathFirstRun.startAt(context) }
     var progressMs by remember(startedAt) {
         mutableLongStateOf(if (reducedMotion) OpenPathFirstRun.DURATION_MS else
