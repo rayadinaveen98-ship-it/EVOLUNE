@@ -7,6 +7,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -68,28 +69,24 @@ private val defaults = listOf(
 
 @Composable
 private fun SetupTitle(n: Int, headline: String, subtitle: String) {
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text("STEP " + (n + 1) + " OF 4", color = Forest,
-            fontSize = 12.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
-        Text(headline, fontFamily = FontFamily.Serif, fontSize = 30.sp,
-            lineHeight = 37.sp, color = Ink)
-        Text(subtitle, fontSize = 15.sp, lineHeight = 22.sp, color = Secondary)
+    Column(verticalArrangement=Arrangement.spacedBy(9.dp)) {
+        EvoluneEyebrow("STEP " + (n + 1) + " OF 4")
+        EvolunePageHeading(headline)
+        Text(subtitle,style=EvoluneType.typography.bodyLarge,
+            color=Secondary,softWrap=true)
     }
 }
 
 @Composable
 private fun SetupCard(content: @Composable ColumnScope.() -> Unit) {
-    Surface(Modifier.fillMaxWidth(), color = Paper, shape = RoundedCornerShape(20.dp),
-        border = BorderStroke(1.dp, Line)) {
-        Column(Modifier.padding(18.dp), content = content)
-    }
+    EvolunePanel(content)
 }
 
 @Composable
 private fun SetupChoice(label: String, selected: Boolean, onClick: () -> Unit) {
     Surface(
-        Modifier.fillMaxWidth().heightIn(min = 54.dp)
-            .clickable(role = Role.RadioButton, onClick = onClick),
+        Modifier.fillMaxWidth().heightIn(min = 56.dp)
+            .selectable(selected = selected, role = Role.RadioButton, onClick = onClick),
         color = if (selected) Pale else Paper,
         shape = RoundedCornerShape(14.dp),
         border = BorderStroke(if (selected) 1.5.dp else 1.dp,
@@ -202,7 +199,9 @@ internal fun GuidedSetup(
                 0 -> {
                     SetupTitle(0, "Choose where you'd like to grow.",
                         "There is no perfect starting point. Choose one area, or decide later.")
-                    Box(Modifier.fillMaxWidth().height(154.dp)
+                    Box(Modifier.fillMaxWidth().height(
+                        if(androidx.compose.ui.platform.LocalConfiguration.current.fontScale>=1.6f) 225.dp else 154.dp
+                    )
                         .clip(RoundedCornerShape(20.dp))) {
                         Image(painterResource(R.drawable.stillwater_banner),
                             contentDescription = null, contentScale = ContentScale.Crop,
@@ -210,10 +209,10 @@ internal fun GuidedSetup(
                         Box(Modifier.fillMaxSize().background(Brush.horizontalGradient(
                             listOf(Forest.copy(alpha = 0.85f), Forest.copy(alpha = 0.10f)))))
                         Column(Modifier.align(Alignment.CenterStart).padding(18.dp)) {
-                            Text("A living path", color = Paper, fontFamily = FontFamily.Serif,
-                                fontSize = 23.sp)
+                            Text("A living path", color = Paper,
+                                style=EvoluneType.typography.headlineMedium)
                             Text("One meaningful step at a time.", color = Paper,
-                                fontSize = 13.sp, lineHeight = 19.sp)
+                                style=EvoluneType.typography.bodySmall,softWrap=true)
                         }
                     }
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
