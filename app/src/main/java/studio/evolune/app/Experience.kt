@@ -42,7 +42,7 @@ private val Forest = Color(0xFF36553E)
 private val Pale = Color(0xFFE7ECE2)
 private val Cream = Color(0xFFFAF8F3)
 private val Paper = Color(0xFFFFFEFA)
-private val Muted = Color(0xFF718077)
+private val Muted = Color(0xFF65746C)
 private val Line = Color(0xFFE5E2D9)
 private val Gold = Color(0xFFB89A63)
 
@@ -181,14 +181,14 @@ fun EvoluneShell(page: String, onPage: (String)->Unit, notice: String?, onDismis
 @Composable
 private fun Header(kicker: String, title: String, subtitle: String = "") {
     Column(Modifier.fillMaxWidth().padding(bottom=4.dp)) {
-        Text(kicker.uppercase(), fontSize=9.sp, letterSpacing=1.6.sp, color=Color(0xFF829085),
+        Text(kicker.uppercase(), fontSize=11.sp, letterSpacing=1.6.sp, color=Color(0xFF829085),
             fontWeight=FontWeight.Bold, lineHeight=13.sp)
         Spacer(Modifier.height(7.dp))
         Text(title, fontFamily=FontFamily.Serif, fontSize=30.sp, lineHeight=32.sp,
             letterSpacing=(-1.15f).sp, color=Ink)
         if (subtitle.isNotEmpty()) {
             Spacer(Modifier.height(6.dp))
-            Text(subtitle, color=Muted, fontSize=12.sp, lineHeight=18.sp)
+            Text(subtitle, color=Muted, fontSize=14.sp, lineHeight=21.sp)
         }
     }
 }
@@ -197,7 +197,7 @@ private fun Header(kicker: String, title: String, subtitle: String = "") {
 private fun Panel(content: @Composable ColumnScope.() -> Unit) {
     Surface(color=Paper, shape=RoundedCornerShape(20.dp), border=BorderStroke(1.dp,Line),
         modifier=Modifier.fillMaxWidth()) {
-        Column(Modifier.padding(17.dp), content=content)
+        Column(Modifier.padding(18.dp), content=content)
     }
 }
 
@@ -209,26 +209,26 @@ private fun MainScroll(content: @Composable ColumnScope.() -> Unit) {
             Modifier.widthIn(max=720.dp).fillMaxWidth().fillMaxHeight()
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal=20.dp, vertical=10.dp),
-            verticalArrangement=Arrangement.spacedBy(15.dp), content=content
+            verticalArrangement=Arrangement.spacedBy(16.dp), content=content
         )
     }
 }
 
 @Composable
 private fun PrimaryAction(text: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
-    Button(onClick=onClick, modifier=modifier.heightIn(min=43.dp),
+    Button(onClick=onClick, modifier=modifier.heightIn(min=50.dp),
         shape=RoundedCornerShape(11.dp),
         colors=ButtonDefaults.buttonColors(containerColor=Forest, contentColor=Paper)) {
-        Text(text, fontSize=12.sp, fontWeight=FontWeight.SemiBold)
+        Text(text, fontSize=14.sp, lineHeight=20.sp, fontWeight=FontWeight.SemiBold)
     }
 }
 
 @Composable
 private fun SecondaryAction(text: String, onClick: () -> Unit) {
-    OutlinedButton(onClick=onClick, shape=RoundedCornerShape(11.dp),
+    OutlinedButton(onClick=onClick, modifier=Modifier.heightIn(min=49.dp), shape=RoundedCornerShape(11.dp),
         colors=ButtonDefaults.outlinedButtonColors(containerColor=Color(0xFFF3F6F0), contentColor=Forest),
         border=BorderStroke(1.dp,Color(0xFFDDE5D9))) {
-        Text(text, fontSize=12.sp, fontWeight=FontWeight.SemiBold)
+        Text(text, fontSize=14.sp, lineHeight=20.sp, fontWeight=FontWeight.SemiBold)
     }
 }
 
