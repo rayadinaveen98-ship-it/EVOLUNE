@@ -68,15 +68,12 @@ fun EvoluneShell(
 
 @Composable
 private fun Header(kicker: String, title: String, subtitle: String = "") {
-    Column(Modifier.fillMaxWidth().padding(bottom=4.dp)) {
-        Text(kicker.uppercase(), fontSize=11.sp, letterSpacing=1.6.sp, color=Color(0xFF829085),
-            fontWeight=FontWeight.Bold, lineHeight=13.sp)
-        Spacer(Modifier.height(7.dp))
-        Text(title, fontFamily=FontFamily.Serif, fontSize=30.sp, lineHeight=32.sp,
-            letterSpacing=(-1.15f).sp, color=Ink)
-        if (subtitle.isNotEmpty()) {
-            Spacer(Modifier.height(6.dp))
-            Text(subtitle, color=Muted, fontSize=14.sp, lineHeight=21.sp)
+    Column(Modifier.fillMaxWidth().padding(bottom=4.dp),
+        verticalArrangement=Arrangement.spacedBy(7.dp)) {
+        EvoluneEyebrow(kicker)
+        EvolunePageHeading(title)
+        if(subtitle.isNotEmpty()) {
+            EvoluneBody(subtitle)
         }
     }
 }
@@ -88,13 +85,16 @@ private fun Panel(content: @Composable ColumnScope.() -> Unit) {
 
 @Composable
 private fun MainScroll(content: @Composable ColumnScope.() -> Unit) {
-    // A readable editorial column on large screens; unchanged full-width behavior on phones.
+    // Use a single readable column; protect narrow screens/large text from
+    // horizontal crowding while preserving the tablet's editorial measure.
+    val config=LocalConfiguration.current
+    val inset=if(config.screenWidthDp < 360 || config.fontScale >= 1.55f)16.dp else 20.dp
     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
         Column(
             Modifier.widthIn(max=720.dp).fillMaxWidth().fillMaxHeight()
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal=20.dp, vertical=10.dp),
-            verticalArrangement=Arrangement.spacedBy(16.dp), content=content
+                .padding(horizontal=inset, vertical=12.dp),
+            verticalArrangement=Arrangement.spacedBy(18.dp),content=content
         )
     }
 }
@@ -111,6 +111,7 @@ private fun SecondaryAction(text: String, onClick: () -> Unit) {
 
 
 /** Approved Stillwater scene, with the readable editorial overlay used in the HTML baseline. */
+/** Decorative Stillwater artwork remains legible at 100–200% Android font scale. */
 @Composable
 private fun LandscapeHero(
     label: String = "YOUR GROWTH SPACE",
@@ -118,53 +119,75 @@ private fun LandscapeHero(
     headline: String = "Every small step\nbelongs here.",
     artwork: Int = R.drawable.stillwater_banner
 ) {
-    val screenWidth = LocalConfiguration.current.screenWidthDp
-    val context = LocalContext.current
-    // Respect Android's system-level motion setting. No movement at animator scale 0.
-    val motionEnabled = remember(context) {
+    val config=LocalConfiguration.current
+    val screenWidth=config.screenWidthDp
+    val scale=config.fontScale
+    val context=LocalContext.current
+    val motionEnabled=remember(context) {
         Settings.Global.getFloat(context.contentResolver,
-            Settings.Global.ANIMATOR_DURATION_SCALE, 1f) > 0f
+            Settings.Global.ANIMATOR_DURATION_SCALE,1f)>0f
     }
-    val breath = if (motionEnabled) {
-        val transition = rememberInfiniteTransition(label="gentle-hero")
-        val scale by transition.animateFloat(
-            initialValue=1f, targetValue=1.018f,
+    val breath=if(motionEnabled) {
+        val transition=rememberInfiniteTransition(label="gentle-hero")
+        val value by transition.animateFloat(
+            initialValue=1f,targetValue=1.018f,
             animationSpec=infiniteRepeatable(
-                tween(durationMillis=8000, easing=FastOutSlowInEasing),
+                tween(durationMillis=8000,easing=FastOutSlowInEasing),
                 repeatMode=RepeatMode.Reverse
-            ), label="slow-drift"
+            ),label="slow-drift"
         )
-        scale
+        value
     } else 1f
-    val heroHeight = when {
-        screenWidth >= 700 -> 250.dp
-        screenWidth < 350 -> 180.dp
+    val heroHeight=when {
+        scale>=1.75f && screenWidth<360 -> 330.dp
+        scale>=1.75f -> 315.dp
+        scale>=1.3f && screenWidth<360 -> 270.dp
+        scale>=1.3f -> 268.dp
+        screenWidth>=700 -> 250.dp
+        screenWidth<350 -> 190.dp
         else -> 205.dp
     }
     Box(Modifier.fillMaxWidth().height(heroHeight).clip(RoundedCornerShape(19.dp))) {
-        Image(painterResource(artwork),
-            contentDescription=if (artwork==R.drawable.atelier_journal)
+        Image(
+            painterResource(artwork),
+            contentDescription=if(artwork==R.drawable.atelier_journal)
                 "Atelier garden and open journal with warm afternoon light"
                 else "Quiet Stillwater landscape with stone steps, a tree and distant hills",
             contentScale=ContentScale.Crop,
             modifier=Modifier.fillMaxSize().graphicsLayer {
-                scaleX = breath
-                scaleY = breath
-            })
+                scaleX=breath;scaleY=breath
+            }
+        )
         Box(Modifier.fillMaxSize().background(Brush.verticalGradient(
-            listOf(Color(0x00112318), Color(0x16112318), Color(0xBD11251A))
+            listOf(Color(0x00112318),Color(0x32112318),Color(0xDF11251A))
         )))
-        Text(label,
+        EvoluneEyebrow(
+            label,
             modifier=Modifier.align(Alignment.TopEnd).padding(12.dp)
-                .clip(RoundedCornerShape(30.dp)).background(Color(0xE8FFFDF6))
-                .padding(horizontal=11.dp,vertical=7.dp),
-            fontSize=9.sp,color=Forest,fontWeight=FontWeight.Bold)
-        Column(Modifier.align(Alignment.BottomStart).padding(start=16.dp,bottom=17.dp)) {
-            Text(overline,fontSize=9.sp,color=Paper,
-                fontWeight=FontWeight.Bold,letterSpacing=1.3.sp)
+                .widthIn(max=230.dp)
+                .clip(RoundedCornerShape(30.dp))
+                .background(Color(0xF0FFFDF6))
+                .padding(horizontal=12.dp,vertical=8.dp),
+            color=Forest
+        )
+        Column(Modifier.align(Alignment.BottomStart)
+            .fillMaxWidth()
+            .padding(start=16.dp,end=15.dp,bottom=17.dp)) {
+            Text(
+                EvoluneFormatting.uppercase(overline),
+                style=EvoluneType.typography.labelSmall,
+                letterSpacing=0.8.sp,color=Paper,
+                softWrap=true
+            )
             Spacer(Modifier.height(6.dp))
-            Text(headline,fontFamily=FontFamily.Serif,
-                fontSize=21.sp,lineHeight=23.sp,color=Paper)
+            Text(
+                headline,
+                fontFamily=FontFamily.Serif,
+                fontSize=if(screenWidth<360)20.sp else 22.sp,
+                lineHeight=if(screenWidth<360)26.sp else 29.sp,
+                color=Paper,
+                softWrap=true
+            )
         }
     }
 }
@@ -276,7 +299,7 @@ fun TodayPage(
 ) {
     val view = remember(s) { presentToday(s) }
     var showLogChoices by remember(s?.plan?.id, view.outcome) { mutableStateOf(false) }
-    val dateLabel = view.date.format(DateTimeFormatter.ofPattern("EEEE · MMMM d")).uppercase()
+    val dateLabel = EvoluneFormatting.uppercase(EvoluneFormatting.date(view.date,"EEEE · MMMM d"))
 
     MainScroll {
         Header(dateLabel + " · YOUR DAY", "A gentle day\nto begin again.",
@@ -326,7 +349,7 @@ fun TodayPage(
                         color = Forest, fontWeight = FontWeight.SemiBold, lineHeight = 19.sp)
                     if (view.cueTime != null && view.mode == TodayMode.SCHEDULED) {
                         Spacer(Modifier.height(4.dp))
-                        Text("Planned cue: " + view.cueTime.toString() +
+                        Text("Planned cue: " + EvoluneFormatting.clock(view.cueTime) +
                             " · This does not mean notifications are enabled",
                             fontSize = 12.sp, lineHeight = 18.sp, color = Muted)
                     }
@@ -409,7 +432,7 @@ fun TodayPage(
                 Text("COMING UP", color = Forest, fontWeight = FontWeight.Bold,
                     letterSpacing = 1.sp, fontSize = 11.sp)
                 Spacer(Modifier.height(7.dp))
-                Text(view.nextScheduled.format(DateTimeFormatter.ofPattern("EEEE · MMM d")),
+                Text(EvoluneFormatting.date(view.nextScheduled,"EEEE · MMM d"),
                     fontFamily = FontFamily.Serif, color = Ink,
                     fontSize = 20.sp, lineHeight = 25.sp)
                 Spacer(Modifier.height(5.dp))
@@ -502,7 +525,7 @@ fun ChallengeListPage(challenges: List<ChallengeEntity>, chosen: String?, onSele
                             "calendar days" else "full recorded sessions"),
                         fontSize=14.sp,lineHeight=21.sp,color=Forest,
                         fontWeight=FontWeight.SemiBold)
-                    Text("Started ${ch.startDate}",fontSize=13.sp,
+                    Text("Started ${EvoluneFormatting.date(LocalDate.parse(ch.startDate))}",fontSize=13.sp,
                         lineHeight=19.sp,color=Muted)
                     Spacer(Modifier.height(14.dp))
                     TodayQuietButton(if(ch.id==chosen)"View active challenge" else "Open challenge",
@@ -539,7 +562,7 @@ fun ChallengeDetailPage(
         Header("Your practice",plan.title,
             "${plan.target} "+
             (if(plan.milestoneKind==MilestoneKind.CALENDAR_DAYS) "calendar days" else "completed sessions")+
-            " · from "+plan.startDate.toString())
+            " · from "+EvoluneFormatting.date(plan.startDate))
 
         Panel {
             Text("TODAY ON THIS PATH",fontSize=11.sp,color=Forest,
@@ -653,7 +676,7 @@ fun ChallengeDetailPage(
                 fontSize=14.sp,color=Muted)
             list.takeLast(7).reversed().forEach { day ->
                 Column(Modifier.fillMaxWidth().padding(vertical=8.dp)) {
-                    Text(day.date.format(DateTimeFormatter.ofPattern("EEE d MMM")),
+                    Text(EvoluneFormatting.date(day.date,"EEE d MMM"),
                         fontSize=13.sp,color=Muted)
                     Text(stateLabel(day.state),fontSize=14.sp,lineHeight=21.sp,
                         fontWeight=FontWeight.SemiBold,color=Forest)
@@ -900,7 +923,7 @@ fun ReviewPage(s: ChallengeSnapshot?, onBack:()->Unit) {
             Text("${plan.target} " +
                 (if(plan.milestoneKind==MilestoneKind.CALENDAR_DAYS)
                     "calendar-day milestone" else "full-session milestone")+
-                " · started ${plan.startDate}",fontSize=14.sp,
+                " · started ${EvoluneFormatting.date(plan.startDate)}",fontSize=14.sp,
                 lineHeight=21.sp,color=Muted)
             Spacer(Modifier.height(18.dp))
             Surface(color=Pale,shape=RoundedCornerShape(15.dp),
