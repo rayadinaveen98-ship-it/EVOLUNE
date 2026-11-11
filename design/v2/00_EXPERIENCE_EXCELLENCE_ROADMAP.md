@@ -44,4 +44,4 @@ The Android system splash is a platform-controlled startup surface, **not** a fo
 - Do not call visual Stage 10 equivalent to public Play Store release readiness; overall V1 security, migration, pilot and signed package remain distinct gates.
 
 ## Immediate next checkpoint
-Complete Stage 01 artifacts, prepare three *actual* mark/app-icon renderings at Android-relevant scales, evaluate together, then select one. Only after selection move to the welcome animation production brief. Do not silently finalize a logo from this written shortlist.
+**Direction A — The Open Path has been selected**. Created original scalable mark prototypes and Android adaptive icon templates in [assets/open-path](assets/open-path/README.md). Next: review exact A geometry at small sizes and launcher masks; finalize wordmark, typefaces, accessible tokens and brand lock-up; then proceed to welcome. Do not pretend these design files are installed in Android. Only after selection move to the welcome animation production brief. Do not silently finalize a logo from this written shortlist.
