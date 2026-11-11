@@ -49,6 +49,7 @@ private fun EvoluneRoot(dao: EvoluneDao, repository: RoomEvoluneRepository) {
     var snapshot by remember { mutableStateOf<ChallengeSnapshot?>(null) }
     var page by rememberSaveable { mutableStateOf("today") }
     var notice by remember { mutableStateOf<String?>(null) }
+    var pendingImport by remember { mutableStateOf<StoredLocalExport?>(null) }
     val context = LocalContext.current
 
     /** SAF export keeps the sensitive archive on a user-selected local destination. */
@@ -68,10 +69,53 @@ private fun EvoluneRoot(dao: EvoluneDao, repository: RoomEvoluneRepository) {
                         }
                         output.bufferedWriter(Charsets.UTF_8).use { it.write(data) }
                     }
-                    notice = "Export saved. Keep this private file safe. Restore is not yet available."
+                    notice = "Export saved. Keep this private file safe."
                 } catch (ex: Exception) {
                     notice = "Export failed. Your app data was not changed. " +
                         (ex.message ?: "Please choose another file location.")
+                }
+            }
+        }
+    }
+
+    /** Read an untrusted file with a size cap, then validate BEFORE any database write. */
+    val importLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument()
+    ) { uri ->
+        if (uri != null) {
+            scope.launch {
+                pendingImport = null
+                try {
+                    val contents = withContext(Dispatchers.IO) {
+                        val source = requireNotNull(context.contentResolver.openInputStream(uri)) {
+                            "Selected backup could not be opened"
+                        }
+                        source.use { input ->
+                            val bytes = java.io.ByteArrayOutputStream()
+                            val buffer = ByteArray(8192)
+                            var total = 0
+                            while (true) {
+                                val read = input.read(buffer)
+                                if (read < 0) break
+                                total += read
+                                require(total <= EvoluneImportJson.MAX_FILE_BYTES) {
+                                    "Backup is larger than 10 MB"
+                                }
+                                bytes.write(buffer, 0, read)
+                            }
+                            String(bytes.toByteArray(), Charsets.UTF_8)
+                        }
+                    }
+                    val validated = withContext(Dispatchers.Default) {
+                        EvoluneImportJson.decode(contents)
+                    }
+                    pendingImport = validated
+                    notice = "Backup validated. Nothing was changed. Type REPLACE to restore it."
+                    page = "data"
+                } catch (ex: Exception) {
+                    pendingImport = null
+                    notice = "Backup could not be loaded. Your current data is safe. " +
+                        (ex.message ?: "Please check that this is an EVOLUNE export.")
                 }
             }
         }
@@ -196,9 +240,33 @@ private fun EvoluneRoot(dao: EvoluneDao, repository: RoomEvoluneRepository) {
                     val name = "evolune-export-" + LocalDate.now().toString() + ".json"
                     exportLauncher.launch(name)
                 },
+                onPickBackup = {
+                    importLauncher.launch(arrayOf("application/json", "text/plain", "application/octet-stream"))
+                },
+                importPreview = pendingImport?.let {
+                    "Contains " + it.challenges.size + " challenges, " +
+                        it.practices.size + " historic practice records, " +
+                        it.journal.size + " journal entries and " +
+                        it.growthAreas.size + " growth areas."
+                },
+                onRestore = {
+                    val verified = pendingImport
+                    if (verified != null) {
+                        execute {
+                            dao.replaceAllLocalData(verified)
+                            activeId = null
+                            snapshot = null
+                            pendingImport = null
+                            page = "today"
+                            notice = "Restore completed. All current device records were replaced with the selected backup."
+                        }
+                    }
+                },
+                onCancelRestore = { pendingImport = null },
                 onErase = {
                     execute {
                         dao.eraseAllLocalData()
+                        pendingImport = null
                         activeId = null
                         snapshot = null
                         page = "today"
