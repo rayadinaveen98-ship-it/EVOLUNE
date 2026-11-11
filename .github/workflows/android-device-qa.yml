@@ -34,9 +34,7 @@ jobs:
             gradle :core:data:connectedDebugAndroidTest :app:connectedDebugAndroidTest :app:assembleDebug --stacktrace --no-daemon
             gradle :app:installDebug --no-daemon
             mkdir -p qa/native_screenshots
-            for screen in today challenges growth journal insights; do
-              adb exec-out run-as studio.evolune.app cat files/evolune-qa/${screen}.png > qa/native_screenshots/${screen}.png || rm -f qa/native_screenshots/${screen}.png
-            done
+            for screen in today challenges growth journal insights; do adb exec-out run-as studio.evolune.app cat files/evolune-qa/${screen}.png > qa/native_screenshots/${screen}.png || rm -f qa/native_screenshots/${screen}.png; done
             adb shell am force-stop studio.evolune.app
             adb shell am start -W -n studio.evolune.app/.MainActivity
             sleep 5
