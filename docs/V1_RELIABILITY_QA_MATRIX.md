@@ -17,7 +17,7 @@
 | Preserve records across closing/reopening an on-disk database | `RoomPersistenceTest` in emulator QA | Verified |
 | Archive and export data on device; restore through actual Android file picker | Two-device manual procedure with test data | Manual gate |
 | Reinstall from a **stable signed** package, restore archive and verify records | Manual full install/upgrade test | Manual gate |
-| Future Room schema migration | Version 1 Room schema exported in new CI artifact for future fixtures | Running |
+| Future Room schema migration | Version 1 schema exported in emulator 42998280747 artifact (14,714-byte JSON); actual v1→v2 migration still nonexistent | Baseline verified; migration pending |
 | Complete delete, including pending reminders | UI + DAO + Android reminder checks; manual Settings review | Partial, manual gate |
 
 ## Gentle reminders
@@ -26,8 +26,8 @@
 |---|---|---|
 | Off by default, schedule and cancel using AlarmManager | [emulator run 42995670616](https://github.com/rayadinave98-ship-it/EVOLUNE/actions/runs/42995670616) | Verified |
 | Weekday, interval, timezone, DST and milestone planning | `ReminderPlanningTest` from run 42995670616 | Verified |
-| Suppress canceled, paused, already-recorded or old-day reminder deliveries | New deterministic `isValidDelivery` tests | Running |
-| Reconstruct opted-in alarm after Room disk reopen; cancel if challenge deleted | New `ReminderSchedulerTest` | Running |
+| Suppress canceled, paused, already-recorded or old-day reminder deliveries | [Emulator 42998280747](https://github.com/rayadinaveen98-ship-it/EVOLUNE/actions/runs/42998280747), deterministic delivery-window tests | Verified |
+| Reconstruct opted-in alarm after Room disk reopen; cancel if challenge deleted | Emulator 42998280747; test uses reopened persistent Room database | Verified |
 | Actual *system* callback fires, creates neutral notification at/after requested time | Physical device/extended emulator timing study | Manual gate |
 | Permission denied/revoked, channel blocked, app upgrade, actual reboot/timezone change | Android Settings / system event trials | Manual gate |
 | Doze/battery saver and many simultaneous reminders; no duplicates or late-night alerts | Long-run Android battery/device matrix | Manual gate |
@@ -36,9 +36,9 @@
 
 | Test | Source of evidence | Current status |
 |---|---|---|
-| 320dp phone, 853dp tablet screenshot renders | [emulator QA 42995670616](https://github.com/rayadinave98-ship-it/EVOLUNE/actions/runs/42995670616) | Verified |
-| 140% Android system font on 320dp phone | New CI screenshot gate | Running |
-| 1280dp wide tablet layout | New CI screenshot gate | Running |
+| 320dp phone, 853dp tablet screenshot renders | Emulator 42998280747: 15 actual PNGs incl. phone, 140% font, tablet, wide tablet | Verified |
+| 140% Android system font on 320dp phone | Emulator 42998280747 screenshot exposed clipped nav labels; corrective Compose code in commit `9c9aee6` | Defect observed; retest running |
+| 1280dp wide tablet layout | Emulator 42998280747 native PNG captured and manually opened | Render verified; content composition needs review |
 | Contrast, keyboard/IME, TalkBack reading order, control focus and hit targets | Human-assisted a11y testing and screenshots | Manual gate |
 | Reduced motion and Android disabled-animation configuration | Programmatic checks and actual visual experience review | Partial |
 | No visual regressions across Today, Journal, Challenge, Recovery and Review | Native screenshot comparison against approved HTML v0.3 | Partial |
