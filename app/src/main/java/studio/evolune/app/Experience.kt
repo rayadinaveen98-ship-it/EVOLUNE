@@ -329,120 +329,267 @@ private fun stateLabel(state: OpportunityState) = when(state) {
     }
 }
 
+private fun todayStatusText(view: TodayViewState): String = when (view.mode) {
+    TodayMode.EMPTY -> "A NEW BEGINNING"
+    TodayMode.STARTS_LATER -> "PLANNED"
+    TodayMode.SCHEDULED -> "READY WHEN YOU ARE"
+    TodayMode.RECORDED -> when (view.outcome) {
+        OpportunityState.COMPLETED -> "COMPLETED"
+        OpportunityState.COMPLETED_BACKUP -> "BACKUP COMPLETED"
+        OpportunityState.PARTIAL -> "PARTLY COMPLETED"
+        OpportunityState.RESTED -> "INTENTIONALLY RESTED"
+        OpportunityState.MISSED -> "MARKED MISSED"
+        else -> "RECORDED"
+    }
+    TodayMode.REST_DAY -> "NOT SCHEDULED"
+    TodayMode.PAUSED -> "PAUSED"
+    TodayMode.MILESTONE_ENDED -> "MILESTONE ENDED"
+}
+
+@Composable
+private fun TodayMainButton(label: String, onClick: () -> Unit) {
+    Button(
+        onClick = onClick, modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp),
+        shape = RoundedCornerShape(14.dp),
+        colors = ButtonDefaults.buttonColors(containerColor = Forest, contentColor = Paper)
+    ) {
+        Text(label, fontSize = 14.sp, lineHeight = 19.sp,
+            fontWeight = FontWeight.SemiBold, textAlign = TextAlign.Center)
+    }
+}
+
+@Composable
+private fun TodayQuietButton(label: String, onClick: () -> Unit) {
+    OutlinedButton(
+        onClick = onClick, modifier = Modifier.fillMaxWidth().heightIn(min = 49.dp),
+        shape = RoundedCornerShape(14.dp),
+        colors = ButtonDefaults.outlinedButtonColors(contentColor = Forest),
+        border = BorderStroke(1.dp, Color(0xFFC8D6C9))
+    ) {
+        Text(label, fontSize = 14.sp, lineHeight = 19.sp,
+            fontWeight = FontWeight.Medium, textAlign = TextAlign.Center)
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun TodayOutcomePicker(onLog: (PracticeOutcome) -> Unit) {
+    Column(verticalArrangement = Arrangement.spacedBy(9.dp)) {
+        Text("What happened today?", fontFamily = FontFamily.Serif,
+            fontSize = 19.sp, color = Ink, lineHeight = 25.sp)
+        Text("Choose what actually happened. You can revise this record later.",
+            fontSize = 14.sp, lineHeight = 20.sp, color = Muted)
+        TodayMainButton("Completed the full practice", { onLog(PracticeOutcome.COMPLETED) })
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            listOf(
+                "Did part of it" to PracticeOutcome.PARTIAL,
+                "Rested intentionally" to PracticeOutcome.RESTED,
+                "Used my backup" to PracticeOutcome.COMPLETED_BACKUP,
+                "Mark as missed" to PracticeOutcome.MISSED
+            ).forEach { (label, outcome) ->
+                OutlinedButton(
+                    onClick = { onLog(outcome) },
+                    modifier = Modifier.heightIn(min = 49.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    border = BorderStroke(1.dp, Color(0xFFC8D6C9))
+                ) {
+                    Text(label, color = Forest, fontSize = 13.sp, lineHeight = 19.sp)
+                }
+            }
+        }
+    }
+}
+
+/** V2 Stage 04. Every label is derived from the saved challenge and practice history. */
 @Composable
 fun TodayPage(
     s: ChallengeSnapshot?, onCreate: () -> Unit, onOpen: () -> Unit,
     onLog: (PracticeOutcome)->Unit, onAdjust:()->Unit, onJournal:()->Unit
 ) {
-    var showLogChoices by remember(s?.plan?.id) { mutableStateOf(false) }
+    val view = remember(s) { presentToday(s) }
+    var showLogChoices by remember(s?.plan?.id, view.outcome) { mutableStateOf(false) }
+    val dateLabel = view.date.format(DateTimeFormatter.ofPattern("EEEE · MMMM d")).uppercase()
+
     MainScroll {
-        val today = LocalDate.now()
-        val dateLabel = today.format(DateTimeFormatter.ofPattern("EEEE · MMMM d")).uppercase()
         Header(dateLabel + " · YOUR DAY", "A gentle day\nto begin again.",
-            "One small step is enough to begin.")
-        LandscapeHero()
-        val compactHeader = LocalConfiguration.current.fontScale >= 1.25f &&
-            LocalConfiguration.current.screenWidthDp <= 400
-        if (compactHeader) {
-            Column(Modifier.fillMaxWidth(),verticalArrangement=Arrangement.spacedBy(2.dp)) {
-                Text("Your one thing",fontFamily=FontFamily.Serif,fontSize=21.sp,color=Ink)
-                TextButton(onClick=if(s==null)onCreate else onOpen,
-                    modifier=Modifier.align(Alignment.Start)) {
-                    Text(if(s==null)"Begin a practice" else "View your path  →",
-                        color=Sage,fontSize=11.sp,fontWeight=FontWeight.Bold)
+            "One meaningful step. At a pace you can sustain.")
+
+        Panel {
+            Text("YOUR NEXT SMALL STEP", fontSize = 11.sp, fontWeight = FontWeight.Bold,
+                letterSpacing = 1.1.sp, color = Forest, lineHeight = 16.sp)
+            Spacer(Modifier.height(12.dp))
+            Surface(
+                color = Pale, shape = RoundedCornerShape(11.dp),
+                border = BorderStroke(0.7.dp, Color(0xFFDAE3D9))
+            ) {
+                Text(todayStatusText(view), color = Forest, fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold, letterSpacing = 0.4.sp,
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp))
+            }
+            Spacer(Modifier.height(13.dp))
+
+            when (view.mode) {
+                TodayMode.EMPTY -> {
+                    Text("Begin with one thing", fontFamily = FontFamily.Serif,
+                        fontSize = 25.sp, lineHeight = 30.sp, color = Ink)
+                    Spacer(Modifier.height(8.dp))
+                    Text("Choose something small and repeatable. There is no required streak or deadline.",
+                        fontSize = 15.sp, lineHeight = 22.sp, color = Muted)
+                    Spacer(Modifier.height(18.dp))
+                    TodayMainButton("Create your first challenge", onCreate)
                 }
-            }
-        } else {
-            Row(Modifier.fillMaxWidth(),verticalAlignment=Alignment.CenterVertically) {
-                Text("Your one thing",fontFamily=FontFamily.Serif,fontSize=21.sp,color=Ink)
-                Spacer(Modifier.weight(1f))
-                TextButton(onClick=if(s==null)onCreate else onOpen) {
-                    Text(if(s==null)"Begin a practice" else "View your path  →",
-                        color=Sage,fontSize=11.sp,fontWeight=FontWeight.Bold)
-                }
-            }
-        }
-        if(s==null) {
-            Panel {
-                Text("Begin with one thing",fontFamily=FontFamily.Serif,fontSize=23.sp,color=Ink)
-                Spacer(Modifier.height(5.dp))
-                Text("Choose a small practice you want to explore. You can change it later.",
-                    fontSize=12.sp,lineHeight=18.sp,color=Muted)
-                Spacer(Modifier.height(13.dp))
-                PrimaryAction("Create your first challenge",onCreate)
-            }
-        } else {
-            val plan=s.plan
-            val localToday=LocalDate.now(plan.zone)
-            val opportunity=days(s).lastOrNull { it.date == localToday }
-            Panel {
-                Row(Modifier.fillMaxWidth(),verticalAlignment=Alignment.CenterVertically) {
-                    Text("TODAY'S PRACTICE",fontSize=9.sp,fontWeight=FontWeight.Bold,
-                        letterSpacing=1.4.sp,color=Color(0xFF99A394))
-                    Spacer(Modifier.weight(1f))
-                    Surface(color=Pale,shape=RoundedCornerShape(50),
-                        border=BorderStroke(1.dp,Color(0xFFDCE5DB))) {
-                        Text(localToday.dayOfMonth.toString(),
-                            Modifier.padding(horizontal=12.dp,vertical=9.dp),
-                            fontSize=11.sp,fontWeight=FontWeight.Bold,color=Sage)
+                else -> {
+                    Text(view.challengeTitle.orEmpty(), fontSize = 13.sp,
+                        fontWeight = FontWeight.Medium, color = Muted, lineHeight = 19.sp)
+                    Spacer(Modifier.height(6.dp))
+                    val focus = when (view.mode) {
+                        TodayMode.SCHEDULED, TodayMode.RECORDED ->
+                            view.action ?: "Your planned practice"
+                        TodayMode.STARTS_LATER -> "A path to look forward to"
+                        TodayMode.REST_DAY -> "Space between practices"
+                        TodayMode.PAUSED -> "Today is intentionally paused"
+                        TodayMode.MILESTONE_ENDED -> "This chapter has reached its milestone"
+                        TodayMode.EMPTY -> ""
                     }
-                }
-                Spacer(Modifier.height(6.dp))
-                Text(plan.scheduleOn(localToday).action,fontFamily=FontFamily.Serif,
-                    fontSize=23.sp,lineHeight=25.sp,color=Ink)
-                Spacer(Modifier.height(6.dp))
-                Text(plan.title + " · " + (opportunity?.state?.let(::stateLabel) ?: "Milestone finished"),
-                    fontSize=11.sp,color=Muted)
-                Spacer(Modifier.height(14.dp))
-                val canLog=opportunity != null &&
-                    opportunity.state != OpportunityState.NOT_SCHEDULED &&
-                    opportunity.state != OpportunityState.PAUSED
-                if(canLog) {
-                    Row(Modifier.fillMaxWidth(), horizontalArrangement=Arrangement.spacedBy(8.dp)) {
-                        PrimaryAction("✓  Log practice",{showLogChoices=!showLogChoices},Modifier.weight(1f))
-                        SecondaryAction("Adjust",onAdjust)
+                    Text(focus, fontFamily = FontFamily.Serif, fontSize = 24.sp,
+                        lineHeight = 29.sp, color = Ink)
+                    Spacer(Modifier.height(9.dp))
+                    Text(view.milestone.orEmpty(), fontSize = 13.sp,
+                        color = Forest, fontWeight = FontWeight.SemiBold, lineHeight = 19.sp)
+                    if (view.cueTime != null && view.mode == TodayMode.SCHEDULED) {
+                        Spacer(Modifier.height(4.dp))
+                        Text("Planned cue: " + view.cueTime.toString() +
+                            " · This does not mean notifications are enabled",
+                            fontSize = 12.sp, lineHeight = 18.sp, color = Muted)
                     }
-                    if(showLogChoices) {
-                        Spacer(Modifier.height(15.dp))
-                        Text("What happened today?",fontFamily=FontFamily.Serif,fontSize=17.sp,color=Ink)
-                        Spacer(Modifier.height(6.dp))
-                        OutcomeButtons { outcome ->
-                            showLogChoices=false
+                    Spacer(Modifier.height(13.dp))
+                    when (view.mode) {
+                        TodayMode.SCHEDULED -> {
+                            Text("Scheduled for today. Nothing has been recorded yet.",
+                                fontSize = 14.sp, lineHeight = 21.sp, color = Muted)
+                            Spacer(Modifier.height(12.dp))
+                            TodayMainButton("Record today's practice", { showLogChoices = !showLogChoices })
+                            Spacer(Modifier.height(8.dp))
+                            TodayQuietButton("Adjust future plan", onAdjust)
+                        }
+                        TodayMode.RECORDED -> {
+                            val message = when (view.outcome) {
+                                OpportunityState.COMPLETED -> "You recorded the full practice today."
+                                OpportunityState.COMPLETED_BACKUP -> "You recorded your smaller backup action."
+                                OpportunityState.PARTIAL -> "You recorded part of the practice today."
+                                OpportunityState.RESTED -> "You chose intentional rest today."
+                                OpportunityState.MISSED -> "You explicitly marked this practice as missed."
+                                else -> "Today's practice was recorded."
+                            }
+                            Text(message + " Your earlier record remains in the history if you update it.",
+                                fontSize = 14.sp, lineHeight = 21.sp, color = Muted)
+                            Spacer(Modifier.height(12.dp))
+                            TodayMainButton("Update today's record", { showLogChoices = !showLogChoices })
+                            Spacer(Modifier.height(8.dp))
+                            TodayQuietButton("View challenge details", onOpen)
+                        }
+                        TodayMode.REST_DAY -> {
+                            Text("There is no practice on today's schedule. A day without a planned action is not a missed day.",
+                                fontSize = 14.sp, lineHeight = 21.sp, color = Muted)
+                            Spacer(Modifier.height(12.dp))
+                            TodayQuietButton("View your path", onOpen)
+                        }
+                        TodayMode.PAUSED -> {
+                            Text("Your plan is paused today. Existing records have not changed.",
+                                fontSize = 14.sp, lineHeight = 21.sp, color = Muted)
+                            Spacer(Modifier.height(12.dp))
+                            TodayQuietButton("Adjust future plan", onAdjust)
+                        }
+                        TodayMode.MILESTONE_ENDED -> {
+                            Text("The calendar period has ended. Your practice history is preserved; no new entry is due today.",
+                                fontSize = 14.sp, lineHeight = 21.sp, color = Muted)
+                            Spacer(Modifier.height(12.dp))
+                            TodayQuietButton("View milestone and history", onOpen)
+                        }
+                        TodayMode.STARTS_LATER -> {
+                            Text("This practice begins on " + view.startDate.toString() +
+                                ". There is nothing to log before it starts.",
+                                fontSize = 14.sp, lineHeight = 21.sp, color = Muted)
+                            Spacer(Modifier.height(12.dp))
+                            TodayQuietButton("View planned challenge", onOpen)
+                        }
+                        TodayMode.EMPTY -> Unit
+                    }
+
+                    if (showLogChoices &&
+                        (view.mode == TodayMode.SCHEDULED || view.mode == TodayMode.RECORDED)) {
+                        Spacer(Modifier.height(16.dp))
+                        Divider(color = Line)
+                        Spacer(Modifier.height(16.dp))
+                        TodayOutcomePicker { outcome ->
+                            showLogChoices = false
                             onLog(outcome)
                         }
                     }
-                } else if(opportunity?.state==OpportunityState.PAUSED) {
-                    Text("Paused today. Your earlier practice remains exactly as recorded.",
-                        fontSize=12.sp,lineHeight=18.sp,color=Muted)
-                    Spacer(Modifier.height(7.dp))
-                    SecondaryAction("Adjust plan",onAdjust)
-                } else {
-                    Text("No practice is scheduled for today.",fontSize=12.sp,color=Muted)
-                    Spacer(Modifier.height(7.dp))
-                    SecondaryAction("Challenge details",onOpen)
                 }
-                Spacer(Modifier.height(10.dp))
-                Text("Your practice record is yours to revise; missing logs are not treated as failures.",
-                    color=Muted,fontSize=10.sp,lineHeight=15.sp)
             }
         }
+
+        // Artwork supports the practice; it no longer pushes the primary action
+        // beneath a large header and the first viewport.
+        LandscapeHero(label = "A SPACE TO RETURN TO",
+            overline = "STILLWATER × ATELIER",
+            headline = "A quiet place\nfor real progress.")
+
+        if (s != null && view.nextScheduled != null) {
+            Panel {
+                Text("COMING UP", color = Forest, fontWeight = FontWeight.Bold,
+                    letterSpacing = 1.sp, fontSize = 11.sp)
+                Spacer(Modifier.height(7.dp))
+                Text(view.nextScheduled.format(DateTimeFormatter.ofPattern("EEEE · MMM d")),
+                    fontFamily = FontFamily.Serif, color = Ink,
+                    fontSize = 20.sp, lineHeight = 25.sp)
+                Spacer(Modifier.height(5.dp))
+                Text(s.plan.scheduleOn(view.nextScheduled).action, fontSize = 14.sp,
+                    lineHeight = 21.sp, color = Muted)
+            }
+        }
+
+        if (s != null && view.unreportedEarlier > 0) {
+            Panel {
+                Text("Some days are still unreported", fontFamily = FontFamily.Serif,
+                    fontSize = 20.sp, lineHeight = 25.sp, color = Ink)
+                Spacer(Modifier.height(7.dp))
+                val count = view.unreportedEarlier
+                Text(count.toString() + if (count == 1)
+                    " earlier scheduled day has no entry. Unreported never means missed."
+                    else " earlier scheduled days have no entry. Unreported never means missed.",
+                    fontSize = 14.sp, lineHeight = 21.sp, color = Muted)
+                Spacer(Modifier.height(11.dp))
+                TodayQuietButton("View practice history", onOpen)
+            }
+        }
+
         Row(
             Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp))
-                .background(Color(0xFFEAF0E7)).clickable { onJournal() }
-                .padding(15.dp),
-            verticalAlignment=Alignment.CenterVertically,
-            horizontalArrangement=Arrangement.spacedBy(11.dp)
+                .background(Color(0xFFEAF0E7))
+                .clickable(role = Role.Button, onClick = onJournal)
+                .heightIn(min = 70.dp).padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Box(Modifier.size(40.dp).clip(RoundedCornerShape(12.dp)).background(Color(0xFFD9E5D7)),
-                contentAlignment=Alignment.Center) { NavGlyph("journal", Sage) }
-            Column(Modifier.weight(1f)) {
-                Text("A moment to reflect",fontSize=12.sp,color=Ink,fontWeight=FontWeight.Bold)
-                Text("Mood and energy are always optional",fontSize=10.sp,color=Muted)
+            Box(Modifier.size(43.dp).clip(RoundedCornerShape(13.dp))
+                .background(Color(0xFFD9E5D7)), contentAlignment = Alignment.Center) {
+                NavGlyph("journal", Forest)
             }
-            Text("→",fontSize=20.sp,color=Sage)
+            Column(Modifier.weight(1f)) {
+                Text("A moment to reflect", color = Ink, fontWeight = FontWeight.SemiBold,
+                    fontSize = 15.sp, lineHeight = 21.sp)
+                Text("Optional, private, and always yours", color = Muted,
+                    fontSize = 13.sp, lineHeight = 19.sp)
+            }
+            Text("Open", color = Forest, fontSize = 12.sp, fontWeight = FontWeight.Medium)
         }
-        Text("Private and offline in this build. Cloud backup and sync are not enabled.",
-            fontSize=10.sp,lineHeight=16.sp,color=Muted)
+        Text("Your entries stay on this device unless you explicitly export them. No cloud sync is enabled.",
+            fontSize = 12.sp, lineHeight = 18.sp, color = Muted)
     }
 }
 
