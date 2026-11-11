@@ -32,6 +32,8 @@ jobs:
           disable-animations: true
           script: |
             gradle :core:data:connectedDebugAndroidTest :app:connectedDebugAndroidTest :app:assembleDebug --stacktrace --no-daemon
+            # Persist the generated Room v1 schema as evidence before any future migration.
+            test -s core/data/schemas/studio.evolune.data.EvoluneDatabase/1.json
             mkdir -p qa/native_screenshots
             adb pull /sdcard/Pictures/EVOLUNE-QA/. qa/native_screenshots/
             # Android test cleanup can remove the app. Install again before wm-size smoke checks.
@@ -71,6 +73,7 @@ jobs:
           name: evolune-emulator-evidence
           path: |
             qa/native_screenshots/
+            core/data/schemas/
             core/data/build/reports/androidTests/
             core/data/build/outputs/androidTest-results/
             app/build/reports/androidTests/
