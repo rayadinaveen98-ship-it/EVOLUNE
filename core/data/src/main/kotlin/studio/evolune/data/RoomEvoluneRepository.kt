@@ -28,26 +28,33 @@ class RoomEvoluneRepository(
     private val dao: EvoluneDao,
     private val clock: Clock = Clock.systemUTC()
 ) {
-    suspend fun createChallenge(plan: ChallengePlan, growthAreaId: String? = null) {
+    suspend fun createChallenge(
+        plan: ChallengePlan,
+        growthAreaId: String? = null,
+        newArea: GrowthAreaEntity? = null
+    ) {
+        require(newArea == null || growthAreaId == newArea.id) {
+            "A new growth area must be linked to its first challenge"
+        }
         require(plan.schedules.size == 1) { "Create with one initial schedule; append revisions separately" }
         val now = Instant.now(clock).toEpochMilli()
         val initial = StorageCodec.rawSchedule(plan.schedules.single())
         val planRaw = StorageCodec.rawPlan(plan)
-        dao.createChallenge(
-            ChallengeEntity(
+        val entity = ChallengeEntity(
                 id = planRaw.id, growthAreaId = growthAreaId, title = planRaw.title,
                 startDate = planRaw.startDate, zoneId = planRaw.zoneId,
                 milestoneKind = planRaw.milestoneKind, target = planRaw.target,
                 createdAtEpochMs = now
-            ),
-            ScheduleVersionEntity(
+            )
+        val schedule = ScheduleVersionEntity(
                 challengeId = plan.id, effectiveFrom = initial.effectiveFrom,
                 recurrenceKind = initial.recurrenceKind,
                 recurrenceArgument = initial.recurrenceArgument,
                 action = initial.action, cueTime = initial.cueTime,
                 fallbackAction = initial.fallbackAction, createdAtEpochMs = now
             )
-        )
+        if (newArea != null) dao.createFirstChallenge(newArea, entity, schedule)
+        else dao.createChallenge(entity, schedule)
     }
 
     suspend fun snapshot(id: String): ChallengeSnapshot? {
