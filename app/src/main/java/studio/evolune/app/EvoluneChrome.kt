@@ -39,7 +39,7 @@ internal val evoluneDestinations = listOf(
     EvoluneDestination("growth", "My Growth", "Growth"),
     EvoluneDestination("challenges", "Challenges", "Plans"),
     EvoluneDestination("journal", "Journal", "Journal"),
-    EvoluneDestination("insights", "Insights", "Insights")
+    EvoluneDestination("insights", "Insights", "Trends")
 )
 
 internal fun selectedEvoluneDestination(page: String): String = when (page) {
@@ -135,8 +135,8 @@ internal fun EvoluneAction(
                 disabledContainerColor=EvoluneTokens.Pale, disabledContentColor=EvoluneTokens.Muted
             )
         ) {
-            Text(text, fontSize=14.sp, lineHeight=20.sp,
-                fontWeight=FontWeight.SemiBold, textAlign=TextAlign.Center)
+            Text(text,style=EvoluneType.typography.labelLarge,
+                textAlign=TextAlign.Center,softWrap=true)
         }
     } else {
         OutlinedButton(
@@ -150,8 +150,9 @@ internal fun EvoluneAction(
             ),
             border=BorderStroke(1.dp, if(enabled) Color(0xFFC5D2C5) else EvoluneTokens.Line)
         ) {
-            Text(text, fontSize=14.sp, lineHeight=20.sp,
-                fontWeight=FontWeight.Medium, textAlign=TextAlign.Center)
+            Text(text,style=EvoluneType.typography.labelLarge.copy(
+                    fontWeight=FontWeight.Medium),
+                textAlign=TextAlign.Center,softWrap=true)
         }
     }
 }
@@ -167,6 +168,7 @@ private fun ChromeDestination(
     onPage: (String) -> Unit
 ) {
     val label = if(showShortName) destination.compactTitle else destination.title
+    val compactIcon=compact && LocalConfiguration.current.fontScale>=1.75f
     Column(
         modifier.selectable(selected=active,role=Role.Tab) { onPage(destination.route) }
             .semantics {
@@ -178,22 +180,32 @@ private fun ChromeDestination(
         horizontalAlignment=Alignment.CenterHorizontally,
         verticalArrangement=Arrangement.Center
     ) {
-        Box(Modifier.size(36.dp).clip(RoundedCornerShape(13.dp))
+        Box(Modifier.size(if(compactIcon)29.dp else 36.dp)
+            .clip(RoundedCornerShape(13.dp))
             .background(if(active)EvoluneTokens.Pale else Color.Transparent),
             contentAlignment=Alignment.Center) {
-            EvoluneGlyph(destination.route,if(active)EvoluneTokens.Forest else EvoluneTokens.Muted,
-                Modifier.size(23.dp))
+            EvoluneGlyph(destination.route,
+                if(active)EvoluneTokens.Forest else EvoluneTokens.Muted,
+                Modifier.size(if(compactIcon)19.dp else 23.dp))
         }
         Spacer(Modifier.height(4.dp))
-        Text(label,fontSize=if(compact)11.sp else 12.sp,
-            lineHeight=if(compact)15.sp else 17.sp,
-            maxLines=2,softWrap=true,
+        Text(label,
+            style=EvoluneType.typography.labelMedium.copy(
+                fontSize=if(compact)11.sp else 12.sp,
+                lineHeight=if(compact)16.sp else 18.sp
+            ),
+            maxLines=3,softWrap=true,
             textAlign=TextAlign.Center,
             fontWeight=if(active)FontWeight.SemiBold else FontWeight.Medium,
             color=if(active)EvoluneTokens.Forest else EvoluneTokens.Muted)
     }
 }
 
+/**
+ * Normal font sizes: five equally-sized destinations in one row.
+ * Narrow screens at >=175% system text: a centered 3+2 grid so complete labels
+ * remain readable, all routes stay visible and no font-scale override is used.
+ */
 @Composable
 internal fun EvoluneBottomNav(
     page: String,
@@ -201,30 +213,61 @@ internal fun EvoluneBottomNav(
     modifier: Modifier = Modifier
 ) {
     val config=LocalConfiguration.current
-    val compact=config.screenWidthDp < 370 || config.fontScale >= 1.35f
-    val shortNames=compact && config.fontScale >= 1.3f
-    // The bottom bar MUST have a bounded height: child fillMaxHeight would
-    // otherwise grow a min-height-only Row to the full window and hide screens.
+    val compact=config.screenWidthDp<370 || config.fontScale>=1.35f
+    val shortNames=compact && config.fontScale>=1.3f
+    val stacked=config.screenWidthDp<400 && config.fontScale>=1.75f
+    val selected=selectedEvoluneDestination(page)
     val navHeight=when {
-        config.fontScale >= 1.65f -> 128.dp
-        config.fontScale >= 1.3f -> 104.dp
-        else -> 86.dp
+        stacked -> 166.dp
+        config.fontScale>=1.65f ->116.dp
+        config.fontScale>=1.3f ->102.dp
+        else ->86.dp
     }
-    Surface(color=EvoluneTokens.Paper,modifier=modifier.fillMaxWidth(),
-        border=BorderStroke(0.5.dp,EvoluneTokens.Line)) {
+    Surface(
+        color=EvoluneTokens.Paper,
+        modifier=modifier.fillMaxWidth(),
+        border=BorderStroke(0.5.dp,EvoluneTokens.Line)
+    ) {
         Box(Modifier.fillMaxWidth().navigationBarsPadding(),
             contentAlignment=Alignment.Center) {
-            Row(
-                Modifier.widthIn(max=760.dp).fillMaxWidth()
-                    .height(navHeight)
-                    .padding(horizontal=4.dp,vertical=4.dp),
-                horizontalArrangement=Arrangement.SpaceEvenly,
-                verticalAlignment=Alignment.CenterVertically
-            ) {
-                val selected=selectedEvoluneDestination(page)
-                evoluneDestinations.forEach { dest ->
-                    ChromeDestination(dest,selected==dest.route,compact,shortNames,
-                        Modifier.weight(1f).fillMaxHeight(),onPage)
+            if(stacked) {
+                Column(
+                    Modifier.widthIn(max=760.dp).fillMaxWidth()
+                        .height(navHeight).padding(horizontal=5.dp,vertical=4.dp),
+                    verticalArrangement=Arrangement.spacedBy(0.dp)
+                ) {
+                    Row(Modifier.fillMaxWidth().weight(1f),
+                        horizontalArrangement=Arrangement.SpaceEvenly) {
+                        evoluneDestinations.take(3).forEach { dest ->
+                            ChromeDestination(dest,selected==dest.route,
+                                compact=true,showShortName=true,
+                                modifier=Modifier.weight(1f).fillMaxHeight(),
+                                onPage=onPage)
+                        }
+                    }
+                    Row(Modifier.fillMaxWidth().weight(1f),
+                        horizontalArrangement=Arrangement.SpaceEvenly) {
+                        Spacer(Modifier.weight(0.5f))
+                        evoluneDestinations.drop(3).forEach { dest ->
+                            ChromeDestination(dest,selected==dest.route,
+                                compact=true,showShortName=true,
+                                modifier=Modifier.weight(1f).fillMaxHeight(),
+                                onPage=onPage)
+                        }
+                        Spacer(Modifier.weight(0.5f))
+                    }
+                }
+            } else {
+                Row(
+                    Modifier.widthIn(max=760.dp).fillMaxWidth()
+                        .height(navHeight).padding(horizontal=4.dp,vertical=4.dp),
+                    horizontalArrangement=Arrangement.SpaceEvenly,
+                    verticalAlignment=Alignment.CenterVertically
+                ) {
+                    evoluneDestinations.forEach { dest ->
+                        ChromeDestination(dest,selected==dest.route,compact,shortNames,
+                            Modifier.weight(1f).fillMaxHeight(),onPage)
+                    }
                 }
             }
         }
@@ -238,18 +281,23 @@ internal fun EvoluneSideRail(
     modifier: Modifier = Modifier
 ) {
     val selected=selectedEvoluneDestination(page)
-    Surface(color=EvoluneTokens.Paper,modifier=modifier.width(116.dp).fillMaxHeight(),
+    val largeScale=LocalConfiguration.current.fontScale>=1.6f
+    Surface(color=EvoluneTokens.Paper,
+        modifier=modifier.width(if(largeScale)144.dp else 116.dp).fillMaxHeight(),
         border=BorderStroke(0.5.dp,EvoluneTokens.Line)) {
         Column(Modifier.fillMaxHeight().systemBarsPadding()
             .verticalScroll(rememberScrollState()).padding(horizontal=9.dp,vertical=14.dp),
             verticalArrangement=Arrangement.spacedBy(6.dp)) {
-            Text("EXPLORE",color=EvoluneTokens.Forest,fontSize=11.sp,
-                letterSpacing=1.sp,fontWeight=FontWeight.Bold,
+            Text("EXPLORE",color=EvoluneTokens.Forest,
+                style=EvoluneType.typography.labelSmall,
+                letterSpacing=0.7.sp,
                 modifier=Modifier.padding(start=10.dp,top=8.dp,bottom=8.dp))
             evoluneDestinations.forEach { dest ->
                 ChromeDestination(dest, selected==dest.route,
                     compact=false,showShortName=false,
-                    modifier=Modifier.fillMaxWidth().heightIn(min=76.dp),onPage=onPage)
+                    modifier=Modifier.fillMaxWidth()
+                        .heightIn(min=if(largeScale)122.dp else 76.dp),
+                    onPage=onPage)
             }
         }
     }
@@ -267,8 +315,11 @@ internal fun EvoluneTopBar(onGrowth: () -> Unit) {
             OpenPathSmallMark(Modifier.size(40.dp))
         }
         Spacer(Modifier.width(8.dp))
-        Text("EVOLUNE",fontSize=14.sp,letterSpacing=2.sp,
-            fontWeight=FontWeight.SemiBold,color=EvoluneTokens.Ink)
+        Text("EVOLUNE",
+            style=EvoluneType.typography.titleMedium.copy(
+                letterSpacing=1.1.sp
+            ),
+            color=EvoluneTokens.Ink,softWrap=true)
         Spacer(Modifier.weight(1f))
         Surface(
             onClick=onGrowth,
@@ -294,11 +345,13 @@ internal fun EvoluneNotice(message: String, onDismiss: () -> Unit) {
     ) {
         Row(Modifier.padding(start=14.dp,top=10.dp,bottom=10.dp,end=5.dp),
             verticalAlignment=Alignment.CenterVertically) {
-            Text(message,color=EvoluneTokens.Ink,fontSize=14.sp,lineHeight=21.sp,
-                modifier=Modifier.weight(1f))
+            Text(message,color=EvoluneTokens.Ink,
+                style=EvoluneType.typography.bodyMedium,
+                modifier=Modifier.weight(1f),softWrap=true)
             Spacer(Modifier.width(4.dp))
             TextButton(onClick=onDismiss,modifier=Modifier.heightIn(min=48.dp)) {
-                Text("Close",color=EvoluneTokens.Forest,fontSize=14.sp)
+                Text("Close",color=EvoluneTokens.Forest,
+                    style=EvoluneType.typography.labelLarge)
             }
         }
     }
@@ -331,7 +384,10 @@ internal fun EvoluneChromeShell(
     content: @Composable () -> Unit
 ) {
     val expanded = expandedOverride ?: (LocalConfiguration.current.screenWidthDp >= 700)
-    MaterialTheme(colorScheme=EvoluneTokens.appColors) {
+    MaterialTheme(
+        colorScheme=EvoluneTokens.appColors,
+        typography=EvoluneType.typography
+    ) {
         Scaffold(
             modifier=Modifier.fillMaxSize(),
             containerColor=EvoluneTokens.Cream,

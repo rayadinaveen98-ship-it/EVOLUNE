@@ -192,7 +192,8 @@ internal fun OpenPathWelcome(onFinished: () -> Unit) {
     }
 
     val config = LocalConfiguration.current
-    val compact = config.screenHeightDp < 670 || config.screenWidthDp < 345
+    val largeText = config.fontScale >= 1.6f
+    val compact = config.screenHeightDp < 670 || config.screenWidthDp < 345 || largeText
     val symbolSize = if (compact) 148.dp else 174.dp
     val sceneFraction = if (reducedMotion) 1f else entrance(progressMs, 0L, 800L)
     val wordmarkFraction = if (reducedMotion) 1f else entrance(progressMs, 3_100L, 1_140L)
@@ -237,12 +238,14 @@ internal fun OpenPathWelcome(onFinished: () -> Unit) {
             )
             Spacer(Modifier.height(if (compact) 2.dp else 8.dp))
             Text(
-                "E V O L U N E",
+                if (largeText) "EVOLUNE" else "E V O L U N E",
                 color = Paper.copy(alpha = wordmarkFraction),
                 fontFamily = FontFamily.Serif,
-                fontSize = if (compact) 28.sp else 33.sp,
-                letterSpacing = 1.2.sp,
-                maxLines = 1,
+                fontSize = if (largeText) 25.sp else if (compact) 28.sp else 33.sp,
+                letterSpacing = if (largeText) 0.5.sp else 1.2.sp,
+                maxLines = 2,
+                softWrap = true,
+                textAlign = TextAlign.Center,
                 modifier = Modifier.graphicsLayer {
                     translationY = (1f - wordmarkFraction) * 12f
                 }
@@ -253,8 +256,9 @@ internal fun OpenPathWelcome(onFinished: () -> Unit) {
                 textAlign = TextAlign.Center,
                 color = Paper.copy(alpha = taglineFraction),
                 fontSize = 14.sp,
-                lineHeight = 21.sp,
-                modifier = Modifier.graphicsLayer {
+                lineHeight = 22.sp,
+                softWrap = true,
+                modifier = Modifier.fillMaxWidth().graphicsLayer {
                     translationY = (1f - taglineFraction) * 10f
                 }
             )

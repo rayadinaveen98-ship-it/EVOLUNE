@@ -38,6 +38,18 @@ jobs:
             test -s core/data/schemas/studio.evolune.data.EvoluneDatabase/1.json
             # Android test cleanup can remove the app. Install again before wm-size smoke checks.
             gradle :app:installDebug --no-daemon
+            # The Pixel Launcher is a background system process during app QA.
+            # Suppress background-only ANR overlays, never foreground app ANRs,
+            # so screenshots can reveal the Android app layout itself.
+            adb shell settings put global anr_show_background 0
+            adb shell am force-stop com.google.android.apps.nexuslauncher || true
+            # Synthetic debug-only post-onboarding state so responsive captures
+            # show Today/navigation instead of four-step first-run setup.
+            # No production user data or app APIs are modified.
+            adb shell am force-stop studio.evolune.app
+            adb shell run-as studio.evolune.app mkdir -p shared_prefs
+            adb shell "run-as studio.evolune.app sh -c 'echo PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiIHN0YW5kYWxvbmU9InllcyIgPz48bWFwPjxib29sZWFuIG5hbWU9ImludHJvX2NvbXBsZXRlZCIgdmFsdWU9InRydWUiIC8+PC9tYXA+ | base64 -d > shared_prefs/evolune_open_path_entry_v1.xml'"
+            adb shell "run-as studio.evolune.app sh -c 'echo PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiIHN0YW5kYWxvbmU9InllcyIgPz48bWFwPjxib29sZWFuIG5hbWU9InNldHVwX2NvbXBsZXRlZCIgdmFsdWU9InRydWUiIC8+PC9tYXA+ | base64 -d > shared_prefs/evolune_v2_setup.xml'"
             # Screen-size overrides exercise 320dp phones and 800dp tablets on one emulator.
             adb shell wm size 640x1280
             adb shell wm density 320
@@ -51,6 +63,13 @@ jobs:
             adb shell am start -W -n studio.evolune.app/.MainActivity
             sleep 3
             adb exec-out screencap -p > qa/native_screenshots/responsive_large_type_320dp.png
+            # 200% system font-scale: a real emulator configuration, not just a
+            # local Compose override. Record the post-onboarding Today screen.
+            adb shell settings put system font_scale 2.0
+            adb shell am force-stop studio.evolune.app
+            adb shell am start -W -n studio.evolune.app/.MainActivity
+            sleep 3
+            adb exec-out screencap -p > qa/native_screenshots/responsive_font200_320dp.png
             adb shell settings put system font_scale 1.0
             adb shell wm size 1280x1920
             adb shell wm density 240
@@ -66,7 +85,7 @@ jobs:
             adb exec-out screencap -p > qa/native_screenshots/responsive_tablet_landscape_1280dp.png
             adb shell wm size reset
             adb shell wm density reset
-            python3 -c 'from pathlib import Path; names=("setup_growth_area","setup_practice","setup_rhythm","setup_review","welcome_stones","welcome_open_path_first_run","today","challenges","growth","journal","insights","challenge_create","challenge_detail_populated","reminders_disabled","recovery_populated","review_populated","today_populated","stage06_phone_tabs","stage06_expanded_rail_simulated","responsive_320dp","responsive_large_type_320dp","responsive_tablet_853dp","responsive_tablet_landscape_1280dp"); root=Path("qa/native_screenshots"); missing=[n for n in names if not (root / ((n+".png") if n.startswith("responsive_") else ("evolune_qa_"+n+".png"))).is_file() or (root / ((n+".png") if n.startswith("responsive_") else ("evolune_qa_"+n+".png"))).read_bytes()[:8] != bytes([137,80,78,71,13,10,26,10])]; assert not missing, "Missing or invalid native PNG: "+", ".join(missing)'
+            python3 -c 'from pathlib import Path; names=("setup_growth_area","setup_practice","setup_rhythm","setup_review","welcome_stones","welcome_open_path_first_run","today","challenges","growth","journal","insights","challenge_create","challenge_detail_populated","reminders_disabled","recovery_populated","review_populated","today_populated","stage06_phone_tabs","stage06_expanded_rail_simulated","stage07_320dp_font100","stage07_320dp_font200","stage07_rail_font140_simulated","responsive_320dp","responsive_font200_320dp","responsive_large_type_320dp","responsive_tablet_853dp","responsive_tablet_landscape_1280dp"); root=Path("qa/native_screenshots"); missing=[n for n in names if not (root / ((n+".png") if n.startswith("responsive_") else ("evolune_qa_"+n+".png"))).is_file() or (root / ((n+".png") if n.startswith("responsive_") else ("evolune_qa_"+n+".png"))).read_bytes()[:8] != bytes([137,80,78,71,13,10,26,10])]; assert not missing, "Missing or invalid native PNG: "+", ".join(missing)'
       - uses: actions/upload-artifact@v4
         if: always()
         with:
