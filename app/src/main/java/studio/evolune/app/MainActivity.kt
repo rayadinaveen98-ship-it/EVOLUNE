@@ -74,7 +74,9 @@ private fun EvoluneRoot(dao: EvoluneDao, repository: RoomEvoluneRepository) {
     var pendingReminderPermission by remember { mutableStateOf<Pair<String,String>?>(null) }
     val context = LocalContext.current
     // First-run is an in-app presentation only; returning users see Today immediately.
-    var showOpenPathWelcome by rememberSaveable {
+    // Re-evaluate persistent completion on Activity recreation. A monotonic timestamp
+    // in OpenPathFirstRun resumes the existing sequence rather than replaying it.
+    var showOpenPathWelcome by remember {
         mutableStateOf(!OpenPathFirstRun.completed(context))
     }
 
