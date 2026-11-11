@@ -2,7 +2,7 @@
 
 **Working branch:** `feature/android-phase3c`  
 **Baseline:** Existing native Compose screens + Room/engine from main (preserved, not rewritten).  
-**Decision:** Repair the actual Android CI build before expanding screen features.
+**Decision:** Repair the actual Android CI build before expanding screen features.\n**Update 2026-11-11:** Verified GitHub Actions run [42950543150](https://github.com/rayadinaveen98-ship-it/EVOLUNE/actions/runs/42950543150) completed successfully for domain/data JVM tests, Android compilation and debug APK upload. Android emulator/device execution is a separate, unverified gate.
 
 ## Audit
 
@@ -27,9 +27,9 @@ The previous CI run failed AAR metadata checks because Compose **1.12.1** from t
 - [x] Local JVM domain verification (standalone compiler)
 - [x] Local storage codec round trip verification
 - [x] Local SQLite schema/integrity/reopen contract verification
-- [ ] Remote CI JVM/Room compile and app-debug APK build — **pending workflow result**
-- [ ] Emulator / device Room instrumentation test
-- [ ] Android screenshots and visual parity check
+- [x] Remote CI JVM/Room compile and app-debug APK build — verified in run [42950543150](https://github.com/rayadinaveen98-ship-it/EVOLUNE/actions/runs/42950543150)
+- [ ] Emulator / device Room instrumentation test — workflow configured in [Phase 3D QA](PHASE3D_DEVICE_QA.md), actual run result not verified
+- [ ] Native Android screenshots and visual parity check — screenshot automation configured for first-launch state; output not yet verified
 - [ ] Notification reliability and private-data export/delete review
 - [ ] Final installable APK handoff
 
