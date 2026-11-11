@@ -38,6 +38,11 @@ jobs:
             test -s core/data/schemas/studio.evolune.data.EvoluneDatabase/1.json
             # Android test cleanup can remove the app. Install again before wm-size smoke checks.
             gradle :app:installDebug --no-daemon
+            # The Pixel Launcher is a background system process during app QA.
+            # Suppress background-only ANR overlays, never foreground app ANRs,
+            # so screenshots can reveal the Android app layout itself.
+            adb shell settings put global anr_show_background 0
+            adb shell am force-stop com.google.android.apps.nexuslauncher || true
             # Synthetic debug-only post-onboarding state so responsive captures
             # show Today/navigation instead of four-step first-run setup.
             # No production user data or app APIs are modified.
