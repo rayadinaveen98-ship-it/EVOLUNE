@@ -2,11 +2,16 @@ package studio.evolune.app
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.ui.platform.LocalContext
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.room.Room
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import studio.evolune.data.*
 import studio.evolune.domain.*
 import java.time.*
@@ -44,6 +49,33 @@ private fun EvoluneRoot(dao: EvoluneDao, repository: RoomEvoluneRepository) {
     var snapshot by remember { mutableStateOf<ChallengeSnapshot?>(null) }
     var page by rememberSaveable { mutableStateOf("today") }
     var notice by remember { mutableStateOf<String?>(null) }
+    val context = LocalContext.current
+
+    /** SAF export keeps the sensitive archive on a user-selected local destination. */
+    val exportLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.CreateDocument("application/json")
+    ) { uri ->
+        if (uri != null) {
+            scope.launch {
+                try {
+                    val snapshotRows = dao.exportLocalData()
+                    val data = withContext(Dispatchers.Default) {
+                        EvoluneExportJson.encode(snapshotRows)
+                    }
+                    withContext(Dispatchers.IO) {
+                        val output = requireNotNull(context.contentResolver.openOutputStream(uri, "w")) {
+                            "Selected location could not be opened for writing"
+                        }
+                        output.bufferedWriter(Charsets.UTF_8).use { it.write(data) }
+                    }
+                    notice = "Export saved. Keep this private file safe. Restore is not yet available."
+                } catch (ex: Exception) {
+                    notice = "Export failed. Your app data was not changed. " +
+                        (ex.message ?: "Please choose another file location.")
+                }
+            }
+        }
+    }
 
     suspend fun refresh() {
         snapshot = activeId?.let { repository.snapshot(it) }
@@ -156,7 +188,24 @@ private fun EvoluneRoot(dao: EvoluneDao, repository: RoomEvoluneRepository) {
                         body = body, mood = mood, energy = energy, updatedAtEpochMs = now
                     ))
                 }
-            }, onDelete = { entry -> execute { repository.deleteReflection(entry.id) } })
+            }, onDelete = { entry -> execute { repository.deleteReflection(entry.id) } },
+                onDataPrivacy = { page = "data" })
+            "data" -> DataPrivacyPage(
+                onBack = { page = "journal" },
+                onExport = {
+                    val name = "evolune-export-" + LocalDate.now().toString() + ".json"
+                    exportLauncher.launch(name)
+                },
+                onErase = {
+                    execute {
+                        dao.eraseAllLocalData()
+                        activeId = null
+                        snapshot = null
+                        page = "today"
+                        notice = "All EVOLUNE local data was erased. Export files outside the app were not touched."
+                    }
+                }
+            )
             "insights" -> InsightsPage(snapshot)
             else -> TodayPage(snapshot, { page = "create" }, { page = "detail" }, {}, { page = "recovery" }, { page = "journal" })
         }
