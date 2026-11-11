@@ -65,7 +65,10 @@
     "darkPaletteApproved": false,
     "logoApproved": false,
     "fontPairApproved": false,
-    "commercialTrademarkCleared": false
+    "commercialTrademarkCleared": false,
+    "logoDirectionApproved": true
   },
-  "note": "Palette and motion proposal only; not a production theme. Contrast must be validated for every real foreground/background. Font candidates are not bundled."
+  "note": "Open Path direction selected by owner; exact paths, typography, trademark clearance, dark palette and Android icon integration remain in review. Font files not bundled.",
+  "selectedLogoDirection": "A — The Open Path",
+  "brandAssets": "design/v2/assets/open-path"
 }
