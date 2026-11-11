@@ -1,0 +1,422 @@
+package studio.evolune.app
+
+import androidx.compose.foundation.*
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import studio.evolune.data.*
+import studio.evolune.domain.*
+import java.time.*
+import java.time.format.DateTimeFormatter
+
+private val Ink = Color(0xFF26392D)
+private val Sage = Color(0xFF587966)
+private val Cream = Color(0xFFF7F4EB)
+private val Paper = Color(0xFFFFFEFA)
+private val Muted = Color(0xFF718077)
+private val Line = Color(0xFFE8E6DD)
+private val Gold = Color(0xFFB89A63)
+
+private val appColors = lightColorScheme(
+    primary = Sage, onPrimary = Color.White, background = Cream, onBackground = Ink,
+    surface = Paper, onSurface = Ink, secondary = Gold, surfaceVariant = Color(0xFFEEF1E9)
+)
+
+@Composable
+fun EvoluneShell(page: String, onPage: (String)->Unit, notice: String?, onDismissNotice: ()->Unit, content: @Composable () -> Unit) {
+    MaterialTheme(colorScheme = appColors) {
+        Scaffold(
+            containerColor = Cream,
+            bottomBar = {
+                NavigationBar(containerColor = Paper) {
+                    listOf("today" to "Today", "challenges" to "Challenges", "growth" to "Growth", "journal" to "Journal", "insights" to "Insights").forEach { (route,label) ->
+                        NavigationBarItem(
+                            selected = route == page, onClick = { onPage(route) },
+                            icon = { Text(when(route){ "today"->"◌";"challenges"->"◇";"growth"->"✿";"journal"->"✎";else->"▥" }, fontSize=19.sp) },
+                            label = { Text(label, fontSize=10.sp, maxLines=1) }
+                        )
+                    }
+                }
+            }
+        ) { padding ->
+            Column(Modifier.fillMaxSize().padding(padding)) {
+                Row(Modifier.fillMaxWidth().padding(start=22.dp,end=22.dp,top=16.dp,bottom=10.dp), verticalAlignment=Alignment.CenterVertically) {
+                    Text("EVOLUNE", fontSize=17.sp, color=Ink, letterSpacing=2.sp, fontWeight=FontWeight.SemiBold)
+                    Spacer(Modifier.weight(1f))
+                    Text("GROW THROUGH EVERY PHASE", fontSize=9.sp, letterSpacing=1.sp, color=Muted)
+                }
+                if (notice != null) {
+                    Surface(color=Color(0xFFFFEDE1), modifier=Modifier.fillMaxWidth().padding(horizontal=16.dp), shape=RoundedCornerShape(12.dp)) {
+                        Row(Modifier.padding(12.dp), verticalAlignment=Alignment.CenterVertically) {
+                            Text(notice, color=Ink, modifier=Modifier.weight(1f), fontSize=12.sp)
+                            TextButton(onClick=onDismissNotice){Text("Close")}
+                        }
+                    }
+                }
+                Box(Modifier.fillMaxSize()) { content() }
+            }
+        }
+    }
+}
+
+@Composable private fun Header(kicker: String, title: String, subtitle: String = "") {
+    Column(Modifier.fillMaxWidth().padding(bottom=18.dp)) {
+        Text(kicker.uppercase(), fontSize=10.sp, letterSpacing=2.sp, color=Sage, fontWeight=FontWeight.Bold)
+        Spacer(Modifier.height(7.dp))
+        Text(title, fontFamily=FontFamily.Serif, fontSize=31.sp, lineHeight=36.sp, color=Ink)
+        if (subtitle.isNotEmpty()) { Spacer(Modifier.height(7.dp)); Text(subtitle, color=Muted, fontSize=13.sp, lineHeight=19.sp) }
+    }
+}
+
+@Composable private fun Panel(content: @Composable ColumnScope.() -> Unit) {
+    Surface(color=Paper, shape=RoundedCornerShape(22.dp), border=BorderStroke(1.dp,Line), modifier=Modifier.fillMaxWidth()) {
+        Column(Modifier.padding(20.dp), content=content)
+    }
+}
+
+@Composable private fun MainScroll(content: @Composable ColumnScope.() -> Unit) {
+    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal=20.dp, vertical=12.dp), verticalArrangement=Arrangement.spacedBy(16.dp), content=content)
+}
+
+@Composable private fun PrimaryAction(text: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    Button(onClick=onClick, modifier=modifier, shape=RoundedCornerShape(14.dp)) { Text(text) }
+}
+
+@Composable private fun SecondaryAction(text: String, onClick: () -> Unit) {
+    OutlinedButton(onClick=onClick, shape=RoundedCornerShape(14.dp)) { Text(text) }
+}
+
+@Composable private fun LandscapeHero() {
+    Box(Modifier.fillMaxWidth().height(175.dp).clip(RoundedCornerShape(22.dp))) {
+        Image(painterResource(R.drawable.stillwater_banner), contentDescription="Quiet garden with stepping stones and leaves", contentScale=ContentScale.Crop, modifier=Modifier.fillMaxSize())
+        Surface(color=Color(0xDDFFFDF7), shape=RoundedCornerShape(16.dp), modifier=Modifier.align(Alignment.BottomStart).padding(12.dp)) {
+            Text("A little progress is still progress.", Modifier.padding(10.dp), fontSize=12.sp, color=Ink)
+        }
+    }
+}
+
+private fun days(s: ChallengeSnapshot): List<Opportunity> {
+    val plan = s.plan
+    val today = LocalDate.now(plan.zone)
+    val end = maxOf(today, plan.startDate)
+    val capped = minOf(end, plan.startDate.plusDays(3650))
+    return ChallengeEngine.opportunities(plan, ZonedDateTime.now(plan.zone), capped, s.records, s.pauses)
+}
+
+private fun stateLabel(state: OpportunityState) = when(state) {
+    OpportunityState.UNREPORTED -> "Not logged"
+    OpportunityState.NOT_SCHEDULED -> "Not scheduled"
+    OpportunityState.COMPLETED -> "Completed"
+    OpportunityState.PARTIAL -> "Partially completed"
+    OpportunityState.RESTED -> "Intentionally rested"
+    OpportunityState.MISSED -> "Marked missed"
+    OpportunityState.COMPLETED_BACKUP -> "Backup action completed"
+    OpportunityState.PAUSED -> "Paused"
+    OpportunityState.SCHEDULED -> "Scheduled"
+}
+
+@Composable private fun OutcomeButtons(onLog: (PracticeOutcome)->Unit) {
+    Text("Record what happened", color=Muted, fontSize=12.sp)
+    Row(horizontalArrangement=Arrangement.spacedBy(8.dp), modifier=Modifier.fillMaxWidth()) {
+        PrimaryAction("Completed", { onLog(PracticeOutcome.COMPLETED) }, Modifier.weight(1f))
+        SecondaryAction("Partly", { onLog(PracticeOutcome.PARTIAL) })
+    }
+    Row(horizontalArrangement=Arrangement.spacedBy(8.dp)) {
+        SecondaryAction("Rested", { onLog(PracticeOutcome.RESTED) })
+        SecondaryAction("Missed", { onLog(PracticeOutcome.MISSED) })
+        SecondaryAction("Backup", { onLog(PracticeOutcome.COMPLETED_BACKUP) })
+    }
+}
+
+@Composable
+fun TodayPage(s: ChallengeSnapshot?, onCreate: () -> Unit, onOpen: () -> Unit, onLog: (PracticeOutcome)->Unit, onAdjust:()->Unit) {
+    MainScroll {
+        Header("Your daily space", "Make room for growth.", "One meaningful step at a time. No pressure, no comparisons.")
+        LandscapeHero()
+        if(s==null) {
+            Panel {
+                Text("Begin with one thing", fontFamily=FontFamily.Serif,fontSize=23.sp,color=Ink)
+                Text("Choose a small practice you want to explore. You can change it later.", fontSize=13.sp, color=Muted)
+                Spacer(Modifier.height(12.dp)); PrimaryAction("Create your first challenge",onCreate)
+            }
+        } else {
+            val plan = s.plan
+            val today = LocalDate.now(plan.zone)
+            val opportunity = days(s).lastOrNull { it.date == today }
+            Panel {
+                Text("YOUR FOCUS", fontSize=10.sp, letterSpacing=2.sp, color=Sage, fontWeight=FontWeight.Bold)
+                Spacer(Modifier.height(8.dp))
+                Text(plan.title, fontSize=24.sp, fontFamily=FontFamily.Serif, color=Ink)
+                Text(plan.scheduleOn(today).action, color=Muted, fontSize=14.sp)
+                Spacer(Modifier.height(8.dp))
+                Text("Today · ${opportunity?.state?.let(::stateLabel) ?: "Milestone closed or not yet begun"}", fontSize=12.sp, color=Sage)
+                Spacer(Modifier.height(14.dp))
+                if (opportunity?.state != null && opportunity.state != OpportunityState.NOT_SCHEDULED && opportunity.state != OpportunityState.PAUSED) OutcomeButtons(onLog)
+                if (opportunity?.state == OpportunityState.PAUSED) Text("This practice is paused today. Your history stays intact.", fontSize=12.sp,color=Muted)
+                Spacer(Modifier.height(9.dp))
+                Row(horizontalArrangement=Arrangement.spacedBy(8.dp)) {
+                    SecondaryAction("Challenge details",onOpen)
+                    SecondaryAction("Adjust plan",onAdjust)
+                }
+            }
+        }
+        Text("Your data stays on this device. Backups and sync are not enabled in this foundation build.", fontSize=11.sp,color=Muted)
+    }
+}
+
+@Composable
+fun ChallengeListPage(challenges: List<ChallengeEntity>, chosen: String?, onSelect: (String)->Unit, onCreate:()->Unit) {
+    MainScroll {
+        Header("Challenge studio", "The changes you choose.", "Create your own practice, at your own pace.")
+        PrimaryAction("+ New challenge",onCreate)
+        if(challenges.isEmpty()) Panel { Text("No challenges yet. Start with a small, repeatable action.", color=Muted) }
+        for(ch in challenges) Panel {
+            Text(ch.title, fontSize=21.sp,fontFamily=FontFamily.Serif,color=Ink)
+            Spacer(Modifier.height(5.dp))
+            Text("${ch.target} ${if(ch.milestoneKind == MilestoneKind.CALENDAR_DAYS.name) "calendar days" else "full sessions"} · ${ch.startDate}",fontSize=12.sp,color=Muted)
+            Spacer(Modifier.height(9.dp))
+            SecondaryAction(if(ch.id==chosen) "View active challenge" else "Open challenge", { onSelect(ch.id) })
+        }
+    }
+}
+
+@Composable
+fun ChallengeDetailPage(s: ChallengeSnapshot?, onAdjust:()->Unit, onReview:()->Unit, onBack:()->Unit, onLog:(PracticeOutcome)->Unit) {
+    if(s == null) { MainScroll { Text("Choose a challenge to see its details."); SecondaryAction("Back",onBack) }; return }
+    val plan = s.plan; val list = days(s); val sum = ChallengeEngine.summarize(list)
+    MainScroll {
+        Header("Your practice", plan.title,"${plan.target} ${if(plan.milestoneKind==MilestoneKind.CALENDAR_DAYS)"calendar days" else "completed sessions"} · ${plan.startDate}")
+        Panel {
+            Text("Recorded full actions",color=Muted,fontSize=12.sp)
+            Text("${sum.recordedFull} / ${sum.eligibleOpportunities}",fontSize=30.sp,color=Ink,fontFamily=FontFamily.Serif)
+            Text("${sum.unreported} unreported · ${sum.partial} partial · ${sum.rested} rest days",fontSize=12.sp,color=Muted)
+            Spacer(Modifier.height(10.dp))
+            Row(horizontalArrangement=Arrangement.spacedBy(8.dp)) { PrimaryAction("Adjust plan",onAdjust); SecondaryAction("Milestone review",onReview) }
+        }
+        Panel {
+            Text("Recent opportunities",fontSize=18.sp,fontFamily=FontFamily.Serif)
+            Spacer(Modifier.height(10.dp))
+            if(list.isEmpty()) Text("Your first practice hasn't started yet.",color=Muted)
+            list.takeLast(15).reversed().forEach { day ->
+                Row(Modifier.fillMaxWidth().padding(vertical=7.dp),horizontalArrangement=Arrangement.SpaceBetween) {
+                    Text(day.date.format(DateTimeFormatter.ofPattern("EEE d MMM")),fontSize=13.sp)
+                    Text(stateLabel(day.state),fontSize=12.sp,color=Sage)
+                }
+                HorizontalDivider(color=Line)
+            }
+        }
+        val todayState = list.lastOrNull { it.date == LocalDate.now(plan.zone) }?.state
+        if(todayState != null && todayState != OpportunityState.NOT_SCHEDULED && todayState != OpportunityState.PAUSED) Panel { OutcomeButtons(onLog) }
+        SecondaryAction("Back to challenges",onBack)
+    }
+}
+
+data class CreateRequest(
+    val title: String, val action: String, val target: Int, val kind: MilestoneKind,
+    val recurrence: Recurrence, val cueTime: LocalTime?, val fallback: String?, val areaId: String?
+)
+
+@Composable
+fun CreateChallengePage(areas: List<GrowthAreaEntity>, onBack:()->Unit, onCreate:(CreateRequest)->Unit) {
+    var title by remember { mutableStateOf("") }
+    var action by remember { mutableStateOf("") }
+    var targetText by remember { mutableStateOf("21") }
+    var mode by remember { mutableStateOf(MilestoneKind.CALENDAR_DAYS) }
+    var recurrence by remember { mutableStateOf<Recurrence>(Recurrence.Daily) }
+    var cue by remember { mutableStateOf("") }
+    var fallback by remember { mutableStateOf("") }
+    var areaId by remember { mutableStateOf<String?>(null) }
+    var warning by remember { mutableStateOf("") }
+    MainScroll {
+        Header("A fresh beginning", "Start with one thing.", "Define an action you can practice. It doesn't have to be perfect.")
+        Panel {
+            OutlinedTextField(value=title,onValueChange={title=it},label={Text("Challenge title")},singleLine=true,modifier=Modifier.fillMaxWidth())
+            Spacer(Modifier.height(12.dp))
+            OutlinedTextField(value=action,onValueChange={action=it},label={Text("My repeatable action")},placeholder={Text("Read for 10 minutes")},modifier=Modifier.fillMaxWidth())
+            Spacer(Modifier.height(12.dp))
+            OutlinedTextField(value=targetText,onValueChange={targetText=it.filter(Char::isDigit)},label={Text("Milestone number")},singleLine=true,modifier=Modifier.fillMaxWidth())
+            Spacer(Modifier.height(10.dp))
+            Text("Milestone means",color=Muted,fontSize=12.sp)
+            Row(horizontalArrangement=Arrangement.spacedBy(6.dp)) {
+                FilterChip(selected=mode==MilestoneKind.CALENDAR_DAYS,onClick={mode=MilestoneKind.CALENDAR_DAYS},label={Text("Calendar days")})
+                FilterChip(selected=mode==MilestoneKind.COMPLETED_SESSIONS,onClick={mode=MilestoneKind.COMPLETED_SESSIONS},label={Text("Full sessions")})
+            }
+            Text("A 21-day period isn't a guarantee that a habit is formed.",fontSize=11.sp,color=Muted)
+        }
+        Panel {
+            Text("Choose practice days",fontSize=17.sp,fontFamily=FontFamily.Serif)
+            listOf("Every day" to Recurrence.Daily,"Weekdays" to Recurrence.Weekdays,"Weekends" to Recurrence.Weekends).forEach { (name,r) ->
+                Row(verticalAlignment=Alignment.CenterVertically) {
+                    RadioButton(selected=recurrence==r,onClick={recurrence=r})
+                    Text(name,modifier=Modifier.clickable{recurrence=r},fontSize=14.sp)
+                }
+            }
+            OutlinedTextField(value=cue,onValueChange={cue=it},label={Text("Optional time (HH:mm)")},singleLine=true,modifier=Modifier.fillMaxWidth())
+            Spacer(Modifier.height(9.dp))
+            OutlinedTextField(value=fallback,onValueChange={fallback=it},label={Text("Smaller backup action (optional)")},modifier=Modifier.fillMaxWidth())
+            if(areas.isNotEmpty()) {
+                Spacer(Modifier.height(12.dp)); Text("Growth area (optional)",fontSize=12.sp,color=Muted)
+                Row(horizontalArrangement=Arrangement.spacedBy(6.dp),modifier=Modifier.horizontalScroll(rememberScrollState())) {
+                    FilterChip(selected=areaId==null,onClick={areaId=null},label={Text("None")})
+                    areas.forEach { area -> FilterChip(selected=area.id==areaId,onClick={areaId=area.id},label={Text(area.name)}) }
+                }
+            }
+        }
+        if(warning.isNotEmpty()) Text(warning,color=Color(0xFF9D4F40),fontSize=12.sp)
+        PrimaryAction("Create my challenge",{
+            val count=targetText.toIntOrNull()
+            val time=if(cue.isBlank()) null else runCatching { LocalTime.parse(cue.trim()) }.getOrNull()
+            warning = when {
+                title.isBlank() || action.isBlank() -> "Enter a title and one repeatable action."
+                count == null || count !in 1..3650 -> "Choose a valid milestone number from 1 to 3650."
+                cue.isNotBlank() && time == null -> "Use a valid time such as 07:30."
+                else -> ""
+            }
+            if(warning.isEmpty()) onCreate(CreateRequest(title,action,count!!,mode,recurrence,time,fallback,areaId))
+        },Modifier.fillMaxWidth())
+        SecondaryAction("Back",onBack)
+    }
+}
+
+@Composable
+fun RecoveryPage(s: ChallengeSnapshot?, onBack:()->Unit, onRevise:(String,Recurrence)->Unit, onPause:()->Unit) {
+    if(s==null){MainScroll{Text("No challenge selected.");SecondaryAction("Back",onBack)};return}
+    var action by remember(s.plan.id){mutableStateOf(s.plan.schedules.last().action)}
+    var recurrence by remember(s.plan.id){mutableStateOf(s.plan.schedules.last().recurrence)}
+    MainScroll {
+        Header("A gentle restart", "Adjust the path.", "Your history stays exactly as you recorded it.")
+        LandscapeHero()
+        Panel {
+            Text("Smaller steps still matter",fontSize=20.sp,fontFamily=FontFamily.Serif)
+            OutlinedTextField(value=action,onValueChange={action=it},label={Text("Next action (from tomorrow)")},modifier=Modifier.fillMaxWidth())
+            Spacer(Modifier.height(10.dp))
+            Text("Practice days",fontSize=12.sp,color=Muted)
+            listOf("Daily" to Recurrence.Daily,"Weekdays" to Recurrence.Weekdays,"Weekends" to Recurrence.Weekends).forEach { (label,r) ->
+                Row(verticalAlignment=Alignment.CenterVertically){RadioButton(selected=recurrence==r,onClick={recurrence=r});Text(label)}
+            }
+            PrimaryAction("Save future plan", { if(action.isNotBlank()) onRevise(action,recurrence) },Modifier.fillMaxWidth())
+        }
+        Panel {
+            Text("Need some space?",fontFamily=FontFamily.Serif,fontSize=19.sp)
+            Text("Pause the next three days. Nothing is erased, and this isn't counted as completing them.",color=Muted,fontSize=12.sp)
+            Spacer(Modifier.height(8.dp)); SecondaryAction("Pause next three days",onPause)
+        }
+        SecondaryAction("Back without changes",onBack)
+    }
+}
+
+@Composable
+fun ReviewPage(s: ChallengeSnapshot?, onBack:()->Unit) {
+    if(s==null){MainScroll{Text("Choose a challenge first.");SecondaryAction("Back",onBack)};return}
+    val summary=ChallengeEngine.summarize(days(s))
+    MainScroll {
+        Header("Your reflection", "Every phase has meaning.","A factual summary of what's been recorded so far.")
+        Panel {
+            Text(s.plan.title,fontFamily=FontFamily.Serif,fontSize=20.sp)
+            Spacer(Modifier.height(10.dp))
+            listOf(
+                "Recorded full actions" to summary.recordedFull,
+                "Partial sessions" to summary.partial,
+                "Backup sessions" to summary.recordedBackup,
+                "Intentional rest" to summary.rested,
+                "Explicitly marked missed" to summary.explicitlyMissed,
+                "Not logged" to summary.unreported,
+                "Paused" to summary.paused,
+                "Eligible scheduled opportunities" to summary.eligibleOpportunities
+            ).forEach { (label,value)-> Row(Modifier.fillMaxWidth().padding(vertical=5.dp),horizontalArrangement=Arrangement.SpaceBetween){Text(label,fontSize=12.sp,color=Muted);Text("$value",fontSize=13.sp,fontWeight=FontWeight.SemiBold)} }
+        }
+        Panel {
+            Text("A milestone is a moment to reflect—not proof of permanent habit formation.",fontSize=13.sp,color=Ink)
+            Text("You can continue, adjust the plan, or take a pause. Your choice.",fontSize=12.sp,color=Muted)
+        }
+        SecondaryAction("Back to challenge",onBack)
+    }
+}
+
+@Composable
+fun GrowthPage(areas:List<GrowthAreaEntity>,onCreateArea:(String)->Unit,onStart:()->Unit) {
+    var title by remember { mutableStateOf("") }
+    MainScroll {
+        Header("My growth", "Your direction, your pace.", "Choose the parts of life that feel meaningful to you.")
+        LandscapeHero()
+        Panel {
+            Text("Create a growth area",fontFamily=FontFamily.Serif,fontSize=19.sp)
+            OutlinedTextField(value=title,onValueChange={title=it},label={Text("Area name")},modifier=Modifier.fillMaxWidth())
+            Spacer(Modifier.height(8.dp));PrimaryAction("Add area",{if(title.isNotBlank()){onCreateArea(title);title=""}})
+        }
+        if(areas.isEmpty()) Text("Examples: Learning, Mind & awareness, Daily foundations, Connection, Body & energy.",color=Muted,fontSize=12.sp)
+        areas.forEach { area -> Panel {Text(area.name,fontFamily=FontFamily.Serif,fontSize=20.sp);Spacer(Modifier.height(7.dp));SecondaryAction("Start a related challenge",onStart)} }
+    }
+}
+
+@Composable
+fun JournalPage(entries: List<JournalEntryEntity>,onSave:(JournalEntryEntity?,String,String?,Int?)->Unit,onDelete:(JournalEntryEntity)->Unit) {
+    var editing by remember { mutableStateOf<JournalEntryEntity?>(null) }
+    var body by remember { mutableStateOf("") }
+    var mood by remember { mutableStateOf<String?>(null) }
+    var energy by remember { mutableStateOf<Int?>(null) }
+    fun clear(){editing=null;body="";mood=null;energy=null}
+    MainScroll {
+        Header("A private place", "The living journal.","Your reflections are optional. They are not psychological diagnoses.")
+        Panel {
+            Text(if(editing==null) "New reflection" else "Edit reflection",fontFamily=FontFamily.Serif,fontSize=20.sp)
+            Spacer(Modifier.height(10.dp))
+            OutlinedTextField(value=body,onValueChange={body=it},label={Text("What would you like to remember?")},minLines=3,modifier=Modifier.fillMaxWidth())
+            Spacer(Modifier.height(10.dp))
+            Text("How are you feeling? (optional)",fontSize=12.sp,color=Muted)
+            Row(Modifier.horizontalScroll(rememberScrollState()),horizontalArrangement=Arrangement.spacedBy(5.dp)) {
+                listOf("Calm","Hopeful","Tired","Worried").forEach { m -> FilterChip(selected=mood==m,onClick={mood=if(mood==m)null else m},label={Text(m)}) }
+            }
+            Text("Energy (optional)",fontSize=12.sp,color=Muted)
+            Row(horizontalArrangement=Arrangement.spacedBy(5.dp)) { (1..5).forEach {n->FilterChip(selected=energy==n,onClick={energy=if(energy==n)null else n},label={Text("$n")})} }
+            PrimaryAction(if(editing==null) "Save reflection" else "Save changes",{
+                if(body.isNotBlank()) {onSave(editing,body,mood,energy);clear()}
+            })
+            if(editing!=null) SecondaryAction("Cancel editing",{clear()})
+        }
+        Text("Entries are stored in this device's private app database. Cloud backup is disabled.",fontSize=11.sp,color=Muted)
+        entries.forEach { entry ->
+            Panel {
+                Text(entry.body,fontSize=14.sp,color=Ink)
+                Spacer(Modifier.height(8.dp))
+                Text(listOfNotNull(entry.mood, entry.energy?.let {"Energy $it/5"}).joinToString(" · "),color=Muted,fontSize=11.sp)
+                Row(horizontalArrangement=Arrangement.spacedBy(9.dp)) {
+                    SecondaryAction("Edit",{editing=entry;body=entry.body;mood=entry.mood;energy=entry.energy})
+                    SecondaryAction("Delete",{onDelete(entry);if(editing?.id==entry.id)clear()})
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun InsightsPage(s: ChallengeSnapshot?) {
+    MainScroll {
+        Header("Clearer perspective", "Look at what is real.","A description of your recorded actions, not a score for your worth or mental health.")
+        if(s==null) {Panel {Text("Create a challenge to see factual insights.",color=Muted)};return@MainScroll}
+        val list=days(s);val summary=ChallengeEngine.summarize(list)
+        Panel {
+            Text(s.plan.title,fontFamily=FontFamily.Serif,fontSize=22.sp)
+            Spacer(Modifier.height(12.dp))
+            Text("${summary.recordedFull} full completions",fontSize=26.sp,color=Ink)
+            Text("of ${summary.eligibleOpportunities} scheduled eligible opportunities shown",fontSize=12.sp,color=Muted)
+            Spacer(Modifier.height(8.dp))
+            Text("${summary.unreported} days have no check-in. We can't tell whether the action happened on those days.",fontSize=12.sp,color=Muted)
+        }
+        Panel { Text("The purpose of tracking is to notice patterns and make helpful adjustments—not to judge yourself.",fontSize=14.sp,color=Ink) }
+    }
+}
