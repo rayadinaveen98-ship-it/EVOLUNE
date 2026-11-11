@@ -1,6 +1,9 @@
 package studio.evolune.app
 
+import android.Manifest
 import android.os.Bundle
+import android.os.Build
+import android.content.pm.PackageManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -12,6 +15,9 @@ import androidx.room.Room
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import studio.evolune.data.*
 import studio.evolune.domain.*
 import java.time.*
@@ -20,6 +26,7 @@ import java.util.UUID
 /** The only Android entry point. No remote database, account, telemetry or network permission. */
 class MainActivity : ComponentActivity() {
     private lateinit var database: EvoluneDatabase
+    private val reminderScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,8 +39,21 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        if (::database.isInitialized) {
+            reminderScope.launch {
+                try {
+                    ReminderScheduler.rescheduleAll(applicationContext, database.evoluneDao())
+                } catch (_: Exception) {
+                    // App remains usable even if Android does not permit reminders.
+                }
+            }
+        }
+    }
+
     override fun onDestroy() {
-        // Avoid keeping a stale Room instance open across rotation/activity recreation.
+        reminderScope.cancel()
         if (::database.isInitialized) database.close()
         super.onDestroy()
     }
@@ -50,7 +70,31 @@ private fun EvoluneRoot(dao: EvoluneDao, repository: RoomEvoluneRepository) {
     var page by rememberSaveable { mutableStateOf("today") }
     var notice by remember { mutableStateOf<String?>(null) }
     var pendingImport by remember { mutableStateOf<StoredLocalExport?>(null) }
+    var reminderEnabled by remember { mutableStateOf(false) }
+    var pendingReminderPermission by remember { mutableStateOf<Pair<String,String>?>(null) }
     val context = LocalContext.current
+
+    fun turnOnReminder(id: String, time: String) {
+        scope.launch {
+            try {
+                val created = ReminderScheduler.enable(context, dao, id, LocalTime.parse(time))
+                if (activeId == id) reminderEnabled = true
+                notice = if (created) "Reminder enabled. Android may deliver it later than the chosen time."
+                    else "Reminder enabled; there is no upcoming scheduled opportunity yet."
+            } catch (ex: Exception) {
+                notice = ex.message ?: "Could not enable reminders."
+            }
+        }
+    }
+
+    val reminderPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        val pending = pendingReminderPermission
+        pendingReminderPermission = null
+        if (granted && pending != null) turnOnReminder(pending.first, pending.second)
+        else if (!granted) notice = "Notifications remain off. You can enable them later in Android Settings."
+    }
 
     /** SAF export keeps the sensitive archive on a user-selected local destination. */
     val exportLauncher = rememberLauncherForActivityResult(
@@ -140,7 +184,10 @@ private fun EvoluneRoot(dao: EvoluneDao, repository: RoomEvoluneRepository) {
         if (activeId == null && challenges.isNotEmpty()) activeId = challenges.first().id
         if (activeId != null && challenges.none { it.id == activeId }) activeId = challenges.firstOrNull()?.id
     }
-    LaunchedEffect(activeId) { refresh() }
+    LaunchedEffect(activeId) {
+        refresh()
+        reminderEnabled = activeId?.let { ReminderScheduler.isOptedIn(context, it) } ?: false
+    }
 
     EvoluneShell(
         page = page,
@@ -153,7 +200,8 @@ private fun EvoluneRoot(dao: EvoluneDao, repository: RoomEvoluneRepository) {
                 onCreate = { page = "create" }, onOpen = { page = "detail" },
                 onLog = { outcome ->
                     val s = snapshot ?: return@TodayPage
-                    execute { repository.recordPractice(s.plan.id, LocalDate.now(s.plan.zone), outcome) }
+                    execute { repository.recordPractice(s.plan.id, LocalDate.now(s.plan.zone), outcome)
+                        ReminderScheduler.reschedule(context, dao, s.plan.id) }
                 }, onAdjust = { page = "recovery" },
                 onJournal = { page = "journal" }
             )
@@ -162,9 +210,12 @@ private fun EvoluneRoot(dao: EvoluneDao, repository: RoomEvoluneRepository) {
             )
             "detail" -> ChallengeDetailPage(snapshot,
                 onAdjust = { page = "recovery" }, onReview = { page = "review" },
-                onBack = { page = "challenges" }, onLog = { outcome ->
+                onBack = { page = "challenges" },
+                onReminders = { page = "reminders" },
+                onLog = { outcome ->
                     val s = snapshot ?: return@ChallengeDetailPage
-                    execute { repository.recordPractice(s.plan.id, LocalDate.now(s.plan.zone), outcome) }
+                    execute { repository.recordPractice(s.plan.id, LocalDate.now(s.plan.zone), outcome)
+                        ReminderScheduler.reschedule(context, dao, s.plan.id) }
                 }
             )
             "create" -> CreateChallengePage(growthAreas,
@@ -200,6 +251,7 @@ private fun EvoluneRoot(dao: EvoluneDao, repository: RoomEvoluneRepository) {
                             ScheduleVersion(LocalDate.now(s.plan.zone).plusDays(1),
                                 nextRecurrence, nextAction, s.plan.schedules.last().cueTime,
                                 s.plan.schedules.last().fallbackAction))
+                        ReminderScheduler.reschedule(context, dao, s.plan.id)
                         page = "detail"
                     }
                 },
@@ -208,7 +260,34 @@ private fun EvoluneRoot(dao: EvoluneDao, repository: RoomEvoluneRepository) {
                     execute {
                         val tomorrow = LocalDate.now(s.plan.zone).plusDays(1)
                         repository.addPause(s.plan.id, PauseWindow(tomorrow, tomorrow.plusDays(2)))
+                        ReminderScheduler.reschedule(context, dao, s.plan.id)
                         page = "detail"
+                    }
+                }
+            )
+            "reminders" -> ReminderSettingsPage(
+                s = snapshot,
+                enabled = reminderEnabled,
+                permissionAvailable = ReminderScheduler.canNotify(context),
+                selectedTime = activeId?.let { ReminderScheduler.time(context,it).toString() } ?: "09:00",
+                nextAt = activeId?.let { ReminderScheduler.scheduledAt(context,it) } ?: -1L,
+                onBack = { page = "detail" },
+                onEnable = { at ->
+                    val id = activeId
+                    if (id == null) notice = "Choose a challenge before enabling reminders."
+                    else if (Build.VERSION.SDK_INT >= 33 &&
+                        context.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                        pendingReminderPermission = id to at
+                        reminderPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                    } else if (!ReminderScheduler.canNotify(context)) {
+                        notice = "Notifications are blocked in Android Settings. Enable EVOLUNE notifications there."
+                    } else turnOnReminder(id,at)
+                },
+                onDisable = {
+                    activeId?.let { id ->
+                        ReminderScheduler.disable(context,id)
+                        reminderEnabled = false
+                        notice = "Gentle reminder turned off."
                     }
                 }
             )
@@ -254,6 +333,8 @@ private fun EvoluneRoot(dao: EvoluneDao, repository: RoomEvoluneRepository) {
                     if (verified != null) {
                         execute {
                             dao.replaceAllLocalData(verified)
+                            ReminderScheduler.disableAll(context)
+                            reminderEnabled = false
                             activeId = null
                             snapshot = null
                             pendingImport = null
@@ -266,6 +347,8 @@ private fun EvoluneRoot(dao: EvoluneDao, repository: RoomEvoluneRepository) {
                 onErase = {
                     execute {
                         dao.eraseAllLocalData()
+                        ReminderScheduler.disableAll(context)
+                        reminderEnabled = false
                         pendingImport = null
                         activeId = null
                         snapshot = null
