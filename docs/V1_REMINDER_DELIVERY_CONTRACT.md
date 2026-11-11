@@ -1,6 +1,6 @@
 # EVOLUNE v1 — Local reminder delivery contract
 
-**Decision date:** 2026-11-11. This is the **implementation contract**, not evidence that reminders work in Android v0.5/v0.6.
+**Decision date:** 2026-11-11. Implementation contract and acceptance matrix. Optional reminder source and automated Android QA are now implemented; the real-device delivery gates remain.
 
 ## Product intent
 - Reminders are **opt-in** per challenge and can be disabled at any time.
@@ -33,4 +33,4 @@ Official policy references:
 8. QA must include permissions denied, permissions revoked, reboot, zone change, short/long recurrences, inactive challenge and multiple challenges.
 
 ## Current status
-Planned, **not implemented or user-verified**. Do not treat the existing optional cueTime field as notification scheduling.
+**Partially implemented and emulator-tested.** [Read the 22-test Android verification report](V1_REMINDER_IMPLEMENTATION_REPORT.md). Real timed delivery under battery restrictions, reboot and permission-denial trials, and manual multi-device checks remain unverified. The existing challenge cueTime still does **not** grant notification consent.
