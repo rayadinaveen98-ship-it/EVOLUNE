@@ -11,7 +11,7 @@ This is **the existing Stage 07** from the ten-stage V2 experience roadmap. No a
 |---|---|
 | System-wide | `EvoluneType.typography`: Android-native serif for display/reflection, sans-serif for controls and data; 11/12 through 36sp type ladder with generous line heights. No external font file or license risk. |
 | Screen headings | `EvolunePageHeading`, `EvoluneEyebrow`, and `EvoluneBody` unify semantic and visual hierarchy. At narrow 320dp + large fonts, headings use a more compact still-scalable 23sp base; **system fontScale is never suppressed**. |
-| Navigation | Stage 06 five-destination semantics retained; compact visible labels and bounded 86–146dp bar heights support 1.0–2.0 font scaling without fixed one-line truncation. Full accessible names stay unchanged. |
+| Navigation | Stage 06 five-destination semantics retained; compact visible labels and bounded single-row heights support normal scaling. At 175%+ on narrow phones, a centered two-row (3+2) layout keeps complete tab labels visible without overriding Android font scale. Full accessible names stay unchanged. |
 | Editorial content | Existing scrollable phone/tablet column retained; horizontal padding contracts to 16dp on narrow or high-scale devices; no text ellipsis on core practice/record content. |
 | Art caption | Stillwater hero preserves original artwork, with higher-contrast fade and dynamically taller image/caption area for large text. Original motion/reduced-motion behavior unchanged. |
 | First-run | Guided setup uses the shared type hierarchy and native RadioButton selection semantics. Original welcome uses compact brand lettering at 200% instead of clipping the letterspaced wordmark. |
@@ -23,8 +23,14 @@ This is **the existing Stage 07** from the ten-stage V2 experience roadmap. No a
 - New **Stage07TypographyTest** uses a constrained 320dp Compose column with synthetic 100% and 200% system-text configurations; verifies Today heading/action, all destination semantics and navigation callbacks; also checks simulated expanded rail at 140%, plus date/clock helpers. Creates native screenshots under `EVOLUNE-QA`.
 - Existing **Stage03–06 instrumented regression tests** remain unchanged and must all pass on the final branch SHA.
 - Device emulator workflow now captures **actual system font scale 2.0 at 320dp**, in addition to 1.0 and 1.4 and tablet/landscape widths. For diagnostic clarity it writes synthetic **debug-only** first-run-completed flags into private prefs after APK installation so those screenshots show the Today/navigation screen, not the setup gate. No real user data is accessed; these QA artifacts must never be confused with production onboarding behavior.
-- Actual 320dp/200% and tablet captures must be **visually inspected** for clipping, headline wrapping, nav taps, bottom CTA overlap, data dialogs and Journal; screenshot file existence is only a pipeline check.
+- Actual 320dp/200% and tablet captures must be **visually inspected** for clipping, headline wrapping, tab layout, bottom CTA overlap, dialogs and Journal; screenshot existence alone is not visual approval. Pixel Launcher background ANR overlays were observed in a previous run; the QA workflow now suppresses **background** ANR dialogs, not foreground app errors. Clean post-onboarding captures remain an exit gate.
 - Manual device gates remain: text and TalkBack at 100, 140, 200%; keyboard/IME; RTL direction; scripts beyond English; hardware tablets and small phones; adaptation to landscape and split-screen; user visual signoff.
+
+
+## Verified intermediate evidence and corrections
+- First Stage 07 source compile was successful, but the initial emulator run had two Guided Setup interaction failures. These were corrected by automatic scroll-to-new-optional-details and stable semantics tags for all setup fields, with focused tests using these tags.
+- Subsequent Stage 07 [emulator run 43046610602](https://github.com/rayadinaveen98-ship-it/EVOLUNE/actions/runs/43046610602) passed **58/58 tests**: 7 Room + 51 app. This was prior to the latest 200%-font stacked navigation and Pixel Launcher QA changes, and should **not** be treated as evidence for that later SHA.
+- Review of its real 200%-font 320dp screenshots revealed unreadable one-row tab labels and background Pixel Launcher ANR dialogs. The two-row layout and background-dialog mitigation are on the latest source branch and require a fresh successful exact-head run and clean screenshot review.
 
 ## Exit conditions
 1. Exact Stage 07 head: Android CI and Room/Compose emulator QA both green.
