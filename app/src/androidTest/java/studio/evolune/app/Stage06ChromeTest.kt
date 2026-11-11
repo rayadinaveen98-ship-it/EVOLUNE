@@ -14,6 +14,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.assertIsSelected
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
@@ -74,13 +75,15 @@ class Stage06ChromeTest {
             ) { Text("Screen: $destination") }
         }
         rule.onNodeWithTag("evolune-nav-today").assertIsSelected()
+        rule.onNodeWithText("Screen: today").assertIsDisplayed()
+        rule.onNodeWithText("EVOLUNE").assertIsDisplayed()
         saveFrame("phone_tabs")
         rule.onNodeWithTag("evolune-nav-challenges").performClick()
         rule.waitForIdle()
         assertEquals("challenges",destination)
         rule.onNodeWithTag("evolune-nav-challenges").assertIsSelected()
         rule.onNodeWithTag("evolune-nav-today").assertIsNotSelected()
-        rule.onNodeWithText("Screen: challenges").assertExists()
+        rule.onNodeWithText("Screen: challenges").assertIsDisplayed()
         rule.onNodeWithTag("evolune-nav-journal").performClick()
         rule.waitForIdle()
         assertEquals("journal",destination)
@@ -101,7 +104,7 @@ class Stage06ChromeTest {
         saveFrame("expanded_rail_simulated")
         rule.onNodeWithTag("evolune-nav-growth").performClick()
         assertEquals("growth",chosen)
-        rule.onNodeWithText("Recovery detail").assertExists()
+        rule.onNodeWithText("Recovery detail").assertIsDisplayed()
     }
 
     @Test fun headerShortcutAndNoticesRemainActionable() {
