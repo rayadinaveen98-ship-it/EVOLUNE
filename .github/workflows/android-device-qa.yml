@@ -31,11 +31,18 @@ jobs:
           profile: pixel_6
           disable-animations: true
           script: |
-            gradle :core:data:connectedDebugAndroidTest :app:connectedDebugAndroidTest :app:assembleDebug --stacktrace --no-daemon
+            test_exit=0
+            gradle :core:data:connectedDebugAndroidTest :app:connectedDebugAndroidTest :app:assembleDebug --stacktrace --no-daemon || test_exit=$?
+            # Always save synthetic screenshots and test reports, even if UI QA fails.
+            # A failure remains a failure; preserving evidence makes debugging safer.
+            mkdir -p qa/native_screenshots
+            adb pull /sdcard/Pictures/EVOLUNE-QA/. qa/native_screenshots/ || true
+            if [ "$test_exit" -ne 0 ]; then
+              echo "Android instrumentation failed; screenshots preserved for diagnosis."
+              exit "$test_exit"
+            fi
             # Persist the generated Room v1 schema as evidence before any future migration.
             test -s core/data/schemas/studio.evolune.data.EvoluneDatabase/1.json
-            mkdir -p qa/native_screenshots
-            adb pull /sdcard/Pictures/EVOLUNE-QA/. qa/native_screenshots/
             # Android test cleanup can remove the app. Install again before wm-size smoke checks.
             gradle :app:installDebug --no-daemon
             # Screen-size overrides exercise 320dp phones and 800dp tablets on one emulator.
