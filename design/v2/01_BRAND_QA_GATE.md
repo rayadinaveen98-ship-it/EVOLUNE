@@ -1,14 +1,14 @@
 # EVOLUNE V2 — Stage 01 review and sign-off checklist
 
-**Stage status:** Under design; *not yet signed off*.  
+**Stage status:** Under design; **Direction A selected** by the owner (2026-11-11), exact artwork and other tokens *not yet signed off*.  
 **Scope:** The design system and real asset prototypes, **not** changes to the V1 challenge engine.
 
 ## Sign-off matrix
 
 | Test | Pass evidence | State |
 | --- | --- | --- |
-| Three original marks | Vector source + previews at 24dp, 48dp, 108dp; light/dark/monochrome | ☐ Pending |
-| Logo legibility | 66×66dp safe area in 108×108dp masks; circular/squircle/theme previews | ☐ Pending |
+| Chosen Open Path mark (direction A) | Original SVG paths, Android XML candidates; previews rendered at 24, 48, 108, 512px and light/dark/monochrome | ◐ Prototypes created; user review pending |
+| Logo legibility | Path silhouette measured within 31.84dp radius from 54dp center; circle/squircle/rounded crops mocked | ◐ Offline render checked; real launcher testing pending |
 | Brand uniqueness | Manual app store/trademark preflight for selected mark and wordmark | ☐ Pending |
 | Palette | Correct WCAG contrast for every text/surface/status combination | ☐ Pending |
 | Typography | Licensed fonts, fallback for Telugu/English, visual review at 100/140/200% scales | ☐ Pending |
@@ -19,8 +19,8 @@
 | Cross-device | 320dp, ~393dp, 600–840dp, expanded tablet, landscape/multiwindow | ☐ Pending |
 | Decision record | Exact chosen mark + type + color variants + exclusions signed off | ☐ Pending |
 
-## Candidate A/B/C decision criteria
-Score 1–5 for each option only *after seeing actual renderings*:
+## Chosen direction and final artwork criteria
+Direction **A — Open Path** has been selected; B and C are archived as alternatives. Score the **actual final A vector variant** 1–5 before final artwork approval:
 
 - Originality / memorability (25%)
 - Small-scale clarity (25%)
@@ -38,6 +38,6 @@ Do not select the mark by whether its 3D mockup looks beautiful; test the flat s
 - Do not publish to Play Store or change a release signing key as part of Stage 01.
 
 ## First review artifact
-A 3-concept brand sheet plus actual-scale Android icon grid. Review with a neutral landscape and a dense app launcher, not only a large white gallery.
+[Original Open Path SVG and Android candidate assets](assets/open-path/README.md), with light/dark/monochrome and actual-size PNG review exported separately in this design conversation.
 
-**Owner decision requested after artifact review:** choose A, B, C, or request a hybrid; approve final tokens and icon stroke. Stage 02 starts only when that mark direction is agreed.
+**Owner decision requested after asset review:** confirm or refine the *specific Open Path geometry*, icon colors and wordmark typography. Stage 02 welcome production starts after artwork identity is signed off, not only because Direction A was selected.
