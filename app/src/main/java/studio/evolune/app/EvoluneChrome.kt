@@ -180,13 +180,13 @@ private fun ChromeDestination(
         horizontalAlignment=Alignment.CenterHorizontally,
         verticalArrangement=Arrangement.Center
     ) {
-        Box(Modifier.size(if(compactIcon)29.dp else36.dp)
+        Box(Modifier.size(if(compactIcon)29.dp else 36.dp)
             .clip(RoundedCornerShape(13.dp))
             .background(if(active)EvoluneTokens.Pale else Color.Transparent),
             contentAlignment=Alignment.Center) {
             EvoluneGlyph(destination.route,
                 if(active)EvoluneTokens.Forest else EvoluneTokens.Muted,
-                Modifier.size(if(compactIcon)19.dp else23.dp))
+                Modifier.size(if(compactIcon)19.dp else 23.dp))
         }
         Spacer(Modifier.height(4.dp))
         Text(label,
@@ -283,7 +283,7 @@ internal fun EvoluneSideRail(
     val selected=selectedEvoluneDestination(page)
     val largeScale=LocalConfiguration.current.fontScale>=1.6f
     Surface(color=EvoluneTokens.Paper,
-        modifier=modifier.width(if(largeScale)144.dp else116.dp).fillMaxHeight(),
+        modifier=modifier.width(if(largeScale)144.dp else 116.dp).fillMaxHeight(),
         border=BorderStroke(0.5.dp,EvoluneTokens.Line)) {
         Column(Modifier.fillMaxHeight().systemBarsPadding()
             .verticalScroll(rememberScrollState()).padding(horizontal=9.dp,vertical=14.dp),
@@ -296,7 +296,7 @@ internal fun EvoluneSideRail(
                 ChromeDestination(dest, selected==dest.route,
                     compact=false,showShortName=false,
                     modifier=Modifier.fillMaxWidth()
-                        .heightIn(min=if(largeScale)122.dp else76.dp),
+                        .heightIn(min=if(largeScale)122.dp else 76.dp),
                     onPage=onPage)
             }
         }
