@@ -6,10 +6,8 @@ import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.onRoot
 import java.io.File
 import java.io.FileOutputStream
-import androidx.compose.ui.test.assertExists
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasSetTextAction
-import androidx.compose.ui.test.onAllNodes
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
