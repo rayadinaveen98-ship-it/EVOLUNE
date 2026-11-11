@@ -18,6 +18,9 @@ abstract class EvoluneDao {
 
     @Query("SELECT * FROM growth_areas ORDER BY createdAtEpochMs, id")
     abstract fun observeGrowthAreas(): Flow<List<GrowthAreaEntity>>
+    
+    @Query("SELECT * FROM growth_areas ORDER BY createdAtEpochMs, id")
+    abstract suspend fun listGrowthAreas(): List<GrowthAreaEntity>
 
     @Insert(onConflict = OnConflictStrategy.ABORT)
     protected abstract suspend fun insertChallenge(challenge: ChallengeEntity)
@@ -104,6 +107,9 @@ abstract class EvoluneDao {
 
     @Query("SELECT * FROM journal_entries ORDER BY updatedAtEpochMs DESC, id")
     abstract fun observeJournal(): Flow<List<JournalEntryEntity>>
+    
+    @Query("SELECT * FROM journal_entries ORDER BY updatedAtEpochMs DESC, id")
+    abstract suspend fun listJournal(): List<JournalEntryEntity>
 
     @Query("SELECT * FROM journal_entries WHERE id = :id LIMIT 1")
     abstract suspend fun findJournal(id: String): JournalEntryEntity?
@@ -116,7 +122,51 @@ abstract class EvoluneDao {
 
     @Query("DELETE FROM growth_areas WHERE id = :id")
     abstract suspend fun deleteGrowthArea(id: String): Int
+
+    /**
+     * A read-consistent local export: all linked private data is collected in one
+     * Room transaction, so a concurrent journal/challenge edit cannot split the snapshot.
+     */
+    @Transaction
+    open suspend fun exportLocalData(): StoredLocalExport {
+        val challenges = listChallenges()
+        return StoredLocalExport(
+            growthAreas = listGrowthAreas(),
+            challenges = challenges,
+            schedules = challenges.flatMap { schedulesFor(it.id) },
+            practices = challenges.flatMap { historyFor(it.id) },
+            pauses = challenges.flatMap { pausesFor(it.id) },
+            journal = listJournal()
+        )
+    }
+
+    @Query("DELETE FROM journal_entries")
+    protected abstract suspend fun deleteAllJournalEntries()
+
+    @Query("DELETE FROM challenges")
+    protected abstract suspend fun deleteAllChallenges()
+
+    @Query("DELETE FROM growth_areas")
+    protected abstract suspend fun deleteAllGrowthAreas()
+
+    /** Explicitly user-confirmed reset, one atomic transaction. */
+    @Transaction
+    open suspend fun eraseAllLocalData() {
+        deleteAllJournalEntries()
+        deleteAllChallenges()
+        deleteAllGrowthAreas()
+    }
 }
+
+/** Complete local snapshot, including historic schedule and outcome revisions. */
+data class StoredLocalExport(
+    val growthAreas: List<GrowthAreaEntity>,
+    val challenges: List<ChallengeEntity>,
+    val schedules: List<ScheduleVersionEntity>,
+    val practices: List<PracticeRecordEntity>,
+    val pauses: List<PauseWindowEntity>,
+    val journal: List<JournalEntryEntity>
+)
 
 /** Atomic, consistent read for the domain engine; no UI should independently join these tables. */
 data class StoredChallengeRows(
