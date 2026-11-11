@@ -1308,63 +1308,75 @@ fun ReminderSettingsPage(
     val parsed = remember(timeValue) {
         runCatching { java.time.LocalTime.parse(timeValue.trim()) }.getOrNull()
     }
+    val status = when {
+        !enabled -> "OFF · Notifications are not enabled for this challenge"
+        !permissionAvailable -> "BLOCKED · Android notification permission is unavailable"
+        nextAt > 0L -> "ON · Approximate next reminder: "+
+            java.time.Instant.ofEpochMilli(nextAt)
+                .atZone(s?.plan?.zone ?: java.time.ZoneId.systemDefault())
+                .format(DateTimeFormatter.ofPattern("EEE d MMM · h:mm a"))
+        else -> "ON · No scheduled opportunity is currently due"
+    }
     MainScroll {
         Header("Optional · Quiet · Your choice","Gentle reminders",
-            "A small nudge for your planned practice. Never an obligation.")
+            "A useful nudge if you want one. Never a measure of discipline.")
         Panel {
-            Text("Your reminder",fontFamily=FontFamily.Serif,fontSize=21.sp,color=Ink)
-            Spacer(Modifier.height(7.dp))
-            Text(s?.plan?.title ?: "Choose a challenge first",
-                color=Muted,fontSize=12.sp,lineHeight=18.sp)
+            Text("CURRENT STATUS",fontSize=11.sp,color=Forest,
+                fontWeight=FontWeight.Bold,letterSpacing=1.sp)
             Spacer(Modifier.height(9.dp))
-            Text(
-                when {
-                    !enabled -> "OFF · Notifications are not enabled for this challenge"
-                    !permissionAvailable -> "BLOCKED · Android notification permission is unavailable"
-                    nextAt > 0L -> "ON · Approximate next reminder: "+
-                        java.time.Instant.ofEpochMilli(nextAt)
-                            .atZone(s?.plan?.zone ?: java.time.ZoneId.systemDefault())
-                            .format(DateTimeFormatter.ofPattern("EEE d MMM · h:mm a"))
-                    else -> "ON · No scheduled opportunity is currently due"
-                },color=Sage,fontSize=12.sp,lineHeight=19.sp
-            )
-            Spacer(Modifier.height(15.dp))
-            OutlinedTextField(
-                value=timeValue,
+            Text(s?.plan?.title ?: "Choose a challenge first",
+                fontFamily=FontFamily.Serif,fontSize=22.sp,
+                lineHeight=28.sp,color=Ink)
+            Spacer(Modifier.height(13.dp))
+            Surface(color=Pale,shape=RoundedCornerShape(13.dp),
+                modifier=Modifier.fillMaxWidth()) {
+                Text(status,modifier=Modifier.padding(14.dp),
+                    fontSize=14.sp,lineHeight=21.sp,color=Forest,
+                    fontWeight=FontWeight.SemiBold)
+            }
+            Spacer(Modifier.height(17.dp))
+            OutlinedTextField(value=timeValue,
                 onValueChange={timeValue=it.take(5)},
                 label={Text("Preferred time · 24-hour HH:mm")},
-                placeholder={Text("09:00")},
-                singleLine=true,
-                modifier=Modifier.fillMaxWidth()
-            )
+                placeholder={Text("09:00")},singleLine=true,
+                modifier=Modifier.fillMaxWidth())
             Spacer(Modifier.height(9.dp))
-            Text("Time is interpreted in the challenge's timezone. Android battery restrictions may delay delivery. Reminders are not exact alarms.",
-                color=Muted,fontSize=11.sp,lineHeight=17.sp)
-            Spacer(Modifier.height(14.dp))
-            PrimaryAction(if(enabled)"Update reminder" else "Enable reminder",{
-                if(parsed!=null)onEnable(parsed.toString())
-            },Modifier.fillMaxWidth())
+            Text("The time follows this challenge's timezone. Android may deliver inexact reminders later due to battery restrictions.",
+                color=Muted,fontSize=14.sp,lineHeight=21.sp)
             if(parsed==null) {
-                Spacer(Modifier.height(5.dp))
-                Text("Enter a valid time, for example 07:30 or 20:00.",
-                    color=Color(0xFF996044),fontSize=11.sp)
+                Spacer(Modifier.height(9.dp))
+                Text("Enter a valid time such as 07:30 or 20:00.",
+                    color=Color(0xFF905C3E),fontSize=13.sp,lineHeight=19.sp)
+            }
+            Spacer(Modifier.height(17.dp))
+            Button(
+                onClick={ if(parsed!=null) onEnable(parsed.toString()) },
+                enabled=parsed!=null && s!=null,
+                modifier=Modifier.fillMaxWidth().heightIn(min=52.dp),
+                shape=RoundedCornerShape(14.dp),
+                colors=ButtonDefaults.buttonColors(
+                    containerColor=Forest,contentColor=Paper)
+            ) {
+                Text(if(enabled)"Update reminder" else "Enable reminder",
+                    fontSize=14.sp,lineHeight=20.sp,
+                    fontWeight=FontWeight.SemiBold)
             }
             if(enabled) {
-                Spacer(Modifier.height(9.dp))
-                SecondaryAction("Turn off reminders",onDisable)
+                Spacer(Modifier.height(10.dp))
+                TodayQuietButton("Turn off reminders",onDisable)
             }
         }
-        Surface(color=Pale,shape=RoundedCornerShape(16.dp),
-            modifier=Modifier.fillMaxWidth()) {
-            Column(Modifier.padding(15.dp)) {
-                Text("PRIVACY FIRST",fontSize=9.sp,fontWeight=FontWeight.Bold,
-                    letterSpacing=1.2.sp,color=Sage)
-                Spacer(Modifier.height(7.dp))
-                Text("We never display your journal or mood in a notification. Your challenge stays available even if notifications are disabled.",
-                    fontSize=12.sp,lineHeight=19.sp,color=Muted)
-            }
+        Panel {
+            Text("You stay in control",fontFamily=FontFamily.Serif,
+                fontSize=21.sp,lineHeight=27.sp,color=Ink)
+            Spacer(Modifier.height(9.dp))
+            Text("Reminders are off unless you choose to enable them. Permission is requested only when needed, and your private journal or mood never appears in a notification.",
+                fontSize=14.sp,lineHeight=21.sp,color=Muted)
+            Spacer(Modifier.height(8.dp))
+            Text("Turning reminders off never deletes your challenge or its records.",
+                fontSize=13.sp,lineHeight=20.sp,color=Muted)
         }
-        SecondaryAction("Back to challenge",onBack)
+        TodayQuietButton("Back to challenge",onBack)
     }
 }
 
