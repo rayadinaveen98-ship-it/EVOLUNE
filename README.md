@@ -17,7 +17,8 @@ EVOLUNE is an Android-first, personal self-development experience for choosing m
 
 ## Current status
 
-**Phase 3B: Local persistence source committed.** Stillwater + Atelier remains the approved prototype direction. Pure-Kotlin challenge engine tests, independent storage codec tests, and on-disk SQLite restart/revision tests passed locally. Room entities, DAO, and repository source are now in `core/data`. **Room has not been compiled in an Android Gradle project or tested on-device; no APK exists.** Compose screens, platform persistence verification, reminders, artwork integration and device QA are pending.
+**Phase 3D — Native Android device QA in progress (2026-11-11).** The Stillwater + Atelier HTML v0.3 remains the visual baseline. Kotlin challenge engine, standalone storage codec and offline SQLite persistence contract checks passed. A **native debug APK was built successfully** in [GitHub Actions run 42950543150](https://github.com/rayadinaveen98-ship-it/EVOLUNE/actions/runs/42950543150). This verifies compilation, **not** Android runtime correctness or visual parity. A separate emulator workflow, Room guard tests, Compose UI navigation/persistence tests, and screenshots are now committed to the development branch but **their emulator results have not been verified**. No release-ready APK is claimed. Do not merge the draft PR until device QA and visual approval.
+
 
 ## Project documents
 
@@ -33,6 +34,8 @@ EVOLUNE is an Android-first, personal self-development experience for choosing m
 - [Staged roadmap](docs/ROADMAP.md)
 - [Android architecture v0.1](docs/ANDROID_ARCHITECTURE_V01.md)
 - [Phase 3B Room persistence source, tests and verification gaps](docs/PHASE3B_PERSISTENCE.md)
+- [Phase 3C verified build and remaining gaps](docs/PHASE3C_BUILD_VERIFICATION.md)
+- [Phase 3D device QA checklist and evidence status](docs/PHASE3D_DEVICE_QA.md)
 - [Room persistence source](core/data/src/main/kotlin/studio/evolune/data)
 - [Tested Kotlin challenge engine](domain/README.md)
 - [Decision log](docs/DECISIONS.md)
