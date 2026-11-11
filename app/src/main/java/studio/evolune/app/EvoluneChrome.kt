@@ -326,6 +326,7 @@ internal fun EvoluneChromeShell(
     val expanded = expandedOverride ?: (LocalConfiguration.current.screenWidthDp >= 700)
     MaterialTheme(colorScheme=EvoluneTokens.appColors) {
         Scaffold(
+            modifier=Modifier.fillMaxSize(),
             containerColor=EvoluneTokens.Cream,
             bottomBar={if(!expanded) EvoluneBottomNav(page,onPage)}
         ) { padding ->
