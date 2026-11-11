@@ -12,6 +12,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.animation.core.*
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
+import android.provider.Settings
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -177,11 +182,15 @@ private fun Panel(content: @Composable ColumnScope.() -> Unit) {
 
 @Composable
 private fun MainScroll(content: @Composable ColumnScope.() -> Unit) {
-    Column(
-        Modifier.fillMaxSize().verticalScroll(rememberScrollState())
-            .padding(horizontal=20.dp, vertical=10.dp),
-        verticalArrangement=Arrangement.spacedBy(15.dp), content=content
-    )
+    // A readable editorial column on large screens; unchanged full-width behavior on phones.
+    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
+        Column(
+            Modifier.widthIn(max=720.dp).fillMaxWidth().fillMaxHeight()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal=20.dp, vertical=10.dp),
+            verticalArrangement=Arrangement.spacedBy(15.dp), content=content
+        )
+    }
 }
 
 @Composable
@@ -207,12 +216,42 @@ private fun SecondaryAction(text: String, onClick: () -> Unit) {
 private fun LandscapeHero(
     label: String = "YOUR GROWTH SPACE",
     overline: String = "STILLWATER × ATELIER",
-    headline: String = "Every small step\nbelongs here."
+    headline: String = "Every small step\nbelongs here.",
+    artwork: Int = R.drawable.stillwater_banner
 ) {
-    Box(Modifier.fillMaxWidth().height(195.dp).clip(RoundedCornerShape(19.dp))) {
-        Image(painterResource(R.drawable.stillwater_banner),
-            contentDescription="Quiet Stillwater landscape with stone steps, a tree and distant hills",
-            contentScale=ContentScale.Crop, modifier=Modifier.fillMaxSize())
+    val screenWidth = LocalConfiguration.current.screenWidthDp
+    val context = LocalContext.current
+    // Respect Android's system-level motion setting. No movement at animator scale 0.
+    val motionEnabled = remember(context) {
+        Settings.Global.getFloat(context.contentResolver,
+            Settings.Global.ANIMATOR_DURATION_SCALE, 1f) > 0f
+    }
+    val breath = if (motionEnabled) {
+        val transition = rememberInfiniteTransition(label="gentle-hero")
+        val scale by transition.animateFloat(
+            initialValue=1f, targetValue=1.018f,
+            animationSpec=infiniteRepeatable(
+                tween(durationMillis=8000, easing=FastOutSlowInEasing),
+                repeatMode=RepeatMode.Reverse
+            ), label="slow-drift"
+        )
+        scale
+    } else 1f
+    val heroHeight = when {
+        screenWidth >= 700 -> 250.dp
+        screenWidth < 350 -> 180.dp
+        else -> 205.dp
+    }
+    Box(Modifier.fillMaxWidth().height(heroHeight).clip(RoundedCornerShape(19.dp))) {
+        Image(painterResource(artwork),
+            contentDescription=if (artwork==R.drawable.atelier_journal)
+                "Atelier garden and open journal with warm afternoon light"
+                else "Quiet Stillwater landscape with stone steps, a tree and distant hills",
+            contentScale=ContentScale.Crop,
+            modifier=Modifier.fillMaxSize().graphicsLayer {
+                scaleX = breath
+                scaleY = breath
+            })
         Box(Modifier.fillMaxSize().background(Brush.verticalGradient(
             listOf(Color(0x00112318), Color(0x16112318), Color(0xBD11251A))
         )))
@@ -651,7 +690,8 @@ fun JournalPage(
         Header("Private reflections · On this device", "Room to feel.\nSpace to think.",
             "Write as much or as little as you like. No mood check-in is ever required.")
         LandscapeHero(label="A QUIET PAGE",overline="YOUR LIVING JOURNAL",
-            headline="Every day has\nits own story.")
+            headline="Every day has\nits own story.",
+            artwork=R.drawable.atelier_journal)
         Row(Modifier.fillMaxWidth(), horizontalArrangement=Arrangement.spacedBy(9.dp)) {
             PrimaryAction("✎  New reflection", {
                 clear()
