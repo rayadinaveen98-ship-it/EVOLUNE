@@ -11,6 +11,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
@@ -24,43 +29,117 @@ import java.time.*
 import java.time.format.DateTimeFormatter
 
 private val Ink = Color(0xFF26392D)
-private val Sage = Color(0xFF587966)
-private val Cream = Color(0xFFF7F4EB)
+private val Sage = Color(0xFF64816B)
+private val Forest = Color(0xFF36553E)
+private val Pale = Color(0xFFE7ECE2)
+private val Cream = Color(0xFFFAF8F3)
 private val Paper = Color(0xFFFFFEFA)
 private val Muted = Color(0xFF718077)
-private val Line = Color(0xFFE8E6DD)
+private val Line = Color(0xFFE5E2D9)
 private val Gold = Color(0xFFB89A63)
 
 private val appColors = lightColorScheme(
-    primary = Sage, onPrimary = Color.White, background = Cream, onBackground = Ink,
+    primary = Forest, onPrimary = Color.White, background = Cream, onBackground = Ink,
     surface = Paper, onSurface = Ink, secondary = Gold, surfaceVariant = Color(0xFFEEF1E9)
 )
 
+/** Simple original outline icon set; no emoji, default Material purple or external icon dependency. */
+@Composable
+private fun NavGlyph(route: String, color: Color = Sage) {
+    Canvas(Modifier.size(19.dp)) {
+        val k = size.width / 24f
+        fun line(x1: Float, y1: Float, x2: Float, y2: Float) {
+            drawLine(color, Offset(x1*k,y1*k), Offset(x2*k,y2*k), strokeWidth = 1.65f*k, cap = StrokeCap.Round)
+        }
+        fun outline(vararg xy: Float) {
+            val p = Path()
+            if (xy.size >= 4) {
+                p.moveTo(xy[0]*k,xy[1]*k)
+                var i=2
+                while (i < xy.size) { p.lineTo(xy[i]*k,xy[i+1]*k); i+=2 }
+                drawPath(p, color, style=Stroke(width=1.65f*k, cap=StrokeCap.Round))
+            }
+        }
+        when(route) {
+            "today" -> {
+                outline(3f,11f,12f,4f,21f,11f)
+                outline(5.5f,10f,5.5f,20f,18.5f,20f,18.5f,10f)
+                outline(10f,20f,10f,14f,14f,14f,14f,20f)
+            }
+            "growth" -> {
+                line(12f,21f,12f,10f)
+                outline(12f,15f,8f,10f,6f,7f)
+                outline(12f,13f,16f,8f,19f,6f)
+                drawCircle(color, radius=2f*k, center=Offset(7f*k,6.5f*k), style=Stroke(width=1.4f*k))
+                drawCircle(color, radius=2f*k, center=Offset(19f*k,5.5f*k), style=Stroke(width=1.4f*k))
+            }
+            "challenges" -> {
+                outline(4f,8f,12f,3.5f,20f,8f,12f,12.5f,4f,8f)
+                outline(4f,12.5f,12f,17f,20f,12.5f)
+                outline(4f,17f,12f,21.5f,20f,17f)
+            }
+            "journal" -> {
+                outline(4f,20f,8.5f,19f,19f,8.5f,15f,4.5f,4.5f,15f,4f,20f)
+                line(12.9f,6.6f,17f,10.7f)
+                line(4f,22f,20f,22f)
+            }
+            else -> {
+                outline(3f,19f,8f,13f,12f,16f,20f,6f)
+                line(3f,22f,21f,22f)
+            }
+        }
+    }
+}
+
 @Composable
 fun EvoluneShell(page: String, onPage: (String)->Unit, notice: String?, onDismissNotice: ()->Unit, content: @Composable () -> Unit) {
+    val selected = if (page in setOf("detail","create","recovery","review")) "challenges" else page
     MaterialTheme(colorScheme = appColors) {
         Scaffold(
             containerColor = Cream,
             bottomBar = {
-                NavigationBar(containerColor = Paper) {
-                    listOf("today" to "Today", "challenges" to "Challenges", "growth" to "Growth", "journal" to "Journal", "insights" to "Insights").forEach { (route,label) ->
-                        NavigationBarItem(
-                            selected = route == page, onClick = { onPage(route) },
-                            icon = { Text(when(route){ "today"->"◌";"challenges"->"◇";"growth"->"✿";"journal"->"✎";else->"▥" }, fontSize=19.sp) },
-                            label = { Text(label, fontSize=10.sp, maxLines=1) }
-                        )
+                Surface(color = Paper, border = BorderStroke(0.5.dp, Line)) {
+                    Row(Modifier.fillMaxWidth().height(70.dp).padding(horizontal=5.dp, vertical=5.dp),
+                        horizontalArrangement = Arrangement.SpaceEvenly) {
+                        listOf("today" to "Today", "growth" to "My Growth", "challenges" to "Challenges",
+                            "journal" to "Journal", "insights" to "Insights").forEach { (route,label) ->
+                            val isActive = selected == route
+                            Column(
+                                Modifier.weight(1f).fillMaxHeight().clickable { onPage(route) },
+                                horizontalAlignment=Alignment.CenterHorizontally,
+                                verticalArrangement=Arrangement.Center
+                            ) {
+                                Box(
+                                    Modifier.size(30.dp).clip(RoundedCornerShape(50)).background(if(isActive) Pale else Color.Transparent),
+                                    contentAlignment=Alignment.Center
+                                ) { NavGlyph(route, if(isActive) Forest else Color(0xFF96A299)) }
+                                Text(label, fontSize=9.sp, lineHeight=12.sp, maxLines=1,
+                                    color=if(isActive) Forest else Muted,
+                                    fontWeight=if(isActive) FontWeight.Bold else FontWeight.Medium)
+                            }
+                        }
                     }
                 }
             }
         ) { padding ->
             Column(Modifier.fillMaxSize().padding(padding)) {
-                Row(Modifier.fillMaxWidth().padding(start=22.dp,end=22.dp,top=16.dp,bottom=10.dp), verticalAlignment=Alignment.CenterVertically) {
-                    Text("EVOLUNE", fontSize=17.sp, color=Ink, letterSpacing=2.sp, fontWeight=FontWeight.SemiBold)
+                Row(
+                    Modifier.fillMaxWidth().padding(start=20.dp,end=20.dp,top=12.dp,bottom=12.dp),
+                    verticalAlignment=Alignment.CenterVertically
+                ) {
+                    Text("◒", fontSize=21.sp,color=Sage)
+                    Spacer(Modifier.width(8.dp))
+                    Text("E V O L U N E", fontSize=11.sp, color=Ink, letterSpacing=1.2.sp,
+                        fontWeight=FontWeight.Bold)
                     Spacer(Modifier.weight(1f))
-                    Text("GROW THROUGH EVERY PHASE", fontSize=9.sp, letterSpacing=1.sp, color=Muted)
+                    Box(Modifier.size(34.dp).clip(RoundedCornerShape(50)).background(Pale)
+                        .clickable { onPage("growth") }, contentAlignment=Alignment.Center) {
+                        NavGlyph("growth", Sage)
+                    }
                 }
                 if (notice != null) {
-                    Surface(color=Color(0xFFFFEDE1), modifier=Modifier.fillMaxWidth().padding(horizontal=16.dp), shape=RoundedCornerShape(12.dp)) {
+                    Surface(color=Color(0xFFFFEDE1), modifier=Modifier.fillMaxWidth().padding(horizontal=18.dp),
+                        shape=RoundedCornerShape(12.dp)) {
                         Row(Modifier.padding(12.dp), verticalAlignment=Alignment.CenterVertically) {
                             Text(notice, color=Ink, modifier=Modifier.weight(1f), fontSize=12.sp)
                             TextButton(onClick=onDismissNotice){Text("Close")}
