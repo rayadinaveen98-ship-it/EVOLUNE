@@ -1,11 +1,13 @@
 package studio.evolune.app
 
 import android.graphics.Bitmap
+import android.content.ContentValues
+import android.os.Build
+import android.os.Environment
+import android.provider.MediaStore
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.onRoot
-import java.io.File
-import java.io.FileOutputStream
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.onAllNodesWithText
@@ -24,14 +26,25 @@ import org.junit.runner.RunWith
 class NativeJourneyTest {
     @get:Rule val rule = createAndroidComposeRule<MainActivity>()
 
+    /** MediaStore survives Android test cleanup, unlike app-private filesDir. QA has only synthetic data. */
     private fun captureNative(name: String) {
-        val dir = File(rule.activity.filesDir, "evolune-qa")
-        check(dir.exists() || dir.mkdirs()) { "Failed to create QA screenshot directory" }
-        val file = File(dir, "$name.png")
-        FileOutputStream(file).use { out ->
-            check(rule.onRoot().captureToImage().asAndroidBitmap()
-                .compress(Bitmap.CompressFormat.PNG, 100, out)) { "Failed to capture $name" }
+        check(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            "MediaStore QA screenshot export requires Android 10 or later"
         }
+        val context = rule.activity
+        val values = ContentValues().apply {
+            put(MediaStore.Images.Media.DISPLAY_NAME, "evolune_qa_$name.png")
+            put(MediaStore.Images.Media.MIME_TYPE, "image/png")
+            put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/EVOLUNE-QA")
+        }
+        val uri = requireNotNull(context.contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)) {
+            "MediaStore refused screenshot destination for $name"
+        }
+        val written = context.contentResolver.openOutputStream(uri)?.use { stream ->
+            rule.onRoot().captureToImage().asAndroidBitmap()
+                .compress(Bitmap.CompressFormat.PNG, 100, stream)
+        } ?: false
+        check(written) { "Screenshot write failed for $name" }
     }
 
     @Test fun mainDestinationsAreNavigable() {
