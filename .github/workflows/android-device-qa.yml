@@ -31,16 +31,9 @@ jobs:
           profile: pixel_6
           disable-animations: true
           script: |
-            test_exit=0
-            gradle :core:data:connectedDebugAndroidTest :app:connectedDebugAndroidTest :app:assembleDebug --stacktrace --no-daemon || test_exit=$?
-            # Always save synthetic screenshots and test reports, even if UI QA fails.
-            # A failure remains a failure; preserving evidence makes debugging safer.
-            mkdir -p qa/native_screenshots
-            adb pull /sdcard/Pictures/EVOLUNE-QA/. qa/native_screenshots/ || true
-            if [ "$test_exit" -ne 0 ]; then
-              echo "Android instrumentation failed; screenshots preserved for diagnosis."
-              exit "$test_exit"
-            fi
+            # Emulator runner invokes each script line as an independent shell.
+            # Run checks + screenshot recovery in ONE command; propagate the original exit status.
+            gradle :core:data:connectedDebugAndroidTest :app:connectedDebugAndroidTest :app:assembleDebug --stacktrace --no-daemon; qa_exit=$?; mkdir -p qa/native_screenshots; adb pull /sdcard/Pictures/EVOLUNE-QA/. qa/native_screenshots/ || true; exit "$qa_exit"
             # Persist the generated Room v1 schema as evidence before any future migration.
             test -s core/data/schemas/studio.evolune.data.EvoluneDatabase/1.json
             # Android test cleanup can remove the app. Install again before wm-size smoke checks.
