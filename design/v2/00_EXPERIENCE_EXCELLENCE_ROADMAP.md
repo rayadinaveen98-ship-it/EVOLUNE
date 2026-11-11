@@ -29,10 +29,10 @@ This is a **visual, language, brand, onboarding presentation and interaction-qua
 | Work | Verified state | Next gate |
 | --- | --- | --- |
 | Stage 01: Brand | Direction **A / Open Path selected**, original SVG mark and Android icon templates committed | Exact geometry + brand type approval, Android OEM mask and palette QA |
-| Stage 02: Welcome | **Interactive 5.8s first-run HTML v0.1** committed at [prototype](prototypes/open-path-welcome-v0.1.html); browser QA, replay/skip/reduced motion and handoff tested | Native Android Compose implementation and device/accessibility/performance QA |
+| Stage 02: Welcome | Browser prototype and **native 5.8s Compose first-run integration** in [PR #4](https://github.com/rayadinave98-ship-it/EVOLUNE/pull/4). [Android CI 43013838641](https://github.com/rayadinave98-ship-it/EVOLUNE/actions/runs/43013838641) and [emulator QA 43013838539](https://github.com/rayadinave98-ship-it/EVOLUNE/actions/runs/43013838539) passed **31 tests**, with timed native welcome captures | Owner visual signoff, final wordmark, TalkBack/200%-font/real-device animation performance and reduced-motion review |
 | Stages 03–10 | Roadmap established, not implemented in V2 branch | Proceed sequentially after Stage 01 identity lock and Stage 02 native gate |
 
-The runnable browser study is not equivalent to a native splash screen or completed visual release. Current V1 Android PR remains unaffected.
+Native system splash and separate Compose intro are implemented as an integration prototype, not a signed-off V2 visual release. V1 Android PR #2 and all existing challenge/Room/reminder behavior remain unaffected.
 
 ### Delivery order without rework
 - **Design system:** Stage 01. Icons, type, color and spacing are governed before screen rewrite.
