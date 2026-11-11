@@ -73,7 +73,7 @@ class NativeJourneyTest {
 
 
     @Test fun newChallengeCreatesRealDetailRecoveryReviewAndTodayScreens() {
-        val marker = "Visual QA breathing " + System.nanoTime()
+        val marker = "Gentle morning breathing"
         rule.onNodeWithText("Challenges").performClick()
         rule.onNodeWithText("New challenge", substring=true).performClick()
         captureNative("challenge_create")
