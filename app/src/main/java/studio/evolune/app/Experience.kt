@@ -36,17 +36,17 @@ import studio.evolune.domain.*
 import java.time.*
 import java.time.format.DateTimeFormatter
 
-internal val Ink = Color(0xFF26392D)
-internal val Sage = Color(0xFF64816B)
-internal val Forest = Color(0xFF36553E)
-internal val Pale = Color(0xFFE7ECE2)
-internal val Cream = Color(0xFFFAF8F3)
-internal val Paper = Color(0xFFFFFEFA)
-internal val Muted = Color(0xFF65746C)
-internal val Line = Color(0xFFE5E2D9)
-internal val Gold = Color(0xFFB89A63)
+private val Ink = Color(0xFF26392D)
+private val Sage = Color(0xFF64816B)
+private val Forest = Color(0xFF36553E)
+private val Pale = Color(0xFFE7ECE2)
+private val Cream = Color(0xFFFAF8F3)
+private val Paper = Color(0xFFFFFEFA)
+private val Muted = Color(0xFF65746C)
+private val Line = Color(0xFFE5E2D9)
+private val Gold = Color(0xFFB89A63)
 
-internal val appColors = lightColorScheme(
+private val appColors = lightColorScheme(
     primary = Forest, onPrimary = Color.White, background = Cream, onBackground = Ink,
     surface = Paper, onSurface = Ink, secondary = Gold, surfaceVariant = Color(0xFFEEF1E9)
 )
