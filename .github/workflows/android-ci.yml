@@ -1,7 +1,7 @@
 name: EVOLUNE Android CI
 on:
   push:
-    branches: [main]
+    branches: [main, feature/android-phase3c]
   pull_request:
   workflow_dispatch:
 permissions:
@@ -23,9 +23,9 @@ jobs:
         run: |
           command -v sdkmanager
           yes | sdkmanager --licenses >/dev/null || true
-          sdkmanager 'platforms;android-36' 'build-tools;35.0.0'
+          sdkmanager 'platforms;android-36' 'build-tools;36.0.0'
       - name: JVM domain verification
-        run: gradle :domain:compileKotlin --stacktrace
+        run: gradle :domain:test :core:data:testDebugUnitTest --stacktrace
       - name: Compile Room and Android app / assemble debug
         run: gradle :app:assembleDebug --stacktrace
       - uses: actions/upload-artifact@v4
