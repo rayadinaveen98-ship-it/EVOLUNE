@@ -125,7 +125,7 @@ internal fun GuidedSetup(
     var action by rememberSaveable { mutableStateOf("") }
     var target by rememberSaveable { mutableStateOf("21") }
     var mode by rememberSaveable { mutableStateOf(MilestoneKind.CALENDAR_DAYS.name) }
-    var repeat by rememberSaveable { mutableStateOf("DAILY") }
+    var cadence by rememberSaveable { mutableStateOf("DAILY") }
     var optional by rememberSaveable { mutableStateOf(false) }
     var cue by rememberSaveable { mutableStateOf("") }
     var fallback by rememberSaveable { mutableStateOf("") }
@@ -155,7 +155,7 @@ internal fun GuidedSetup(
             3 -> if (!busy) onCreate(GuidedSetupRequest(
                 area.ifBlank { null }, title.trim(), action.trim(), target.toInt(),
                 MilestoneKind.valueOf(mode),
-                when (repeat) {
+                when (cadence) {
                     "WEEKDAYS" -> Recurrence.Weekdays
                     "WEEKENDS" -> Recurrence.Weekends
                     else -> Recurrence.Daily
@@ -273,7 +273,7 @@ internal fun GuidedSetup(
                         listOf("DAILY" to "Every day", "WEEKDAYS" to "Weekdays",
                             "WEEKENDS" to "Weekends").forEachIndexed { index, pair ->
                             if (index > 0) Spacer(Modifier.height(8.dp))
-                            SetupChoice(pair.second, repeat == pair.first) { repeat = pair.first }
+                            SetupChoice(pair.second, cadence == pair.first) { cadence = pair.first }
                         }
                     }
                     SetupCard {
@@ -315,7 +315,7 @@ internal fun GuidedSetup(
                         Text(target + " " +
                             (if (mode == MilestoneKind.CALENDAR_DAYS.name)
                                 "calendar days" else "completed sessions") + " · " +
-                            (when (repeat) {
+                            (when (cadence) {
                                 "WEEKDAYS" -> "Weekdays"
                                 "WEEKENDS" -> "Weekends"
                                 else -> "Every day"
