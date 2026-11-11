@@ -104,7 +104,7 @@ fun EvoluneShell(page: String, onPage: (String)->Unit, notice: String?, onDismis
             containerColor = Cream,
             bottomBar = {
                 Surface(color = Paper, border = BorderStroke(0.5.dp, Line)) {
-                    Box(Modifier.fillMaxWidth(), contentAlignment=Alignment.Center) {
+                    Box(Modifier.fillMaxWidth().navigationBarsPadding(), contentAlignment=Alignment.Center) {
                         Row(Modifier.widthIn(max=760.dp).fillMaxWidth().height(73.dp)
                             .padding(horizontal=4.dp, vertical=5.dp),
                             horizontalArrangement = Arrangement.SpaceEvenly) {
