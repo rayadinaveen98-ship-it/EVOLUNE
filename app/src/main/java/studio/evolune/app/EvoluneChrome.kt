@@ -210,9 +210,9 @@ internal fun EvoluneBottomNav(
     // The bottom bar MUST have a bounded height: child fillMaxHeight would
     // otherwise grow a min-height-only Row to the full window and hide screens.
     val navHeight=when {
-        config.fontScale>=1.85f -> 146.dp
-        config.fontScale>=1.65f -> 130.dp
-        config.fontScale>=1.3f -> 106.dp
+        config.fontScale>=1.85f -> 124.dp
+        config.fontScale>=1.65f -> 116.dp
+        config.fontScale>=1.3f -> 102.dp
         else -> 86.dp
     }
     Surface(color=EvoluneTokens.Paper,modifier=modifier.fillMaxWidth(),
