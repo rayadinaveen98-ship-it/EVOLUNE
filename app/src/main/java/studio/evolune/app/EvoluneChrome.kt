@@ -318,7 +318,9 @@ internal fun EvoluneChromeShell(
                 Column(Modifier.weight(1f).fillMaxHeight()) {
                     EvoluneTopBar(onGrowth={onPage("growth")})
                     if(notice!=null) EvoluneNotice(notice,onDismissNotice)
-                    Box(Modifier.weight(1f).fillMaxWidth()) { content() }
+                    // Match the previously verified parent layout contract:
+                    // its scrollable page occupies the remaining shell surface.
+                    Box(Modifier.fillMaxSize()) { content() }
                 }
             }
         }
