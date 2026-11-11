@@ -1,7 +1,6 @@
 name: EVOLUNE Android Emulator QA
 on:
-  push:
-    branches: [feature/android-phase3c]
+  pull_request:
     paths:
       - '.github/workflows/android-device-qa.yml'
       - 'core/data/**'
