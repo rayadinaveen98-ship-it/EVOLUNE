@@ -38,6 +38,23 @@ abstract class EvoluneDao {
         insertInitialSchedule(initial)
     }
 
+    /**
+     * First-run setup can create a new growth area and its first challenge together.
+     * No orphan area remains if any step (including schedule insertion) fails.
+     */
+    @Transaction
+    open suspend fun createFirstChallenge(
+        newArea: GrowthAreaEntity?,
+        challenge: ChallengeEntity,
+        initial: ScheduleVersionEntity
+    ) {
+        if (newArea != null) {
+            require(challenge.growthAreaId == newArea.id)
+            insertGrowthArea(newArea)
+        }
+        createChallenge(challenge, initial)
+    }
+
     @Query("SELECT * FROM challenges WHERE id = :id LIMIT 1")
     abstract suspend fun findChallenge(id: String): ChallengeEntity?
 
