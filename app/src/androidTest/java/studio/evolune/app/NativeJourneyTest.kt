@@ -73,7 +73,17 @@ class NativeJourneyTest {
             rule.onAllNodesWithText("Skip intro").fetchSemanticsNodes().isNotEmpty()
         }
         rule.onNodeWithText("Skip intro").assertExists()
-        captureNative("welcome_open_path_first_run")
+        val introStarted = prefs.getLong(OpenPathFirstRun.KEY_STARTED_UPTIME,
+            SystemClock.elapsedRealtime())
+        fun captureAt(elapsedMs: Long, name: String) {
+            val remaining = elapsedMs - (SystemClock.elapsedRealtime() - introStarted)
+            if (remaining > 0L) Thread.sleep(remaining)
+            rule.waitForIdle()
+            captureNative(name)
+        }
+        // Capture actual staged artwork, not only the first dark establishing frame.
+        captureAt(2_300L, "welcome_stones")
+        captureAt(4_450L, "welcome_open_path_first_run")
         rule.onNodeWithText("Skip intro").performClick()
         rule.onNodeWithText("A gentle day", substring=true).assertExists()
         assertTrue(OpenPathFirstRun.completed(rule.activity))
