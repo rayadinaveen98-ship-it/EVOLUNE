@@ -26,7 +26,7 @@ kotlin { jvmToolchain(17) }
 dependencies {
     implementation(project(":domain"))
     implementation(project(":core:data"))
-    val composeBom = platform("androidx.compose:compose-bom:2026.09.00")
+    val composeBom = platform("androidx.compose:compose-bom:2025.10.01")
     implementation(composeBom)
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.foundation:foundation")
