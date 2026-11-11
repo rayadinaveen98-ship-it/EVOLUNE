@@ -17,7 +17,8 @@ EVOLUNE is an Android-first, personal self-development experience for choosing m
 
 ## Current status
 
-**Phase 3B: Local persistence source committed.** Stillwater + Atelier remains the approved prototype direction. Pure-Kotlin challenge engine tests, independent storage codec tests, and on-disk SQLite restart/revision tests passed locally. Room entities, DAO, and repository source are now in `core/data`. **Room has not been compiled in an Android Gradle project or tested on-device; no APK exists.** Compose screens, platform persistence verification, reminders, artwork integration and device QA are pending.
+**Android v1 reliability / accessibility hardening (2026-11-11).** The Stillwater + Atelier native development app supports Kotlin/Room challenges, private Journal, local export/validated restore/confirmed erase, and optional inexact per-challenge reminders. The latest [Android CI 42999466754](https://github.com/rayadinave98-ship-it/EVOLUNE/actions/runs/42999466754) and [emulator QA 42999466755](https://github.com/rayadinave98-ship-it/EVOLUNE/actions/runs/42999466755) **passed 28 tests with zero failures**. Tests cover late reminder suppression, independent challenge alarms, reopen/recovery, and prior data ownership. Verified Android images include compact phone, 140% text-scale phone, and portrait/wide tablet renderings; the earlier clipped navigation labels are now visible. **Not release ready:** actual timed Doze/reboot/permission trials, full TalkBack/contrast/200%-font review, manual file-picker/reinstall/migration, user pilot and stable-signed production artifact remain. Development work is isolated in [draft PR #2](https://github.com/rayadinave98-ship-it/EVOLUNE/pull/2); `main` remains unchanged.
+
 
 ## Project documents
 
@@ -33,6 +34,15 @@ EVOLUNE is an Android-first, personal self-development experience for choosing m
 - [Staged roadmap](docs/ROADMAP.md)
 - [Android architecture v0.1](docs/ANDROID_ARCHITECTURE_V01.md)
 - [Phase 3B Room persistence source, tests and verification gaps](docs/PHASE3B_PERSISTENCE.md)
+- [Locked first-version scope](docs/MVP_SCOPE_V1.md)
+- [Versioned local data ownership and Android verification](docs/V1_DATA_OWNERSHIP_VERIFICATION.md)
+- [Privacy and release-risk register](docs/V1_SAFETY_AND_RELEASE_RISKS.md)
+- [Reminder scheduling contract](docs/V1_REMINDER_DELIVERY_CONTRACT.md)
+- [Reminder implementation and 22-test Android QA evidence](docs/V1_REMINDER_IMPLEMENTATION_REPORT.md)
+- [Limited pilot protocol (not yet conducted)](docs/V1_LIMITED_PILOT_PROTOCOL.md)
+- [Native v0.4 visual parity, emulator evidence and remaining gaps](docs/PHASE3E_NATIVE_VISUAL_PARITY.md)
+- [Phase 3C verified build and remaining gaps](docs/PHASE3C_BUILD_VERIFICATION.md)
+- [Phase 3D device QA checklist and evidence status](docs/PHASE3D_DEVICE_QA.md)
 - [Room persistence source](core/data/src/main/kotlin/studio/evolune/data)
 - [Tested Kotlin challenge engine](domain/README.md)
 - [Decision log](docs/DECISIONS.md)
@@ -42,12 +52,3 @@ EVOLUNE is an Android-first, personal self-development experience for choosing m
 EVOLUNE is initially a general wellness and self-development concept, **not** therapy, diagnosis, emergency support, or a medical device. Any clinical features require a separate evidence, regulatory, and safety review. No personal journal, mood, or health data belongs in this public repository.
 
 Copyright © project owner. No license granted by default; license choice pending.
-
-## Phase 3C Android source (2026-11-11)
-
-The repository now contains a **Kotlin + Compose Android source project** with `app`, `domain`, and `core:data` modules, a Room-backed local data layer, instrumented test source and a GitHub Actions build workflow. The native UI is an integration shell and **not yet a final visual match** to the approved Stillwater + Atelier HTML v0.3 prototype.
-
-- [Phase 3C implementation and limitations](docs/PHASE3C_ANDROID_INTEGRATION.md)
-- [GitHub Android CI](.github/workflows/android-ci.yml)
-
-**Important:** An Android APK or working Android persistence is only confirmed after CI builds the app and on-device tests pass. No user data or secrets are stored in this public repository.

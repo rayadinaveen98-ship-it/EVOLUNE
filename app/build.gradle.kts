@@ -26,7 +26,8 @@ kotlin { jvmToolchain(17) }
 dependencies {
     implementation(project(":domain"))
     implementation(project(":core:data"))
-    val composeBom = platform("androidx.compose:compose-bom:2025.12.00")
+    implementation("androidx.room:room-runtime:2.8.5")
+    val composeBom = platform("androidx.compose:compose-bom:2025.10.01")
     implementation(composeBom)
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.foundation:foundation")
@@ -36,4 +37,9 @@ dependencies {
     implementation("androidx.activity:activity-compose:1.12.4")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2")
     debugImplementation("androidx.compose.ui:ui-tooling")
+    debugImplementation("androidx.compose.ui:ui-test-manifest")
+    androidTestImplementation(composeBom)
+    androidTestImplementation("androidx.compose.ui:ui-test-junit4")
+    androidTestImplementation("androidx.test.ext:junit:1.2.1")
+    androidTestImplementation("androidx.test:runner:1.6.2")
 }

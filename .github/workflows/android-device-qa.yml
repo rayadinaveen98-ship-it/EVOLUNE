@@ -1,0 +1,81 @@
+name: EVOLUNE Android Emulator QA
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/android-device-qa.yml'
+      - 'core/data/**'
+      - 'app/**'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  device-qa:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.13'
+      - name: Enable KVM
+        run: sudo chmod 666 /dev/kvm
+      - uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          target: google_apis
+          arch: x86_64
+          profile: pixel_6
+          disable-animations: true
+          script: |
+            gradle :core:data:connectedDebugAndroidTest :app:connectedDebugAndroidTest :app:assembleDebug --stacktrace --no-daemon
+            # Persist the generated Room v1 schema as evidence before any future migration.
+            test -s core/data/schemas/studio.evolune.data.EvoluneDatabase/1.json
+            mkdir -p qa/native_screenshots
+            adb pull /sdcard/Pictures/EVOLUNE-QA/. qa/native_screenshots/
+            # Android test cleanup can remove the app. Install again before wm-size smoke checks.
+            gradle :app:installDebug --no-daemon
+            # Screen-size overrides exercise 320dp phones and 800dp tablets on one emulator.
+            adb shell wm size 640x1280
+            adb shell wm density 320
+            adb shell am force-stop studio.evolune.app
+            adb shell am start -W -n studio.evolune.app/.MainActivity
+            sleep 3
+            adb exec-out screencap -p > qa/native_screenshots/responsive_320dp.png
+            # Accessibility rendering smoke test: large system text on the narrow phone.
+            adb shell settings put system font_scale 1.40
+            adb shell am force-stop studio.evolune.app
+            adb shell am start -W -n studio.evolune.app/.MainActivity
+            sleep 3
+            adb exec-out screencap -p > qa/native_screenshots/responsive_large_type_320dp.png
+            adb shell settings put system font_scale 1.0
+            adb shell wm size 1280x1920
+            adb shell wm density 240
+            adb shell am force-stop studio.evolune.app
+            adb shell am start -W -n studio.evolune.app/.MainActivity
+            sleep 3
+            adb exec-out screencap -p > qa/native_screenshots/responsive_tablet_853dp.png
+            # Wide tablet viewport smoke test; real rotation, keyboard and TalkBack QA remain separate.
+            adb shell wm size 1920x1280
+            adb shell am force-stop studio.evolune.app
+            adb shell am start -W -n studio.evolune.app/.MainActivity
+            sleep 3
+            adb exec-out screencap -p > qa/native_screenshots/responsive_tablet_landscape_1280dp.png
+            adb shell wm size reset
+            adb shell wm density reset
+            python3 -c 'from pathlib import Path; names=("today","challenges","growth","journal","insights","challenge_create","challenge_detail_populated","reminders_disabled","recovery_populated","review_populated","today_populated","responsive_320dp","responsive_large_type_320dp","responsive_tablet_853dp","responsive_tablet_landscape_1280dp"); root=Path("qa/native_screenshots"); missing=[n for n in names if not (root / ((n+".png") if n.startswith("responsive_") else ("evolune_qa_"+n+".png"))).is_file() or (root / ((n+".png") if n.startswith("responsive_") else ("evolune_qa_"+n+".png"))).read_bytes()[:8] != bytes([137,80,78,71,13,10,26,10])]; assert not missing, "Missing or invalid native PNG: "+", ".join(missing)'
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: evolune-emulator-evidence
+          path: |
+            qa/native_screenshots/
+            core/data/schemas/
+            core/data/build/reports/androidTests/
+            core/data/build/outputs/androidTest-results/
+            app/build/reports/androidTests/
+            app/build/outputs/androidTest-results/
+          if-no-files-found: warn

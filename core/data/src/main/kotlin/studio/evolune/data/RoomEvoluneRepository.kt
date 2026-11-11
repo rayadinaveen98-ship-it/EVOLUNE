@@ -76,6 +76,13 @@ class RoomEvoluneRepository(
         require(!day.isBefore(plan.startDate)) { "Cannot log before challenge start" }
         val today = Instant.now(clock).atZone(plan.zone).toLocalDate()
         require(!day.isAfter(today)) { "Cannot log future activities" }
+        if (plan.milestoneKind == studio.evolune.domain.MilestoneKind.CALENDAR_DAYS) {
+            val finalDay = plan.startDate.plusDays(plan.target.toLong() - 1)
+            require(!day.isAfter(finalDay)) { "This calendar challenge's practice period has ended" }
+        }
+        require(snapshot.pauses.none { it.includes(day) }) {
+            "This practice was paused for that date"
+        }
         val version = plan.scheduleOn(day)
         require(ChallengeEngine.isScheduled(day, version.effectiveFrom, version.recurrence)) {
             "Cannot log a day that was not scheduled"
@@ -99,7 +106,15 @@ class RoomEvoluneRepository(
     }
 
     suspend fun addPause(challengeId: String, pause: PauseWindow) {
-        requireNotNull(snapshot(challengeId)) { "Unknown challenge" }
+        val challenge = requireNotNull(snapshot(challengeId)) { "Unknown challenge" }
+        val today = Instant.now(clock).atZone(challenge.plan.zone).toLocalDate()
+        require(pause.from.isAfter(today)) { "Pauses must begin on a future date" }
+        if (challenge.plan.milestoneKind == studio.evolune.domain.MilestoneKind.CALENDAR_DAYS) {
+            val finalDay = challenge.plan.startDate.plusDays(challenge.plan.target.toLong() - 1)
+            require(!pause.from.isAfter(finalDay)) {
+                "Cannot pause after this challenge's calendar period has ended"
+            }
+        }
         dao.insertPause(PauseWindowEntity(
             challengeId = challengeId, fromDate = pause.from.toString(), throughDate = pause.through.toString()
         ))
