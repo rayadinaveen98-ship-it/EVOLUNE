@@ -261,38 +261,106 @@ private fun stateLabel(state: OpportunityState) = when(state) {
 }
 
 @Composable
-fun TodayPage(s: ChallengeSnapshot?, onCreate: () -> Unit, onOpen: () -> Unit, onLog: (PracticeOutcome)->Unit, onAdjust:()->Unit) {
+fun TodayPage(
+    s: ChallengeSnapshot?, onCreate: () -> Unit, onOpen: () -> Unit,
+    onLog: (PracticeOutcome)->Unit, onAdjust:()->Unit, onJournal:()->Unit
+) {
+    var showLogChoices by remember(s?.plan?.id) { mutableStateOf(false) }
     MainScroll {
-        Header("Your daily space", "Make room for growth.", "One meaningful step at a time. No pressure, no comparisons.")
+        val today = LocalDate.now()
+        val dateLabel = today.format(DateTimeFormatter.ofPattern("EEEE · MMMM d")).uppercase()
+        Header(dateLabel + " · YOUR DAY", "A gentle day\nto begin again.",
+            "One small step is enough to begin.")
         LandscapeHero()
-        if(s==null) {
-            Panel {
-                Text("Begin with one thing", fontFamily=FontFamily.Serif,fontSize=23.sp,color=Ink)
-                Text("Choose a small practice you want to explore. You can change it later.", fontSize=13.sp, color=Muted)
-                Spacer(Modifier.height(12.dp)); PrimaryAction("Create your first challenge",onCreate)
-            }
-        } else {
-            val plan = s.plan
-            val today = LocalDate.now(plan.zone)
-            val opportunity = days(s).lastOrNull { it.date == today }
-            Panel {
-                Text("YOUR FOCUS", fontSize=10.sp, letterSpacing=2.sp, color=Sage, fontWeight=FontWeight.Bold)
-                Spacer(Modifier.height(8.dp))
-                Text(plan.title, fontSize=24.sp, fontFamily=FontFamily.Serif, color=Ink)
-                Text(plan.scheduleOn(today).action, color=Muted, fontSize=14.sp)
-                Spacer(Modifier.height(8.dp))
-                Text("Today · ${opportunity?.state?.let(::stateLabel) ?: "Milestone closed or not yet begun"}", fontSize=12.sp, color=Sage)
-                Spacer(Modifier.height(14.dp))
-                if (opportunity?.state != null && opportunity.state != OpportunityState.NOT_SCHEDULED && opportunity.state != OpportunityState.PAUSED) OutcomeButtons(onLog)
-                if (opportunity?.state == OpportunityState.PAUSED) Text("This practice is paused today. Your history stays intact.", fontSize=12.sp,color=Muted)
-                Spacer(Modifier.height(9.dp))
-                Row(horizontalArrangement=Arrangement.spacedBy(8.dp)) {
-                    SecondaryAction("Challenge details",onOpen)
-                    SecondaryAction("Adjust plan",onAdjust)
-                }
+        Row(Modifier.fillMaxWidth(),verticalAlignment=Alignment.CenterVertically) {
+            Text("Your one thing",fontFamily=FontFamily.Serif,fontSize=21.sp,color=Ink)
+            Spacer(Modifier.weight(1f))
+            TextButton(onClick=if(s==null)onCreate else onOpen) {
+                Text(if(s==null)"Begin a practice" else "View your path  →",
+                    color=Sage,fontSize=11.sp,fontWeight=FontWeight.Bold)
             }
         }
-        Text("Your data stays on this device. Backups and sync are not enabled in this foundation build.", fontSize=11.sp,color=Muted)
+        if(s==null) {
+            Panel {
+                Text("Begin with one thing",fontFamily=FontFamily.Serif,fontSize=23.sp,color=Ink)
+                Spacer(Modifier.height(5.dp))
+                Text("Choose a small practice you want to explore. You can change it later.",
+                    fontSize=12.sp,lineHeight=18.sp,color=Muted)
+                Spacer(Modifier.height(13.dp))
+                PrimaryAction("Create your first challenge",onCreate)
+            }
+        } else {
+            val plan=s.plan
+            val localToday=LocalDate.now(plan.zone)
+            val opportunity=days(s).lastOrNull { it.date == localToday }
+            Panel {
+                Row(Modifier.fillMaxWidth(),verticalAlignment=Alignment.CenterVertically) {
+                    Text("TODAY'S PRACTICE",fontSize=9.sp,fontWeight=FontWeight.Bold,
+                        letterSpacing=1.4.sp,color=Color(0xFF99A394))
+                    Spacer(Modifier.weight(1f))
+                    Surface(color=Pale,shape=RoundedCornerShape(50),
+                        border=BorderStroke(1.dp,Color(0xFFDCE5DB))) {
+                        Text(localToday.dayOfMonth.toString(),
+                            Modifier.padding(horizontal=12.dp,vertical=9.dp),
+                            fontSize=11.sp,fontWeight=FontWeight.Bold,color=Sage)
+                    }
+                }
+                Spacer(Modifier.height(6.dp))
+                Text(plan.scheduleOn(localToday).action,fontFamily=FontFamily.Serif,
+                    fontSize=23.sp,lineHeight=25.sp,color=Ink)
+                Spacer(Modifier.height(6.dp))
+                Text(plan.title + " · " + (opportunity?.state?.let(::stateLabel) ?: "Milestone finished"),
+                    fontSize=11.sp,color=Muted)
+                Spacer(Modifier.height(14.dp))
+                val canLog=opportunity != null &&
+                    opportunity.state != OpportunityState.NOT_SCHEDULED &&
+                    opportunity.state != OpportunityState.PAUSED
+                if(canLog) {
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement=Arrangement.spacedBy(8.dp)) {
+                        PrimaryAction("✓  Log practice",{showLogChoices=!showLogChoices},Modifier.weight(1f))
+                        SecondaryAction("Adjust",onAdjust)
+                    }
+                    if(showLogChoices) {
+                        Spacer(Modifier.height(15.dp))
+                        Text("What happened today?",fontFamily=FontFamily.Serif,fontSize=17.sp,color=Ink)
+                        Spacer(Modifier.height(6.dp))
+                        OutcomeButtons { outcome ->
+                            showLogChoices=false
+                            onLog(outcome)
+                        }
+                    }
+                } else if(opportunity?.state==OpportunityState.PAUSED) {
+                    Text("Paused today. Your earlier practice remains exactly as recorded.",
+                        fontSize=12.sp,lineHeight=18.sp,color=Muted)
+                    Spacer(Modifier.height(7.dp))
+                    SecondaryAction("Adjust plan",onAdjust)
+                } else {
+                    Text("No practice is scheduled for today.",fontSize=12.sp,color=Muted)
+                    Spacer(Modifier.height(7.dp))
+                    SecondaryAction("Challenge details",onOpen)
+                }
+                Spacer(Modifier.height(10.dp))
+                Text("Your practice record is yours to revise; missing logs are not treated as failures.",
+                    color=Muted,fontSize=10.sp,lineHeight=15.sp)
+            }
+        }
+        Row(
+            Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp))
+                .background(Color(0xFFEAF0E7)).clickable { onJournal() }
+                .padding(15.dp),
+            verticalAlignment=Alignment.CenterVertically,
+            horizontalArrangement=Arrangement.spacedBy(11.dp)
+        ) {
+            Box(Modifier.size(40.dp).clip(RoundedCornerShape(12.dp)).background(Color(0xFFD9E5D7)),
+                contentAlignment=Alignment.Center) { NavGlyph("journal", Sage) }
+            Column(Modifier.weight(1f)) {
+                Text("A moment to reflect",fontSize=12.sp,color=Ink,fontWeight=FontWeight.Bold)
+                Text("Mood and energy are always optional",fontSize=10.sp,color=Muted)
+            }
+            Text("→",fontSize=20.sp,color=Sage)
+        }
+        Text("Private and offline in this build. Cloud backup and sync are not enabled.",
+            fontSize=10.sp,lineHeight=16.sp,color=Muted)
     }
 }
 
