@@ -1093,25 +1093,49 @@ fun JournalPage(
     var body by remember { mutableStateOf("") }
     var mood by remember { mutableStateOf<String?>(null) }
     var energy by remember { mutableStateOf<Int?>(null) }
+    var pendingDelete by remember { mutableStateOf<JournalEntryEntity?>(null) }
     fun clear() { editing=null;body="";mood=null;energy=null;showingEditor=false }
+    val deletion = pendingDelete
+    if(deletion!=null) {
+        AlertDialog(
+            onDismissRequest={pendingDelete=null},
+            title={Text("Delete this reflection?",color=Ink)},
+            text={Text("This entry will be removed from this device. This cannot be undone. Other reflections are unchanged.",
+                color=Muted,fontSize=14.sp,lineHeight=21.sp)},
+            confirmButton={
+                TextButton(onClick={
+                    onDelete(deletion)
+                    if(editing?.id==deletion.id) clear()
+                    pendingDelete=null
+                }) { Text("Delete reflection",color=Color(0xFF995646)) }
+            },
+            dismissButton={
+                TextButton(onClick={pendingDelete=null}) { Text("Keep reflection",color=Forest) }
+            },
+            containerColor=Paper,shape=RoundedCornerShape(20.dp)
+        )
+    }
     MainScroll {
         Header("Private reflections · On this device", "Room to feel.\nSpace to think.",
             "Write as much or as little as you like. No mood check-in is ever required.")
+        Panel {
+            Text("YOUR PRIVATE PAGE",fontSize=11.sp,color=Forest,
+                fontWeight=FontWeight.Bold,letterSpacing=1.sp)
+            Spacer(Modifier.height(8.dp))
+            Text("Write when you want to.",fontFamily=FontFamily.Serif,
+                fontSize=22.sp,lineHeight=28.sp,color=Ink)
+            Spacer(Modifier.height(7.dp))
+            Text("A reflection, a thought, or a few words. Mood and energy are optional inside each entry.",
+                fontSize=14.sp,lineHeight=21.sp,color=Muted)
+            Spacer(Modifier.height(15.dp))
+            TodayMainButton("New reflection", {
+                clear()
+                showingEditor=true
+            })
+        }
         LandscapeHero(label="A QUIET PAGE",overline="YOUR LIVING JOURNAL",
             headline="Every day has\nits own story.",
             artwork=R.drawable.atelier_journal)
-        Row(Modifier.fillMaxWidth(), horizontalArrangement=Arrangement.spacedBy(9.dp)) {
-            PrimaryAction("✎  New reflection", {
-                clear()
-                showingEditor=true
-            },Modifier.weight(1f))
-            SecondaryAction("Mood & energy",{
-                if(!showingEditor) {
-                    clear()
-                    showingEditor=true
-                }
-            })
-        }
         if(showingEditor) {
             Panel {
                 Text(if(editing==null)"New reflection" else "Edit reflection",
@@ -1125,7 +1149,7 @@ fun JournalPage(
                         focusedContainerColor=Paper,unfocusedContainerColor=Paper
                     ), modifier=Modifier.fillMaxWidth())
                 Spacer(Modifier.height(12.dp))
-                Text("How are you feeling? (optional)",fontSize=12.sp,color=Muted)
+                Text("How are you feeling? (optional)",fontSize=14.sp,color=Muted)
                 Row(Modifier.horizontalScroll(rememberScrollState()),
                     horizontalArrangement=Arrangement.spacedBy(6.dp)) {
                     listOf("Calm","Hopeful","Tired","Worried").forEach { m ->
@@ -1134,7 +1158,7 @@ fun JournalPage(
                     }
                 }
                 Spacer(Modifier.height(9.dp))
-                Text("Energy (optional)",fontSize=12.sp,color=Muted)
+                Text("Energy (optional)",fontSize=14.sp,color=Muted)
                 Row(Modifier.horizontalScroll(rememberScrollState()),
                     horizontalArrangement=Arrangement.spacedBy(6.dp)) {
                     (1..5).forEach { n ->
@@ -1152,7 +1176,7 @@ fun JournalPage(
         Row(Modifier.fillMaxWidth(),verticalAlignment=Alignment.CenterVertically) {
             Text("Your entries",fontFamily=FontFamily.Serif,fontSize=21.sp,color=Ink)
             Spacer(Modifier.weight(1f))
-            Text(entries.size.toString()+" PRIVATE",fontSize=10.sp,color=Muted,
+            Text(entries.size.toString()+" PRIVATE",fontSize=12.sp,color=Muted,
                 fontWeight=FontWeight.Bold,letterSpacing=1.sp)
         }
         if(entries.isEmpty()) {
@@ -1169,8 +1193,8 @@ fun JournalPage(
                     .toLocalDate().format(DateTimeFormatter.ofPattern("MMM d, yyyy")),
                     fontSize=10.sp,color=Muted)
                 Spacer(Modifier.height(9.dp))
-                Text(entry.body,fontFamily=FontFamily.Serif,fontSize=16.sp,
-                    lineHeight=23.sp,color=Ink)
+                Text(entry.body,fontFamily=FontFamily.Serif,fontSize=17.sp,
+                    lineHeight=25.sp,color=Ink)
                 if(entry.mood!=null || entry.energy!=null) {
                     Spacer(Modifier.height(7.dp))
                     Text(listOfNotNull(entry.mood,entry.energy?.let{"Energy "+it+"/5"})
@@ -1180,9 +1204,9 @@ fun JournalPage(
                     TextButton(onClick={
                         editing=entry;body=entry.body;mood=entry.mood;energy=entry.energy
                         showingEditor=true
-                    }) { Text("✎ Edit",color=Sage,fontSize=12.sp) }
-                    TextButton(onClick={onDelete(entry);if(editing?.id==entry.id)clear()}) {
-                        Text("Delete",color=Muted,fontSize=12.sp)
+                    }) { Text("Edit",color=Forest,fontSize=14.sp) }
+                    TextButton(onClick={pendingDelete=entry}) {
+                        Text("Delete",color=Color(0xFF905C3E),fontSize=14.sp)
                     }
                 }
             }
@@ -1194,7 +1218,7 @@ fun JournalPage(
                     letterSpacing=1.5.sp)
                 Spacer(Modifier.height(7.dp))
                 Text("Your journal is stored in this device's private app database. No cloud sync or account is enabled in this build.",
-                    color=Muted,fontSize=12.sp,lineHeight=18.sp)
+                    color=Muted,fontSize=14.sp,lineHeight=21.sp)
                 Spacer(Modifier.height(10.dp))
                 SecondaryAction("Export or manage my data",onDataPrivacy)
             }
