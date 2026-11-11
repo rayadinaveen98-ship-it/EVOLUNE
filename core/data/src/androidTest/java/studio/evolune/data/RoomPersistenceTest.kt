@@ -49,4 +49,40 @@ class RoomPersistenceTest {
             context.deleteDatabase(file)
         }
     }
+    @Test fun firstRunGrowthAreaAndChallengeSaveTogetherOrRollbackTogether() = runBlocking {
+        val context = ApplicationProvider.getApplicationContext<android.content.Context>()
+        val db = Room.inMemoryDatabaseBuilder(context, EvoluneDatabase::class.java).build()
+        try {
+            val dao = db.evoluneDao()
+            val area = GrowthAreaEntity("growth-new", "Learning & craft", null, 1L, 1L)
+            val challenge = ChallengeEntity(
+                id = "path-new", growthAreaId = area.id, title = "Read gently",
+                startDate = "2026-11-11", zoneId = "Asia/Kolkata",
+                milestoneKind = "CALENDAR_DAYS", target = 21, createdAtEpochMs = 2L
+            )
+            val schedule = ScheduleVersionEntity(
+                challengeId = challenge.id, effectiveFrom = "2026-11-11",
+                recurrenceKind = "DAILY", action = "Read for ten minutes",
+                createdAtEpochMs = 2L
+            )
+            dao.createFirstChallenge(area, challenge, schedule)
+            assertEquals(1, dao.listGrowthAreas().size)
+            assertEquals(1, dao.listChallenges().size)
+            assertEquals(1, dao.schedulesFor(challenge.id).size)
+
+            val orphan = GrowthAreaEntity("should-rollback", "Temporary", null, 3L, 3L)
+            val invalidChallenge = challenge.copy(id = "invalid-path", growthAreaId = orphan.id)
+            val wrongSchedule = schedule.copy(challengeId = "other-path")
+            try {
+                dao.createFirstChallenge(orphan, invalidChallenge, wrongSchedule)
+                fail("Mismatched schedule should throw and roll back all inserts")
+            } catch (expected: IllegalArgumentException) {
+                // Intentionally failed transaction.
+            }
+            assertEquals(1, dao.listGrowthAreas().size)
+            assertNull(dao.findChallenge("invalid-path"))
+            assertEquals(1, dao.schedulesFor(challenge.id).size)
+        } finally { db.close() }
+    }
+
 }

@@ -9,6 +9,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.ui.platform.LocalContext
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.room.Room
@@ -73,11 +74,27 @@ private fun EvoluneRoot(dao: EvoluneDao, repository: RoomEvoluneRepository) {
     var reminderEnabled by remember { mutableStateOf(false) }
     var pendingReminderPermission by remember { mutableStateOf<Pair<String,String>?>(null) }
     val context = LocalContext.current
-    // First-run is an in-app presentation only; returning users see Today immediately.
-    // Re-evaluate persistent completion on Activity recreation. A monotonic timestamp
-    // in OpenPathFirstRun resumes the existing sequence rather than replaying it.
-    var showOpenPathWelcome by remember {
-        mutableStateOf(!OpenPathFirstRun.completed(context))
+    // Never show setup to existing V1 users or people restoring a database.
+    // A null entry gate represents the brief initial local Room lookup.
+    var showOpenPathWelcome by remember { mutableStateOf<Boolean?>(null) }
+    var showGuidedSetup by remember { mutableStateOf<Boolean?>(null) }
+    var savingSetup by remember { mutableStateOf(false) }
+    var setupError by remember { mutableStateOf<String?>(null) }
+    LaunchedEffect(Unit) {
+        try {
+            val hasData = dao.listChallenges().isNotEmpty() ||
+                dao.listGrowthAreas().isNotEmpty() || dao.listJournal().isNotEmpty()
+            val prefs = context.getSharedPreferences(OpenPathFirstRun.PREF_FILE, android.content.Context.MODE_PRIVATE)
+            val qaMode = (context.applicationInfo.flags and android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0 &&
+                (prefs.getBoolean(OpenPathFirstRun.FORCE_FULL_MOTION_QA, false) ||
+                    prefs.getBoolean(OpenPathFirstRun.FORCE_REDUCED_MOTION_QA, false))
+            showOpenPathWelcome = !OpenPathFirstRun.completed(context) && (!hasData || qaMode)
+            showGuidedSetup = !GuidedSetupStatus.isComplete(context) && !hasData
+        } catch (ex: Exception) {
+            showOpenPathWelcome = false
+            showGuidedSetup = false
+            notice = "Unable to check previous setup. Your saved records were not changed."
+        }
     }
 
     fun turnOnReminder(id: String, time: String) {
@@ -195,11 +212,86 @@ private fun EvoluneRoot(dao: EvoluneDao, repository: RoomEvoluneRepository) {
         reminderEnabled = activeId?.let { ReminderScheduler.isOptedIn(context, it) } ?: false
     }
 
-    if (showOpenPathWelcome) {
+    if (showOpenPathWelcome == null || showGuidedSetup == null) {
+        // No fake intro while local data is checked: stable and accessible holding surface.
+        androidx.compose.material3.Surface(
+            modifier = androidx.compose.ui.Modifier.fillMaxSize(),
+            color = androidx.compose.ui.graphics.Color(0xFFFAF8F3)
+        ) {
+            androidx.compose.foundation.layout.Box(
+                contentAlignment = androidx.compose.ui.Alignment.Center
+            ) {
+                androidx.compose.material3.Text(
+                    "Opening your path…",
+                    color = androidx.compose.ui.graphics.Color(0xFF36553E)
+                )
+            }
+        }
+    } else if (showOpenPathWelcome == true) {
         OpenPathWelcome(onFinished = {
             OpenPathFirstRun.finish(context)
             showOpenPathWelcome = false
         })
+    } else if (showGuidedSetup == true) {
+        GuidedSetup(
+            areas = growthAreas,
+            busy = savingSetup,
+            error = setupError,
+            onSkip = {
+                GuidedSetupStatus.finish(context)
+                showGuidedSetup = false
+                page = "today"
+            },
+            onCreate = { request ->
+                if (!savingSetup) {
+                    savingSetup = true
+                    setupError = null
+                    scope.launch {
+                        try {
+                            val zone = ZoneId.systemDefault()
+                            val today = LocalDate.now(zone)
+                            val existing = request.areaName?.let { chosen ->
+                                dao.listGrowthAreas().firstOrNull {
+                                    it.name.trim().equals(chosen.trim(), ignoreCase = true)
+                                }
+                            }
+                            val newArea = if (request.areaName != null && existing == null) {
+                                val time = Instant.now().toEpochMilli()
+                                GrowthAreaEntity(
+                                    id = UUID.randomUUID().toString(),
+                                    name = request.areaName.trim(),
+                                    createdAtEpochMs = time, updatedAtEpochMs = time
+                                )
+                            } else null
+                            val id = UUID.randomUUID().toString()
+                            val plan = ChallengePlan(
+                                id = id, title = request.title, startDate = today,
+                                zone = zone, milestoneKind = request.milestoneKind,
+                                target = request.target,
+                                schedules = listOf(ScheduleVersion(
+                                    effectiveFrom = today, recurrence = request.recurrence,
+                                    action = request.action, cueTime = request.cueTime,
+                                    fallbackAction = request.fallbackAction
+                                ))
+                            )
+                            repository.createChallenge(
+                                plan = plan, growthAreaId = existing?.id ?: newArea?.id,
+                                newArea = newArea
+                            )
+                            activeId = id
+                            snapshot = repository.snapshot(id)
+                            GuidedSetupStatus.finish(context)
+                            showGuidedSetup = false
+                            page = "today"
+                        } catch (ex: Exception) {
+                            setupError = ex.message ?: "Unable to save your path. Nothing was lost."
+                        } finally {
+                            savingSetup = false
+                        }
+                    }
+                }
+            }
+        )
     } else EvoluneShell(
         page = page,
         onPage = { page = it },
