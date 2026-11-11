@@ -37,12 +37,14 @@
 - Source includes no analytics, remote API, private data fixtures or externally transmitted text.
 
 ## Stage 03 quality gates
-- [ ] Native Android app builds on exact integration commit.
-- [ ] End-to-end on emulator: step 1–4, validation, skip, Back and creating real challenge.
-- [ ] Room in-memory test proves combined area/challenge insert and rollback.
-- [ ] Four native Android screenshots captured (Direction, One Practice, Rhythm, Review) and reviewed at phone size.
+- [x] [Android CI 43017839689](https://github.com/rayadinave98-ship-it/EVOLUNE/actions/runs/43017839689) passed after correcting a test-only import.
+- [x] Native UI test navigates steps 1–4, validates required fields, tests skip, selects calendar/session fields, cue/fallback and invokes the real create request; [ ] additional real-Activity process-death and full creation end-to-end QA.
+- [x] Room emulator test proves the combined area/challenge insert and transactional rollback on invalid schedule.
+- [x] Four real Android emulator PNGs (Direction, One Practice, Rhythm, Review) reviewed side-by-side at 1080×2400 rendering, with fixed footer and scrollable content.
 - [ ] Real device/rotation/process death, keyboard, TalkBack, large-font (140%/200%), screen-reader selection state.
 - [ ] Confirm returning users with **journal only** remain undisrupted and setup creation isn't repeated.
 - [ ] Approve Stage 03 visual parity; no V1 database or reminder regression.
+
+**Verification:** [Android CI 43017839689](https://github.com/rayadinave98-ship-it/EVOLUNE/actions/runs/43017839689) and [Emulator QA 43017839716](https://github.com/rayadinave98-ship-it/EVOLUNE/actions/runs/43017839716) **succeeded**; XML reports show **35 Android tests (7 core Room + 28 app), zero failures/errors**, and 21 screenshots including the four setup views.
 
 **Stage 03 is not a separate functionality-expansion release.** It presents the already-supported practice choices with a stronger, calmer first-run experience.
