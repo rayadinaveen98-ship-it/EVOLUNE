@@ -49,8 +49,8 @@ internal fun EvoluneInput(
     OutlinedTextField(
         value=value,onValueChange=onValueChange,
         label={Text(label,fontSize=14.sp)},
-        placeholder=placeholder?.let { hint ->
-            { Text(hint,color=Muted,fontSize=14.sp) }
+        placeholder=if(placeholder==null) null else {
+            { Text(placeholder,color=Muted,fontSize=14.sp) }
         },
         modifier=modifier.fillMaxWidth(),
         enabled=enabled,isError=isError,
