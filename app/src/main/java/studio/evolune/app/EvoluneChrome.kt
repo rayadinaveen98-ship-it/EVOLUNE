@@ -263,13 +263,17 @@ internal fun EvoluneTopBar(onGrowth: () -> Unit) {
         Text("EVOLUNE",fontSize=14.sp,letterSpacing=2.sp,
             fontWeight=FontWeight.SemiBold,color=EvoluneTokens.Ink)
         Spacer(Modifier.weight(1f))
-        Box(Modifier.size(48.dp).clip(RoundedCornerShape(16.dp))
-            .background(EvoluneTokens.Pale)
-            .clickable(role=Role.Button,onClick=onGrowth)
-            .semantics { contentDescription="Open My Growth" }
-            .testTag("evolune-top-growth"),
-            contentAlignment=Alignment.Center) {
-            EvoluneGlyph("growth",EvoluneTokens.Forest,Modifier.size(23.dp))
+        Surface(
+            onClick=onGrowth,
+            modifier=Modifier.size(48.dp)
+                .semantics { contentDescription="Open My Growth" }
+                .testTag("evolune-top-growth"),
+            shape=RoundedCornerShape(16.dp),
+            color=EvoluneTokens.Pale
+        ) {
+            Box(Modifier.fillMaxSize(),contentAlignment=Alignment.Center) {
+                EvoluneGlyph("growth",EvoluneTokens.Forest,Modifier.size(23.dp))
+            }
         }
     }
 }
