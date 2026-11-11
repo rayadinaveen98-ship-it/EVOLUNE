@@ -1,6 +1,6 @@
 # EVOLUNE V2 — Stage 02: Open Path welcome experience
 
-**Status:** Interactive browser design prototype v0.1 created and tested, **not native Android implementation**.  
+**Status:** Browser concept and **native Android Compose integration prototype completed and emulator-tested**; final V2 owner visual approval and advanced accessibility/performance gates pending. Native integration lives in a separate PR based on V1 Android code.  
 **Dependency:** Owner selected **Open Path (direction A)**. Exact logo shape, typesetting and palette remain in Stage 01 final identity review.  
 **Prototype:** [Open the actual standalone HTML concept](prototypes/open-path-welcome-v0.1.html). It embeds the already-approved Stillwater illustration and uses the same Open Path SVG geometry as the Stage 01 source.
 
@@ -56,8 +56,8 @@ The 229 KB self-contained HTML prototype was exercised in local headless Chromiu
 - [x] Same original Stillwater art appears in intro and Today handoff.
 - [x] No external APIs, music, fonts or account dependence.
 - [ ] Exact final mark and commercial wordmark approval / font licensing.
-- [ ] Final Android system-splash plus separate Compose first-run intro implementation.
+- [x] Android 12+ brief system splash plus separate Compose first-run intro implemented in [integration PR #4](https://github.com/rayadinave98-ship-it/EVOLUNE/pull/4).
 - [ ] Real TalkBack, orientation, 200% font, reduced motion and slow-device startup QA.
-- [ ] Native/emulator screenshots and timing/performance report; owner visual approval.
+- [x] Native emulator screenshots captured at ~2.3s and ~4.45s; [QA run 43013838539](https://github.com/rayadinave98-ship-it/EVOLUNE/actions/runs/43013838539) passed **31/31 tests**. [ ] Frame-time/performance profiling and owner visual approval.
 
-**Stage 02 remains in progress.** Do not label this self-contained HTML file an APK or Play Store-ready build.
+**Stage 02 remains in progress for final visual/accessibility signoff.** The native Compose implementation and debug APK exist in [PR #4](https://github.com/rayadinave98-ship-it/EVOLUNE/pull/4), but this is not a final V2 launcher-icon approval or Play Store release.
