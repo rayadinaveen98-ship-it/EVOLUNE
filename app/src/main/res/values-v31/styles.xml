@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.Evolune" parent="android:style/Theme.Material.Light.NoActionBar">
+        <item name="android:statusBarColor">#FAF8F3</item>
+        <item name="android:navigationBarColor">#FAF8F3</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLightNavigationBar">true</item>
+        <!-- Android 12+ platform splash exits as soon as content is ready; no fake hold. -->
+        <item name="android:windowSplashScreenBackground">#36553E</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/ic_open_path_splash</item>
+        <item name="android:windowSplashScreenAnimationDuration">650</item>
+    </style>
+</resources>

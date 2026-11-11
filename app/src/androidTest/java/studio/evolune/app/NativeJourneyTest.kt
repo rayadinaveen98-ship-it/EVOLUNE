@@ -4,6 +4,10 @@ import android.graphics.Bitmap
 import android.content.ContentValues
 import android.os.Build
 import android.os.Environment
+import android.os.SystemClock
+import android.content.Context
+import org.junit.Before
+import org.junit.Assert.assertTrue
 import android.provider.MediaStore
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.test.captureToImage
@@ -26,6 +30,16 @@ import org.junit.runner.RunWith
 class NativeJourneyTest {
     @get:Rule val rule = createAndroidComposeRule<MainActivity>()
 
+    @Before fun dismissFirstRunForExistingJourneyTests() {
+        rule.waitUntil(timeoutMillis = 10_000) {
+            rule.onAllNodesWithText("Skip intro").fetchSemanticsNodes().isNotEmpty() ||
+                rule.onAllNodesWithText("A gentle day", substring=true).fetchSemanticsNodes().isNotEmpty()
+        }
+        if (rule.onAllNodesWithText("Skip intro").fetchSemanticsNodes().isNotEmpty()) {
+            rule.onNodeWithText("Skip intro").performClick()
+        }
+    }
+
     /** MediaStore survives Android test cleanup, unlike app-private filesDir. QA has only synthetic data. */
     private fun captureNative(name: String) {
         check(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -45,6 +59,75 @@ class NativeJourneyTest {
                 .compress(Bitmap.CompressFormat.PNG, 100, stream)
         } ?: false
         check(written) { "Screenshot write failed for $name" }
+    }
+
+    @Test fun firstRunOpenPathCanBeSkippedAndReturningUserIsImmediate() {
+        val prefs = rule.activity.getSharedPreferences(
+            OpenPathFirstRun.PREF_FILE, Context.MODE_PRIVATE
+        )
+        prefs.edit().remove(OpenPathFirstRun.KEY_COMPLETED)
+            .remove(OpenPathFirstRun.KEY_STARTED_UPTIME)
+            .putBoolean(OpenPathFirstRun.FORCE_FULL_MOTION_QA, true).commit()
+        rule.activityRule.scenario.recreate()
+        rule.waitUntil(timeoutMillis = 10_000) {
+            rule.onAllNodesWithText("Skip intro").fetchSemanticsNodes().isNotEmpty()
+        }
+        rule.onNodeWithText("Skip intro").assertExists()
+        val introStarted = prefs.getLong(OpenPathFirstRun.KEY_STARTED_UPTIME,
+            SystemClock.elapsedRealtime())
+        fun captureAt(elapsedMs: Long, name: String) {
+            val remaining = elapsedMs - (SystemClock.elapsedRealtime() - introStarted)
+            if (remaining > 0L) Thread.sleep(remaining)
+            rule.waitForIdle()
+            captureNative(name)
+        }
+        // Capture actual staged artwork, not only the first dark establishing frame.
+        captureAt(2_300L, "welcome_stones")
+        captureAt(4_450L, "welcome_open_path_first_run")
+        rule.onNodeWithText("Skip intro").performClick()
+        rule.onNodeWithText("A gentle day", substring=true).assertExists()
+        assertTrue(OpenPathFirstRun.completed(rule.activity))
+        rule.activityRule.scenario.recreate()
+        rule.onNodeWithText("A gentle day", substring=true).assertExists()
+        assertTrue(rule.onAllNodesWithText("Skip intro").fetchSemanticsNodes().isEmpty())
+        prefs.edit().remove(OpenPathFirstRun.FORCE_FULL_MOTION_QA).commit()
+    }
+
+    @Test fun reducedMotionWelcomeReturnsDirectlyWithoutLongSequence() {
+        val prefs = rule.activity.getSharedPreferences(
+            OpenPathFirstRun.PREF_FILE, Context.MODE_PRIVATE
+        )
+        prefs.edit().remove(OpenPathFirstRun.KEY_COMPLETED)
+            .remove(OpenPathFirstRun.KEY_STARTED_UPTIME)
+            .remove(OpenPathFirstRun.FORCE_FULL_MOTION_QA)
+            .putBoolean(OpenPathFirstRun.FORCE_REDUCED_MOTION_QA, true).commit()
+        try {
+            rule.activityRule.scenario.recreate()
+            rule.waitUntil(timeoutMillis = 8_000) {
+                rule.onAllNodesWithText("A gentle day", substring=true)
+                    .fetchSemanticsNodes().isNotEmpty()
+            }
+            assertTrue(OpenPathFirstRun.completed(rule.activity))
+        } finally {
+            prefs.edit().remove(OpenPathFirstRun.FORCE_REDUCED_MOTION_QA).commit()
+        }
+    }
+
+    @Test fun introProgressSurvivesActivityRecreationWithoutRestarting() {
+        val prefs = rule.activity.getSharedPreferences(
+            OpenPathFirstRun.PREF_FILE, Context.MODE_PRIVATE
+        )
+        prefs.edit().remove(OpenPathFirstRun.KEY_COMPLETED)
+            .putBoolean(OpenPathFirstRun.FORCE_FULL_MOTION_QA, true)
+            .putLong(OpenPathFirstRun.KEY_STARTED_UPTIME,
+                SystemClock.elapsedRealtime() - 5_450L).commit()
+        rule.activityRule.scenario.recreate()
+        rule.waitUntil(timeoutMillis = 5_000) {
+            rule.onAllNodesWithText("A gentle day", substring=true)
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+        assertTrue(OpenPathFirstRun.completed(rule.activity))
+        prefs.edit().remove(OpenPathFirstRun.FORCE_FULL_MOTION_QA).commit()
     }
 
     @Test fun mainDestinationsAreNavigable() {

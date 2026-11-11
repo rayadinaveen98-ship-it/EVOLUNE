@@ -73,6 +73,12 @@ private fun EvoluneRoot(dao: EvoluneDao, repository: RoomEvoluneRepository) {
     var reminderEnabled by remember { mutableStateOf(false) }
     var pendingReminderPermission by remember { mutableStateOf<Pair<String,String>?>(null) }
     val context = LocalContext.current
+    // First-run is an in-app presentation only; returning users see Today immediately.
+    // Re-evaluate persistent completion on Activity recreation. A monotonic timestamp
+    // in OpenPathFirstRun resumes the existing sequence rather than replaying it.
+    var showOpenPathWelcome by remember {
+        mutableStateOf(!OpenPathFirstRun.completed(context))
+    }
 
     fun turnOnReminder(id: String, time: String) {
         scope.launch {
@@ -189,7 +195,12 @@ private fun EvoluneRoot(dao: EvoluneDao, repository: RoomEvoluneRepository) {
         reminderEnabled = activeId?.let { ReminderScheduler.isOptedIn(context, it) } ?: false
     }
 
-    EvoluneShell(
+    if (showOpenPathWelcome) {
+        OpenPathWelcome(onFinished = {
+            OpenPathFirstRun.finish(context)
+            showOpenPathWelcome = false
+        })
+    } else EvoluneShell(
         page = page,
         onPage = { page = it },
         notice = notice,
